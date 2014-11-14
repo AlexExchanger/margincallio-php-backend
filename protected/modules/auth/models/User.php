@@ -14,7 +14,7 @@ class User extends CActiveRecord {
         return array(
             array('email', 'required'),
             array('id','numerical', 'integerOnly'=>true),
-            array('id, password, email, status', 'safe'),
+            array('id, password, email', 'safe'),
         );
     }
     
@@ -28,6 +28,18 @@ class User extends CActiveRecord {
         
     }
     
+    public static function verifyNewUser($code) {
+        $user = User::model()->findByAttributes(array('emailVerification'=>$code));
+        if(!$user) {
+            throw new ExceptionUserVerification();
+        }
+        
+        $user->emailVerification = null;
+        $user->save();
+        return true;
+    }
+    
+    
     public function registerUser($email) {
         $this->email = $email;
         $this->emailVerification = UserIdentity::trickyPasswordEncoding($email, rand(0, PHP_INT_MAX));
@@ -37,12 +49,17 @@ class User extends CActiveRecord {
             print Response::ResponseError(json_encode($errorList));
             exit();
         }
-        
-        if(!$this->save()){
+        try {
+            $this->save();
+            $this->createNewTradeAccount($this->id);
+        } catch(Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+               throw $e;
+            }
             throw new ExceptionUserSave();
         }
         
-        MailSender::sendEmail('userActivate', $email, array('confirmCode'=>$this->emailVerification));
+        return MailSender::sendEmail('userActivate', $email, array('confirmCode'=>$this->emailVerification));
     }
     
 }

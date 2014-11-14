@@ -10,9 +10,12 @@ class MailSender extends CComponent {
             throw new ExceptionNotificationNoView();
         }
         
-        $fullMessagePath = Yii::app()->controller->renderFile($fullPath, $data);
+        $fullMessagePath = Yii::app()->controller->renderFile($fullPath, $data, true);
 
-        $status = mail($to, isset($data['subject'])?$data['subject']:'Rocket BTC', $fullMessagePath);
+        $headers = 'Content-type: text/html; charset=utf-8' . "\r\n";
+        
+        $status = mail($to, isset($data['subject'])?$data['subject']:'Rocket BTC', $fullMessagePath, $headers);
+
         return $status;
     }
     

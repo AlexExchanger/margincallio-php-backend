@@ -2,7 +2,7 @@
 
 class UserController extends CController {
 
-    private $guestControl = array('login', 'register');
+    private $guestControl = array('login', 'register', 'activate');
 
     public function beforeAction($action) {
         if(!(Yii::app()->user->isGuest ^ in_array($action->id, $this->guestControl))) {
@@ -12,6 +12,24 @@ class UserController extends CController {
         print Response::ResponseError('Access denied');
         return false;
     }
+    
+    public function actionActivate($id) {
+        try {
+            User::verifyNewUser($id);
+        } catch(ExceptionUser $e) {
+            $resultMessage = '';
+            if($e instanceof ExceptionUserVerification) {
+                $resultMessage = $e->getMessage();
+            } else {
+                $resultMessage = 'Unknow error';
+            }
+            print Response::ResponseError($resultMessage);
+            exit();
+        }
+        
+        print Response::ResponseSuccess(array(), 'Successfuly verified');
+    }
+    
 
     public function actionRegister() {
         
@@ -20,18 +38,17 @@ class UserController extends CController {
         
         $user = new User();
         try {
-            $confirmCode = (Yii::app()->params->registerByInvite)? $user->registerByInvite($inviteCode):$user->registerUser($email);
+            $status = (Yii::app()->params->registerByInvite)? $user->registerByInvite($inviteCode):$user->registerUser($email);
         } catch(Exception $e) {
             print Response::ResponseError('Error: '.$e->getMessage());
             return;
         }
-        
-        if($confirmCode) {
-            print Response::ResponseSuccess(array('confirmcode'=>$confirmCode), 'User has registered');
+    
+        if($status) {
+            print Response::ResponseSuccess(array(), 'User has registered');
         } else {
             print Response::ResponseError('Unknow error');
         }
-        
     }
 
     public function actionLogin() {

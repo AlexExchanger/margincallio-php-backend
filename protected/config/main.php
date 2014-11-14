@@ -26,7 +26,7 @@ return array(
         'urlManager' => array(
             'urlFormat'=>'path',
             'rules' => array(
-                '<module:\w+>/<controller:\w+>/<action:[0-9a-zA-Z_\-]+>/<id:\d+>' => '<module>/<controller>/<action>',
+                '<module:\w+>/<controller:\w+>/<action:[0-9a-zA-Z_\-]+>/<id:[0-9a-zA-Z_\-]+>' => '<module>/<controller>/<action>',
                 '<module:\w+>/<controller:\w+>/<action:[0-9a-zA-Z_\-]+>'          => '<module>/<controller>/<action>',
                 '<module:\w+>/<controller:\w+>'                                   => '<module>/<controller>/index',
                 '<controller:\w+>/<action:[0-9a-zA-Z_\-]+>'                       => '<controller>/<action>',

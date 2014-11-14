@@ -21,6 +21,9 @@ class ExceptionUser extends Exception {
 class ExceptionUserSave extends ExceptionUser {
     public $message = 'Save error';
 }
+class ExceptionUserVerification extends ExceptionUser {
+    public $message = 'Wrong verify code';
+}
 
 
 

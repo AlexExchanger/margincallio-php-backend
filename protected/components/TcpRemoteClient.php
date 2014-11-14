@@ -78,11 +78,12 @@ class TcpRemoteClient extends CComponent {
     private function makeRequestString($params) {
         $requestString = '{';
         $paramsCount = 0;
+        $requestArray = array();
         foreach($params as $value) {
-            $requestString .= '"'.$paramsCount.'":"'.$value.'"';
+            $requestArray[] = '"'.$paramsCount.'":"'.$value.'"';
             $paramsCount++;
         }
-        $requestString .= '}';
+        $requestString .= implode(',', $requestArray).'}';
         
         return $requestString;
     }
