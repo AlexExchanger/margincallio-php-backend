@@ -13,6 +13,7 @@ class User extends CActiveRecord {
     public function rules() {
         return array(
             array('email', 'required'),
+            array('email', 'email'),
             array('id','numerical', 'integerOnly'=>true),
             array('id, password, email', 'safe'),
         );
@@ -28,17 +29,85 @@ class User extends CActiveRecord {
         
     }
     
+    public static function lostPassword($email, $phone) {
+        
+        $user = User::model()->findByAttributes(array('email'=>$email));
+        if(!$user) {
+            throw new ExceptionLostPassword();
+        }
+        
+        $phoneId = UserIdentity::trickyPasswordEncoding($user->email, $user->id);
+        $userPhone = UserPhone::model()->findByPk($phoneId);
+        
+        if(!$userPhone) {
+            throw new ExceptionLostPassword();
+        }
+        
+        $newVerifyCode = UserIdentity::trickyPasswordEncoding($email, rand(0, PHP_INT_MAX));
+        $user->emailVerification = $newVerifyCode;
+        $user->password = null;
+        
+        MailSender::sendEmail('lostPassword', $email, array('confirmCode'=>$newVerifyCode));
+        
+        if(!$user->save()) {
+            throw new ExceptionUserSave();
+        }
+        
+        return true;
+    }
+    
     public static function verifyNewUser($code) {
-        $user = User::model()->findByAttributes(array('emailVerification'=>$code));
+        
+        //TODO: Action for frond-end.
+        /*$user = User::model()->findByAttributes(array('emailVerification'=>$code));
         if(!$user) {
             throw new ExceptionUserVerification();
         }
         
         $user->emailVerification = null;
-        $user->save();
+        $user->save();*/
         return true;
     }
     
+    public static function continueVerifying($cid, $password, $phone) {
+        $user = self::model()->findByAttributes(array('emailVerification'=>$cid));
+        
+        if(!$user) {
+            throw new ExceptionUserVerification();
+        }
+        
+        $user->password = UserIdentity::trickyPasswordEncoding($user->email, $password);
+        $user->emailVerification = null;
+        
+        if(!$user->save()) {
+            throw new ExceptionUserSave();
+        }
+        
+        $userPhone = new UserPhone();
+        $userPhone->id = UserIdentity::trickyPasswordEncoding($user->email, $user->id);
+        $userPhone->phone = $phone;
+        
+        $userPhone->addPhone();
+        
+        return true;
+    }
+    
+    public static function changeLostPassword($cid, $password) {
+        
+        $user = User::model()->findByAttributes(array('emailVerification'=>$cid));
+        if(!$user) {
+            throw new ExceptionUserVerification();
+        }
+        
+        $user->password = UserIdentity::trickyPasswordEncoding($user->email, $password);
+        $user->emailVerification = null;
+        
+        if(!$user->save()) {
+            throw new ExceptionUserSave();
+        }
+        
+        return true;
+    }
     
     public function registerUser($email) {
         $this->email = $email;

@@ -3,7 +3,6 @@
 class NotificationModule extends CWebModule
 {
     public function init() {
-        print_r('sdf'); die();
         parent::init();
         $this->setImport(array(
             'application.modules.notification.components.*',

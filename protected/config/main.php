@@ -17,7 +17,7 @@ return array(
     'components'=>array(
         'db' => array(
             'class' => 'CDbConnection',
-            'connectionString' => 'pgsql:host=127.0.0.1;port=5432;dbname=exchange',
+            'connectionString' => 'pgsql:host=127.0.0.1;port=5432;dbname=exchange_stock',
             'emulatePrepare' => true,
             'username' => 'admin',
             'password' => '1',

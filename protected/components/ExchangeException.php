@@ -24,6 +24,12 @@ class ExceptionUserSave extends ExceptionUser {
 class ExceptionUserVerification extends ExceptionUser {
     public $message = 'Wrong verify code';
 }
+class ExceptionUserPhone extends ExceptionUser {
+    public $message = 'Error with user phone';
+}
+class ExceptionLostPassword extends ExceptionUser {
+    public $message = 'No user with following data';
+}
 
 
 
