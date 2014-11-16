@@ -38,7 +38,12 @@ class UserController extends CController {
         
         $user = new User();
         try {
-            $status = (Yii::app()->params->registerByInvite)? $user->registerByInvite($inviteCode):$user->registerUser($email);
+            if(Yii::app()->params->registerByInvite || isset($inviteCode)) {
+                $status = $user->registerByInvite($inviteCode);
+            } else {
+                $status = $user->registerUser($email);
+            }
+            
         } catch(Exception $e) {
             print Response::ResponseError('Error: '.$e->getMessage());
             return;

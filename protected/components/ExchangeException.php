@@ -31,6 +31,15 @@ class ExceptionLostPassword extends ExceptionUser {
     public $message = 'No user with following data';
 }
 
+//Admin
+class ExceptionAdmin extends Exception {
+    public $message = 'Unknow error';
+}
+class ExceptionInviteSave extends ExceptionAdmin {
+    public $message = 'Can\'t generate invite code';
+}
+
+
 
 
 //Notification

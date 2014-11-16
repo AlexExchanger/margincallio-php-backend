@@ -26,7 +26,34 @@ class User extends CActiveRecord {
     }
     
     public function registerByInvite($inviteCode) {
+        $userInvite = UserInvite::model()->findByPk($inviteCode);
         
+        if(!$userInvite || $userInvite->activated == true) {
+            throw new ExceptionUserVerification();
+        }
+        
+        $userInvite->activated = true;
+        $userInvite->save();
+        
+        $this->email = $userInvite->email;
+        $this->emailVerification = null;
+        
+        if(!$this->validate()) {
+            $errorList = $this->getErrors();
+            print Response::ResponseError(json_encode($errorList));
+            exit();
+        }
+        try {
+            $this->save();
+            $this->createNewTradeAccount($this->id);
+        } catch(Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+               throw $e;
+            }
+            throw new ExceptionUserSave();
+        }
+        
+        return true;
     }
     
     public static function lostPassword($email, $phone) {
