@@ -5,29 +5,24 @@ class Account extends CActiveRecord {
     public static $currencyOptions = ['BTC', 'USD', 'EUR'];
     public static $typeOptions = [
 
-        'system.gateway.external.universe', // отдано наружу / принято снаружи (сумма)
-        'system.gateway.external.universe.unknown', // всегда в минусе, неизвестные платежи
-        'system.gateway.external', // всегда плюс, реальный внешний кошелек/банк
-        'system.gateway.external.systemCommission', // всегда плюс, деньги отданные платежной системе
-        'system.gateway.internal', // оборот по шлюзу (при внешнем поступлении минус)
-        'system.gateway.internal.commission', // всегда плюс
+//        'system.gateway.external.universe', // отдано наружу / принято снаружи (сумма)
+//        'system.gateway.external.universe.unknown', // всегда в минусе, неизвестные платежи
+//        'system.gateway.external', // всегда плюс, реальный внешний кошелек/банк
+//        'system.gateway.external.systemCommission', // всегда плюс, деньги отданные платежной системе
+//        'system.gateway.internal', // оборот по шлюзу (при внешнем поступлении минус)
+//        'system.gateway.internal.commission', // всегда плюс
 
         // два системных счета для каждого тикера
-        'system.ticker.USDBTC.commission',
-        'system.ticker.EURBTC.commission',
+//        'system.ticker.USDBTC.commission',
+//        'system.ticker.EURBTC.commission',
         
         // промежуточные счета для зачисления реф.комиссии. на них всегда 0
-        'system.ticker.USDBTC.refCommission',
-        'system.ticker.EURBTC.refCommission',
+        //'system.ticker.USDBTC.refCommission',
+        //'system.ticker.EURBTC.refCommission',
         
-        'user.wallet', // накопительный кошелек (забить пока)
-        'user.withdrawWallet',
-        'user.merchant', // для приема денег в интернет-магазине (забить пока)
-        'user.withdrawMerchant',
         'user.trading', // для торговли на бирже, сюда прямо ввод снаружи
-        'user.lockTrading', // всегда плюс, блокированные средства по счету для трейдинга
-        'user.withdrawTrading',
-        'user.partnerCommission', // всегда плюс, комиссия с операций других юзеров
+        'user.safeWallet', // Safe счет пользователя
+        'user.withdrawWallet', // для вывода денег
     ];
     public static $statusOptions = ['opened', 'closed', 'blocked'];
 
@@ -52,10 +47,10 @@ class Account extends CActiveRecord {
     public static function getForSystem($type, $currencyOrGateway) {
         $currency = is_a($currencyOrGateway, 'Gateway') ? $currencyOrGateway->currency : $currencyOrGateway;
         $gatewayId = is_a($currencyOrGateway, 'Gateway') ? $currencyOrGateway->id : null;
-        $attributes = [
+        $attributes = array(
             'type' => $type,
             'currency' => $currency
-        ];
+        );
         if ($gatewayId) {
             $attributes['gatewayId'] = $gatewayId;
         }
@@ -72,15 +67,15 @@ class Account extends CActiveRecord {
 
         $currency = is_a($currencyOrGateway, 'Gateway') ? $currencyOrGateway->currency : $currencyOrGateway;
         $gatewayId = is_a($currencyOrGateway, 'Gateway') ? $currencyOrGateway->id : null;
-        $account = self::create([
+        $account = self::create(array(
             'currency' => $currency,
             'status' => 'opened',
             'type' => $type,
             'gatewayId' => $gatewayId
-        ]);
+        ));
         if ($gatewayId && $type == 'system.gateway.external') {
             $currencyOrGateway->accountId = $account->id;
-            $currencyOrGateway->update(['accountId']);
+            $currencyOrGateway->update(array('accountId'));
         }
         return $account;
     }
@@ -108,7 +103,7 @@ class Account extends CActiveRecord {
         if ($account) {
             return $account;
         }
-
+ 
         $account = self::create([
             'userId' => $userId,
             'currency' => $currency,
@@ -123,12 +118,8 @@ class Account extends CActiveRecord {
         $account = null;
         if (is_numeric($id)) {
             $account = Account::model()->findByPk($id);
-        }
-        elseif (Guid::validate($id)) {
+        } elseif (Guid::validate($id)) {
             $account = Account::model()->findByAttributes(['guid' => $id]);
-        }
-        elseif (StringGenerator::validateAccountPublicId($id)) {
-            $account = Account::model()->findByAttributes(['publicId' => $id]);
         }
 
         return $account;
@@ -169,9 +160,6 @@ class Account extends CActiveRecord {
         $account->type = ArrayHelper::getFromArray($data, 'type');
         $account->creditLimit = ArrayHelper::getFromArray($data, 'creditLimit', 0);
         $account->userId = ArrayHelper::getFromArray($data, 'userId');
-        $account->gatewayId = ArrayHelper::getFromArray($data, 'gatewayId');
-        $account->tickerId = ArrayHelper::getFromArray($data, 'tickerId');
-        // todo remove this hardcode
         $account->tickerId = 1;
 
         $account->createdAt = TIME;
@@ -185,7 +173,7 @@ class Account extends CActiveRecord {
             $account->tickerId = null;
             $account->gatewayId = (int)$account->gatewayId;
             if ($account->gatewayId == 0) {
-                $account->addError('gatewayId', _('Gateway not found'));
+                $account->addError('gatewayId', 'Gateway not found');
             }
             //для пополнения счета шлюза
             if ($account->type == 'system.gateway.external') {
@@ -196,7 +184,7 @@ class Account extends CActiveRecord {
             $account->userId = null;
             $account->gatewayId = null;
             if (!is_numeric($account->tickerId)) {
-                $account->addError('tickerId', _('Ticker not found'));
+                $account->addError('tickerId', 'Ticker not found');
             }
         } // users account
         else {
@@ -204,23 +192,16 @@ class Account extends CActiveRecord {
             $account->gatewayId = null;
             $user = User::get($account->userId);
             if (!$user) {
-                $account->addError('userId', _('User not found'));
-            }
-            else {
-
+                $account->addError('userId', 'User not found');
             }
         }
-
         if (!$account->validate(null, false)) {
-            throw new ModelException(_('Account was not created'), $account->getErrors());
+            throw new ExceptionUserVerification();
         }
-
-
         try {
             if (!$account->save(false)) {
-                throw new SystemException(_('Account was not created'), $account->getErrors());
+                throw new ExceptionUserSave();
             }
-            $account->publicId = $account->generatePublicId();
             $account->save();
         }
         catch (Exception $e) {
@@ -229,19 +210,6 @@ class Account extends CActiveRecord {
 
         return $account;
     }
-
-    public function generatePublicId() {
-        if (!is_null($this->userId)) {
-            return $this->currency . '-U' . dechex(1000+$this->userId*120) . '-A' . dechex(1000+$this->id*120);
-        }
-
-        if (!is_null($this->gatewayId)) {
-            return $this->currency . '-G' . dechex(1000+$this->gatewayId*120) . '-A' . dechex(1000+$this->id*120);
-        }
-
-        return null;
-    }
-
 
     public static function bindTo(array $objects) {
         $ids = [];
@@ -337,7 +305,6 @@ class Account extends CActiveRecord {
         return true;
     }
 
-
     public function setBalance($balance) {
         if ($this->balance === $balance) {
             return false;
@@ -345,10 +312,147 @@ class Account extends CActiveRecord {
         $this->balance = $balance;
 
         if (!$this->save(true, ['balance'])) {
-            throw new ModelException(_('Balance was not updated'), $this->getErrors());
+            throw new ModelException('Balance was not updated', $this->getErrors());
         }
 
         return true;
     }
+    
+    //TODO: rewrite this
+    
+    private static function getAccountPair($userId, $currency) {
+        $accounts = self::model()->findAllByAttributes(array(
+            'userId' => $userId,
+            'currency' => $currency,
+            'type' => array('user.trading', 'user.safeWallet')
+        ));
+        
+        if(!$accounts) {
+            throw new ExceptionNoAccount();
+        }
+        
+        $wallets = array();
+        foreach($accounts as $wallet) {
+            $wallets[$wallet->type] = $wallet;
+        }
+        
+        return $wallets;
+        
+    }
+    
+    
+    private static function createTransaction($wallets, $amount, $type) {
+        
+        $groupId = Guid::generate();
 
+        $accountFrom = ($type)?$wallets['user.trading']:$wallets['user.safeWallet'];
+        $accountTo = ($type)?$wallets['user.safeWallet']:$wallets['user.trading'];
+        
+        $transaction = new Transaction();
+        $transaction->accountId = $accountFrom->id;
+        $transaction->debit = 0;
+        $transaction->credit = $amount;
+        $transaction->createdAt = TIME;
+        $transaction->groupId = $groupId;
+        if (!$transaction->save()) {
+            throw new SystemException(_('Something wrong with transaction creating'), $transaction->getErrors());
+        }
+
+        $transaction = new Transaction();
+        $transaction->accountId = $accountTo->id;
+        $transaction->debit = $amount;
+        $transaction->credit = 0;
+        $transaction->createdAt = TIME;
+        $transaction->groupId = $groupId;
+        if (!$transaction->save()) {
+            throw new SystemException(_('Something wrong with transaction creating'), $transaction->getErrors());
+        }
+    }
+    
+    //type 0 = s to t, type 1 = t to s
+    public static function transferToSafe($currency, $amount) {
+        $user = Yii::app()->user;
+        $wallets = self::getAccountPair($user->id, $currency);
+        
+        $compare = bccomp($wallets['user.trading']->balance, $amount);
+        if($compare<0) {
+            throw new ExceptionNoMoney();
+        }
+        
+        //TODO: add commision
+        
+        $wallets['user.trading']->balance = bcsub($wallets['user.trading']->balance, $amount);
+        $wallets['user.safeWallet']->balance = bcadd($wallets['user.safeWallet']->balance, $amount);
+        
+        if(in_array($currency, array('USD', 'BTC'))) {
+            $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
+            $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_REPLENISH_SAFE_ACCOUNT, $user->id, ($currency == 'USD')?1:0, $amount));
+            if($resultCore != array()) {
+                $result = false;
+            }
+        }
+        
+        self::createTransaction($wallets, $amount, 1);
+        
+        if(!$wallets['user.safeWallet']->save() || !$wallets['user.trading']->save()) {
+            throw new ExceptionAccount(); 
+        }
+        
+        return true;
+    }
+    
+    public static function transferToTrade($currency, $amount) {
+        $user = Yii::app()->user;
+        $wallets = self::getAccountPair($user->id, $currency);
+        
+        $compare = bccomp($wallets['user.safeWallet']->balance, $amount);
+        if($compare<0) {
+            throw new ExceptionNoMoney();
+        }
+        
+        //TODO: add commision
+        
+        $wallets['user.safeWallet']->balance = bcsub($wallets['user.safeWallet']->balance, $amount);
+        $wallets['user.trading']->balance = bcadd($wallets['user.trading']->balance, $amount);
+        
+        if(in_array($currency, array('USD', 'BTC'))) {
+            $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
+            $result = $connector->sendRequest(array(TcpRemoteClient::FUNC_REPLENISH_TRADE_ACCOUNT, $user->id, ($currency == 'USD')?1:0, $amount));
+            if($result != array()) {
+                return false;
+            }
+        }
+        
+        self::createTransaction($wallets, $amount, 0);
+        
+        if(!$wallets['user.safeWallet']->save() || !$wallets['user.trading']->save()) {
+            throw new ExceptionAccount(); 
+        }
+        
+        return false;
+    }
+    
+    public static function getAccountInfo() {
+        $user = Yii::app()->user;
+        if(!$user) {
+            return false;
+        }
+        
+        $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
+        $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_INFO, $user->id));
+        
+        $data = array(
+            'firstAvailable' => $resultCore[0],
+            'firstBlocked' => $resultCore[1],
+            'secondAvailable' => $resultCore[2],
+            'secondBlocked' => $resultCore[3],
+            'comission' => $resultCore[4],
+            'unknow' => $resultCore[5],
+            'marginCall' => $resultCore[6],
+        );
+        
+        return $data;
+    }
+    
+    
 }

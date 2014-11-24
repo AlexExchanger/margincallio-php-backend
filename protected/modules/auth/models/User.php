@@ -19,9 +19,25 @@ class User extends CActiveRecord {
         );
     }
     
-    private function createNewTradeAccount($userId) {
+    private function createTradeAccount($userId) {
+        //currency by default
+        $defaultCurrency = array('USD', 'BTC');
+        $defaultTypes = array('user.safeWallet', 'user.trading', 'user.withdrawWallet');
+        
+        foreach($defaultTypes as $type) {
+            foreach($defaultCurrency as $value) {
+                Account::create(array(
+                    'userId' => $userId,
+                    'currency' => $value,
+                    'status' => 'opened',
+                    'type' => $type
+                ));
+            }
+        }
+        
         $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
         $result = $connector->sendRequest(array(TcpRemoteClient::FUNC_CREATE_TRADE_ACCOUNT, $userId));
+        
         return $result;
     }
     
@@ -45,7 +61,7 @@ class User extends CActiveRecord {
         }
         try {
             $this->save();
-            $this->createNewTradeAccount($this->id);
+            $this->createTradeAccount($this->id);
         } catch(Exception $e) {
             if($e instanceof ExceptionTcpRemoteClient) {
                throw $e;
@@ -147,7 +163,7 @@ class User extends CActiveRecord {
         }
         try {
             $this->save();
-            $this->createNewTradeAccount($this->id);
+            $this->createTradeAccount($this->id);
         } catch(Exception $e) {
             if($e instanceof ExceptionTcpRemoteClient) {
                throw $e;
@@ -156,6 +172,10 @@ class User extends CActiveRecord {
         }
         
         return MailSender::sendEmail('userActivate', $email, array('confirmCode'=>$this->emailVerification));
+    }
+    
+    public static function get($userId) {
+        return self::model()->findByPk($userId);
     }
     
 }

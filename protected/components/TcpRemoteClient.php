@@ -22,6 +22,13 @@ class TcpRemoteClient extends CComponent {
     const FUNC_UNLOCK_TRADE_ACCOUNT = 3;
     const FUNC_REMOVE_TRADE_ACCOUNT = 4;
     const FUNC_REPLENISH_TRADE_ACCOUNT = 5;
+    const FUNC_REPLENISH_SAFE_ACCOUNT = 6;
+    
+    const FUNC_CREATE_LIMIT_ORDER = 7;
+    const FUNC_CREATE_MARKET_ORDER = 8;
+    const FUNC_CREATE_INSTANT_ORDER = 9;
+    
+    const FUNC_GET_ACCOUNT_INFO = 19;
     
     //ErrorCodes
     const ErrorAccountAlreadyExists = 1;
@@ -49,7 +56,10 @@ class TcpRemoteClient extends CComponent {
     const ErrorInvalidFunctionArguments = 23;
     const ErrorFunctionNotFound = 24;
     const ErrorInvalidJsonInput = 25;
-
+    const ErrorNegativeOrZeroLeverage = 26;
+    const ErrorIncorrectPercValue = 27;
+    const ErrorUnknown = 99;
+    
     public function __construct(array $input) {
         if(!isset($input['url']) || !isset($input['port'])) {
             throw new ExceptionWrongInputData();
@@ -80,18 +90,23 @@ class TcpRemoteClient extends CComponent {
         $paramsCount = 0;
         $requestArray = array();
         foreach($params as $value) {
-            $requestArray[] = '"'.$paramsCount.'":"'.$value.'"';
+            if(is_int($value) || is_numeric($value)) {
+                $requestArray[] = '"'.$paramsCount.'":'.$value;
+            } else {
+                $requestArray[] = '"'.$paramsCount.'":"'.$value.'"';
+            }
             $paramsCount++;
         }
         $requestString .= implode(',', $requestArray).'}';
-        
         return $requestString;
     }
     
     private function parseResponse($response) {
         $responseArray = json_decode($response, true);
         if(!isset($responseArray[0]) || $responseArray[0] != 0) {
-            throw new ExceptionTcpRemoteClient();
+            $e = new ExceptionTcpRemoteClient();
+            $e->errorType = (isset($responseArray[0]))?$responseArray[0]:99;
+            throw $e;
         }
         array_shift($responseArray);
         

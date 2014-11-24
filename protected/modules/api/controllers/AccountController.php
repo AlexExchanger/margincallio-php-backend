@@ -1,175 +1,78 @@
 <?php
 
-namespace application\modules\site\controllers;
+class AccountController extends CController {
 
-use Yii;
-
-class AccountController extends \ApiController {
-
-    public function filters() {
-        return ['postOnly', 'auth'];
-    }
-
-    public function actionList() {
-        $accounts = \Account::getByUser(\Yii::app()->params->userId);
-        $userAccounts = [];
-        foreach ($accounts as $account) {
-            $userAccounts[$account->currency][$account->type] = $account;
+    private $user = null;
+    
+    public function beforeAction($action) {
+    
+        if(!Yii::app()->user->isGuest) {
+            $this->user = Yii::app()->user;
+            return true;
         }
-
-        $prepareAccount = function (\Account $account) {
-            return [
-                'accountId' => $account->publicId,
-                'currency' => $account->currency,
-                'balance' => $account->currency == 'BTC' ? bcadd($account->balance, '0', 8) : bcadd($account->balance, '0', 2),
-                'status' => $account->status,
-                'createdAt' => $account->createdAt,
-                'type' => $account->type,
-            ];
-        };
-
-        $currencies = ['USD', 'BTC'];
-        $types = [
-            'user.wallet',
-            'user.merchant',
-            'user.trading',
-            'user.partnerCommission',
-            'user.lockTrading',
-            'user.withdrawWallet',
-            'user.withdrawMerchant',
-            'user.withdrawTrading',
-        ];
-
-        $json = [];
-
-        //создадим недостающие аккаунты
-        foreach ($currencies as $currency) {
-            foreach ($types as $type) {
-                if (!isset($userAccounts[$currency][$type])) {
-                    $userAccounts[$currency][$type] = \Account::getOrCreateForUser(\Yii::app()->params->userId, $type, $currency);
-                }
-                $json[] = $prepareAccount($userAccounts[$currency][$type]);
-            }
-        }
-        $this->json($json);
+        
+        print Response::ResponseError('Access denied');
+        return false;
     }
-
-    public function actionCreate() {
-        $currency = \Yii::app()->request->getPost('currency');
-        if (!in_array($currency, ['USD', 'EUR', 'RUR', 'BTC'])) {
-            throw new \ModelException(['currency' => _('Wrong currency')]);
+    
+    public function actionGetWalletList() {
+        $accountList = Account::model()->findAllByAttributes(array(
+            'userId'=>$this->user->id,
+            'type'=> array('user.trading', 'user.safeWallet'),
+            ));
+        
+        if(!$accountList) {
+            print Response::ResponseError('There are no wallets');
+            exit;
         }
-        $account = \Account::getOrCreateForUser(\Yii::app()->params->userId, 'user.trading', $currency);
-        $this->json([
-            'id' => $account->guid,
-            'publicId' => $account->publicId,
-            'currency' => $account->currency,
-            'balance' => $account->balance,
-            'status' => $account->status,
-            'createdAt' => $account->createdAt
-        ]);
+        
+        $data = array();
+        foreach($accountList as $key=>$value) {
+            $data[] = array(
+                'type' => ($value->type == 'user.trading')? 'trading':'safe',
+                'currency' => $value->currency,
+                'balance' => $value->balance, 
+            );
+        }
+        
+        print Response::ResponseSuccess($data);
     }
-
+    
+    //type 0 = s to t, type 1 = t to s 
     public function actionTransferFunds() {
-        $accountFromId = \Yii::app()->request->getPost('accountFromId');
-        $accountToId = \Yii::app()->request->getPost('accountToId');
-        $amount = \Yii::app()->request->getPost('amount');
-
-        $accountFrom = \Account::get($accountFromId);
-        $accountTo = \Account::get($accountToId);
-
-        if (!$accountFrom) {
-            throw new \ModelException(_('Unknown accountFrom'));
+        $type = Yii::app()->request->getParam('type');
+        $currency = Yii::app()->request->getParam('currency', false);
+        $amount = Yii::app()->request->getParam('amount', false);
+        
+        if(!isset($type)) {
+            print Response::ResponseError('No type');
+            exit();
         }
-        if ($accountFrom->userId != \Yii::app()->params->userId) {
-            throw new \ModelException(_('Account does not belong to current user'));
+        
+        if(!in_array($currency, Yii::app()->params->supportedCurrency)) {
+            print Response::ResponseError('Currency doesn\'t support');
+            exit();
         }
-        if (!$accountTo) {
-            throw new \ModelException(_('Unknown accountTo'));
-        }
-
-        \Account::transferOwnFunds($accountFrom, $accountTo, $amount);
-
-        $this->json(_('Transfer completed'));
-    }
-
-    public function actionGetDetails() {
-        $accountId = \Yii::app()->request->getPost('accountId');
-        $account = \Account::get($accountId);
-
-        if (!$account || $account->userId != \Yii::app()->params->userId) {
-            throw new \ModelException(_('Account not found'));
-        }
-
-        if (!in_array($account->type, ['user.trading', 'user.wallet'])) {
-            throw new \ModelException(_('Wrong account type'));
-        }
-
-        switch ($account->currency) {
-            case 'BTC':
-                $address = \CoinAddress::create($account);
-                $json = [
-                    'type' => 'bitcoin',
-                    'penaltyMax' => 0,
-                    'penaltyFee' => 0,
-                    'details' => [
-                        'address' => $address->address
-                    ]
-                ];
-                break;
-            case 'USD':
-                $json = [];
-                $user = \User::get(\Yii::app()->params->userId);
-                $gateway = \Gateway::getForPayment('bank.norvik', 'USD');
-                if (!$gateway) {
-                    throw new \ModelException(_('Gateway not found'));
+        
+        try {
+            if ($currency == 'BTC') {
+                if (!preg_match('~^\d+(\.\d{1,8})?$~', $amount)) {
+                    throw new Exception('Wrong amount');
                 }
-                $json['type'] = $gateway->type;
-                $json['comment'] = "payment under the contract $account->publicId";
-                $json['details'] = [
-                    'Bank Name' => 'JSC «NORVIK BANKA», Riga, Latvia',
-                    'SWIFT' => 'LATBLV22',
-                    'Account' => 'LVXXXXXXXXXXXXXXXXXXXX',
-                    'Beneficiary' => 'JOHN GALT LEGION LTD',
-                    'Correspondent Bank Name' => 'Commerzbank AG, Frankfurt/Main, Germany',
-                    'Correspondent SWIFT' => 'COBADEFF',
-                    'Correspondent Account' => 'XXXXXXXXXXXXXX',
-                ];
-                $json['penaltyMax'] = 1000;
-                $json['penaltyFee'] = 20;
-                break;
-            default:
-                throw new \ModelException(_('Wrong currency'));
+            } elseif (!preg_match('~^\d+(\.\d{1,2})?$~', $amount)) {
+                throw new Exception('Wrong amount');
+            }
+            
+            if($type) {
+                Account::transferToSafe($currency, $amount);
+            } else {
+                Account::transferToTrade($currency, $amount);   
+            }
+        } catch(Exception $e) {
+            print Response::ResponseError($e->getMessage());
+            exit();
         }
-
-        $json['account'] = \ArrayHelper::objectMap($account, ['accountId' => 'publicId', 'balance', 'type', 'currency']);
-        $json['account']['holdAmount'] = 0;
-        $this->json($json);
-    }
-
-    public function actionRequestCashOut() {
-        $accountId = Yii::app()->request->getPost('accountId');
-        $amount = Yii::app()->request->getPost('amount');
-        $details = Yii::app()->request->getPost('details');
-
-        $errors = [];
-        $details = is_array($details) ? $details : json_decode($details, true);
-        if (!is_array($details)) {
-            $errors['details'] = _('Wrong format');
-        }
-
-        $account = \Account::get($accountId);
-        if (!$account || $account->userId != Yii::app()->params->userId) {
-            $errors['account'] = _('Account not found');
-        }
-
-        if ($errors) {
-            throw new \ModelException(_('Validation failed'), $errors);
-        }
-
-        \TransactionOrder::requestCashOut($account, $amount, $details, Yii::app()->params->userId);
-
-        $this->json(['accountId' => $accountId, 'amount' => $amount], _('Request accepted'));
-    }
-
+        
+        print Response::ResponseSuccess();
+    }   
 }

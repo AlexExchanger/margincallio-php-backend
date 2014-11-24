@@ -57,11 +57,8 @@ class UserController extends CController {
     }
     
     
-    
-    
     public function actionChangePasswordRequest($id) {
         //TODO: action for front-end
-        
         return true;
     }
     

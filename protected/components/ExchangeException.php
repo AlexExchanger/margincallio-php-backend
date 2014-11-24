@@ -5,6 +5,7 @@ class ExceptionWrongInputData extends CException {}
 
 //TcpRemoteClient
 class ExceptionTcpRemoteClient extends CException {
+    public $errorType;
     public $message = 'TCP connection error';
 }
 class ExceptionConnectionRefused extends ExceptionTcpRemoteClient {
@@ -40,12 +41,42 @@ class ExceptionInviteSave extends ExceptionAdmin {
 }
 
 
-
-
 //Notification
 class ExceptionNotification extends Exception {
     public $message = 'Error with notification';
 }
 class ExceptionNotificationNoView extends ExceptionNotification {
     public $message = 'There is no view file with given name';
+}
+
+
+//Account
+class ExceptionAccount extends Exception {
+    public $message = 'Error with account';
+}
+
+class ExceptionWrongCurrency extends ExceptionAccount {
+    public $message = 'Currency does\'t supported';
+}
+
+class ExceptionNoMoney extends ExceptionAccount {
+    public $message = 'This wallet has no money';
+}
+
+//External Gateway
+class ExceptionGateway extends Exception {
+    public $message = 'Error with gateway';
+}
+
+class ExceptionNoAccount extends ExceptionGateway {
+    public $message = 'There is no account for this user and this currency';
+}
+
+//Trade & Orders
+class ExceptionTrade extends Exception {
+    public $message = 'Error with trade operation';
+}
+
+class ExceptionUnknowOrderType extends ExceptionTrade {
+    public $message = 'Unknow order type';
 }
