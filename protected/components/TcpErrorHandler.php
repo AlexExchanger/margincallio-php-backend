@@ -11,7 +11,7 @@ class TcpErrorHandler extends CComponent {
                 $message = 'Account already exist';
                 break;
             case TcpRemoteClient::ErrorInsufficientMarketVolume:
-                $message = 'There is no money at this wallet';
+                $message = 'There is no money at this wallet or the order book is empty';
                 break;
             case TcpRemoteClient::ErrorUnknown:
                 $message = 'Unknow error';

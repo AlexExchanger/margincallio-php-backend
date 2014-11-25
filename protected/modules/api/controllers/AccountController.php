@@ -16,9 +16,13 @@ class AccountController extends CController {
     }
     
     public function actionGetWalletList() {
+        
+        //Example: BTC,USD
+        $pair = Yii::app()->request->getParam('pair', 'BTC,USD');
+        
         $accountList = Account::model()->findAllByAttributes(array(
             'userId'=>$this->user->id,
-            'type'=> array('user.trading', 'user.safeWallet'),
+            'type'=> array('user.safeWallet'),
             ));
         
         if(!$accountList) {
@@ -26,14 +30,28 @@ class AccountController extends CController {
             exit;
         }
         
+        $remoteAccountInfo = Account::getAccountInfo();
+        
         $data = array();
         foreach($accountList as $key=>$value) {
             $data[] = array(
-                'type' => ($value->type == 'user.trading')? 'trading':'safe',
+                'type' => 'safe',
                 'currency' => $value->currency,
                 'balance' => $value->balance, 
             );
         }
+        
+        $data[] = array(
+            'type' => 'trade',
+            'currency' => explode(',', $pair)[0],
+            'balance' => (string)bcadd($remoteAccountInfo['firstAvailable'], 0)
+        );
+        
+        $data[] = array(
+            'type' => 'trade',
+            'currency' => explode(',', $pair)[1],
+            'balance' => (string)bcadd($remoteAccountInfo['secondAvailable'],0)
+        );
         
         print Response::ResponseSuccess($data);
     }
@@ -75,4 +93,32 @@ class AccountController extends CController {
         
         print Response::ResponseSuccess();
     }   
+    
+    public function actionGetActiveOrders() {
+        
+        try {
+            $orders = Order::getActiveOrders($this->user->id);
+        } catch (Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+                print TcpErrorHandler::TcpHandle($e->errorType);
+                exit();
+            }
+        }
+        
+        /**
+            first array - buy, second array - sell 
+           
+            22, - order ID
+            1,  - original amount
+            1,  - actual amount
+            340, - rate
+            635524464736530000 - ticks 
+         */
+        
+        print Response::ResponseSuccess($orders);
+    }
+    
+    
+    
+    
 }

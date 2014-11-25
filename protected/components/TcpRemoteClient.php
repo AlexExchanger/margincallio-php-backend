@@ -27,8 +27,10 @@ class TcpRemoteClient extends CComponent {
     const FUNC_CREATE_LIMIT_ORDER = 7;
     const FUNC_CREATE_MARKET_ORDER = 8;
     const FUNC_CREATE_INSTANT_ORDER = 9;
+    const FUNC_CANCEL_ORDER = 10;
     
     const FUNC_GET_ACCOUNT_INFO = 19;
+    const FUNC_GET_ACTIVE_ORDERS = 20;
     
     //ErrorCodes
     const ErrorAccountAlreadyExists = 1;
