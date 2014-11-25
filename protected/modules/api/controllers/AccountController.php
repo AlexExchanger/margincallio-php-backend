@@ -107,7 +107,7 @@ class AccountController extends CController {
         
         /**
             first array - buy, second array - sell 
-           
+          
             22, - order ID
             1,  - original amount
             1,  - actual amount
@@ -118,7 +118,9 @@ class AccountController extends CController {
         print Response::ResponseSuccess($orders);
     }
     
-    
+    public function actionGetActiveconditional() {
+        
+    }
     
     
 }

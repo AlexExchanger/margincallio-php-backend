@@ -29,6 +29,13 @@ class TcpRemoteClient extends CComponent {
     const FUNC_CREATE_INSTANT_ORDER = 9;
     const FUNC_CANCEL_ORDER = 10;
     
+    const FUNC_CREATE_SL = 11;
+    const FUNC_CREATE_TP = 12;
+    const FUNC_CREATE_TS = 13;
+    const FUNC_CANCEL_SL = 14;
+    const FUNC_CANCEL_TP = 15;
+    const FUNC_CANCEL_TS = 16;
+    
     const FUNC_GET_ACCOUNT_INFO = 19;
     const FUNC_GET_ACTIVE_ORDERS = 20;
     

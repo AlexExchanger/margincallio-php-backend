@@ -73,4 +73,67 @@ class TradeController extends CController {
         print Response::ResponseSuccess();
     }
     
+    public function actionAddConditionalOrder() {
+        
+        //TODO: обсудить с фронтенд, как будет считаться направление условного ордера
+        $availableTypes = array('STOPLOSS', 'TAKEPROFIT', 'TRAILINGSTOP');
+        
+        $type = mb_strtoupper(Yii::app()->request->getParam('type'));
+        
+        if(!in_array($type, $availableTypes)) {
+            print Response::ResponseError('Wrong type for conditional order');
+            exit();
+        }
+        
+        $data = array(
+            'type' => $type,
+            'side' => Yii::app()->request->getParam('side'),
+            'amount' => Yii::app()->request->getParam('amount'),
+            'rate' => Yii::app()->request->getParam('rate'),
+            'offset' => Yii::app()->request->getParam('offset')
+         );
+        
+        try {
+            $result = Order::createConditionalOrder($this->user->id, $data);
+        } catch (Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+                print TcpErrorHandler::TcpHandle($e->errorType);
+                exit();
+            }
+            print Response::ResponseError();
+            exit();
+        }
+        
+        print Response::ResponseSuccess();
+    }
+    
+    public function actionCancelConditionalOrder() {
+        
+        //TODO: обсудить с фронтенд, как будет считаться направление условного ордера
+        $availableTypes = array('STOPLOSS', 'TAKEPROFIT', 'TRAILINGSTOP');
+        
+        $type = mb_strtoupper(Yii::app()->request->getParam('type'));
+        $orderId = Yii::app()->request->getParam('orderId');
+        
+        if(!in_array($type, $availableTypes)) {
+            print Response::ResponseError('Wrong type for conditional order');
+            exit();
+        }
+        
+        try {
+            Order::cancelConditionalOrder($this->user->id, $orderId, $type);
+        } catch (Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+                print TcpErrorHandler::TcpHandle($e->errorType);
+                exit();
+            }
+            print Response::ResponseError();
+            exit();
+        }
+        
+        print Response::ResponseSuccess();
+    }
+    
+    
+    
 }
