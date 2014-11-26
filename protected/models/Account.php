@@ -2,24 +2,18 @@
 
 class Account extends CActiveRecord {
 
+    private static $systemUserId = 0;
+    
     public static $currencyOptions = ['BTC', 'USD', 'EUR'];
+    
+    public static $systemTypeOptions = [
+        'system.gateway.external.universe', // отдано наружу / принято снаружи (сумма)
+        'system.gateway.external.universe.unknown', // неизвестные платежи
+        'system.gateway.external', // всегда плюс, реальный внешний кошелек/банк
+        'system.gateway.internal', // оборот по шлюзу (при внешнем поступлении минус)
+    ];
+    
     public static $typeOptions = [
-
-//        'system.gateway.external.universe', // отдано наружу / принято снаружи (сумма)
-//        'system.gateway.external.universe.unknown', // всегда в минусе, неизвестные платежи
-//        'system.gateway.external', // всегда плюс, реальный внешний кошелек/банк
-//        'system.gateway.external.systemCommission', // всегда плюс, деньги отданные платежной системе
-//        'system.gateway.internal', // оборот по шлюзу (при внешнем поступлении минус)
-//        'system.gateway.internal.commission', // всегда плюс
-
-        // два системных счета для каждого тикера
-//        'system.ticker.USDBTC.commission',
-//        'system.ticker.EURBTC.commission',
-        
-        // промежуточные счета для зачисления реф.комиссии. на них всегда 0
-        //'system.ticker.USDBTC.refCommission',
-        //'system.ticker.EURBTC.refCommission',
-        
         'user.trading', // для торговли на бирже, сюда прямо ввод снаружи
         'user.safeWallet', // Safe счет пользователя
         'user.withdrawWallet', // для вывода денег
@@ -38,81 +32,11 @@ class Account extends CActiveRecord {
         return array(
             array('currency', 'filter', 'filter' => 'strtoupper'),
             array('currency', 'in', 'allowEmpty' => false, 'range' => self::$currencyOptions, 'strict' => true),
-            array('type', 'in', 'allowEmpty' => false, 'range' => self::$typeOptions, 'strict' => true),
+            array('type', 'in', 'allowEmpty' => false, 'range' => array_merge(self::$typeOptions, self::$systemTypeOptions), 'strict' => true),
             array('status', 'in', 'allowEmpty' => false, 'range' => self::$statusOptions, 'strict' => true),
             array('creditLimit', 'numerical', 'allowEmpty' => false, 'min' => 0, 'max' => 100000, 'integerOnly' => false),
         );
     }
-
-    public static function getForSystem($type, $currencyOrGateway) {
-        $currency = is_a($currencyOrGateway, 'Gateway') ? $currencyOrGateway->currency : $currencyOrGateway;
-        $gatewayId = is_a($currencyOrGateway, 'Gateway') ? $currencyOrGateway->id : null;
-        $attributes = array(
-            'type' => $type,
-            'currency' => $currency
-        );
-        if ($gatewayId) {
-            $attributes['gatewayId'] = $gatewayId;
-        }
-        $account = Account::model()->findByAttributes($attributes);
-        return $account;
-    }
-
-
-    public static function getOrCreateForSystem($type, $currencyOrGateway) {
-        $account = Account::getForSystem($type, $currencyOrGateway);
-        if ($account) {
-            return $account;
-        }
-
-        $currency = is_a($currencyOrGateway, 'Gateway') ? $currencyOrGateway->currency : $currencyOrGateway;
-        $gatewayId = is_a($currencyOrGateway, 'Gateway') ? $currencyOrGateway->id : null;
-        $account = self::create(array(
-            'currency' => $currency,
-            'status' => 'opened',
-            'type' => $type,
-            'gatewayId' => $gatewayId
-        ));
-        if ($gatewayId && $type == 'system.gateway.external') {
-            $currencyOrGateway->accountId = $account->id;
-            $currencyOrGateway->update(array('accountId'));
-        }
-        return $account;
-    }
-
-
-    public static function getForUser($userId, $type, $currency) {
-        $account = Account::model()->findByAttributes([
-            'userId' => $userId,
-            'type' => $type,
-            'currency' => $currency
-        ]);
-        return $account;
-    }
-
-
-    public static function getByUser($userId) {
-        return Account::model()->findAllByAttributes([
-            'userId' => $userId,
-        ]);
-    }
-
-
-    public static function getOrCreateForUser($userId, $type, $currency) {
-        $account = Account::getForUser($userId, $type, $currency);
-        if ($account) {
-            return $account;
-        }
- 
-        $account = self::create([
-            'userId' => $userId,
-            'currency' => $currency,
-            'status' => 'opened',
-            'type' => $type
-        ]);
-        return $account;
-    }
-
 
     public static function get($id) {
         $account = null;
@@ -128,30 +52,6 @@ class Account extends CActiveRecord {
     public static function getMany(array $ids) {
         return $ids ? self::model()->findAllByPk($ids) : [];
     }
-
-
-    public static function getForUpdate($id) {
-        $account = null;
-        if (is_numeric($id)) {
-            $account = self::model()->dbConnection->createCommand('select * from account where id = :id limit 1 for update')
-                ->queryRow(true, [':id' => $id]);
-        }
-        elseif (Guid::validate($id)) {
-            $account = self::model()->dbConnection->createCommand('select * from account where guid = :guid limit 1 for update')
-                ->queryRow(true, [':guid' => $id]);
-        }
-        elseif (StringGenerator::validateAccountPublicId($id)) {
-            $account = self::model()->dbConnection->createCommand('select * from account where publicId = :publicId limit 1 for update')
-                ->queryRow(true, [':publicId' => $id]);
-        }
-
-        if ($account) {
-            $account = self::model()->populateRecord($account, true);
-        }
-
-        return $account;
-    }
-
 
     public static function create(array $data) {
         $account = new self();
@@ -210,38 +110,6 @@ class Account extends CActiveRecord {
 
         return $account;
     }
-
-    public static function bindTo(array $objects) {
-        $ids = [];
-        foreach ($objects as $object) {
-            if ($object instanceof Gateway) {
-                $ids[$object->accountId] = true;
-            }
-            if ($object instanceof TransactionOrder) {
-                $ids[$object->accountFromId] = true;
-                $ids[$object->accountToId] = true;
-            }
-        }
-
-        $accounts = [];
-        if ($ids) {
-            $accountModels = Account::model()->findAllByPk(array_keys($ids));
-            foreach ($accountModels as $account) {
-                $accounts[$account->id] = $account;
-            }
-        }
-
-        foreach ($objects as $object) {
-            if ($object instanceof Gateway) {
-                $object->account = ArrayHelper::getFromArray($accounts, $object->accountId, null);
-            }
-            if ($object instanceof TransactionOrder) {
-                $object->accountFrom = ArrayHelper::getFromArray($accounts, $object->accountFromId, null);
-                $object->accountTo = ArrayHelper::getFromArray($accounts, $object->accountToId, null);
-            }
-        }
-    }
-
 
     public static function transferOwnFunds(Account $accountFrom, Account $accountTo, $amount) {
         try {
@@ -318,8 +186,49 @@ class Account extends CActiveRecord {
         return true;
     }
     
-    //TODO: rewrite this
+    private static function createSystemAccount($currency) {
+        
+        $account = new Account();
+        $account->currency = $currency;
+        $account->status = 'opened';
+        $account->userId = self::$systemUserId;
+        $account->createdAt = TIME;
+        
+        $accountList = array();
+        
+        foreach(self::$systemTypeOptions as $wallet) {
+            $account->setIsNewRecord(true);
+            $account->type = $wallet;
+            $account->guid = Guid::generate();
+            $account->save();
+            array_push($accountList, $account);
+        }
+    }
     
+    public static function getSystemAccount($currency) {
+        if(!in_array($currency, $currencyOptions)) {
+            return false;
+        }
+        
+        $accounts = Account::model()->findAllByAttributes(array(
+            'type'=>self::$systemTypeOptions,
+            'userId'=>self::$systemUserId,
+            'currency'=>$currency
+        ));
+        
+        if(!$accounts) {
+            $accounts = self::createSystemAccount($currency);
+        }
+        
+        $data = array();
+        foreach($accounts as $value) {
+            $data[$value->type] = $value;
+        }
+        
+        return $data;
+    }
+    
+    //TODO: rewrite this   
     private static function getAccountPair($userId, $currency) {
         $accounts = self::model()->findAllByAttributes(array(
             'userId' => $userId,
@@ -337,10 +246,8 @@ class Account extends CActiveRecord {
         }
         
         return $wallets;
-        
     }
-    
-    
+        
     private static function createTransaction($wallets, $amount, $type) {
         
         $groupId = Guid::generate();
@@ -380,7 +287,6 @@ class Account extends CActiveRecord {
         }
         
         //TODO: add commision
-        
         $wallets['user.trading']->balance = bcsub($wallets['user.trading']->balance, $amount);
         $wallets['user.safeWallet']->balance = bcadd($wallets['user.safeWallet']->balance, $amount);
         

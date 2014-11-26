@@ -108,10 +108,10 @@ class AccountController extends CController {
         /**
             first array - buy, second array - sell 
           
-            22, - order ID
-            1,  - original amount
-            1,  - actual amount
-            340, - rate
+            22  - order ID
+            1   - original amount
+            1   - actual amount
+            340 - rate
             635524464736530000 - ticks 
          */
         
