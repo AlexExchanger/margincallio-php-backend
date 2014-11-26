@@ -80,3 +80,7 @@ class ExceptionTrade extends Exception {
 class ExceptionUnknowOrderType extends ExceptionTrade {
     public $message = 'Unknow order type';
 }
+
+class ExceptionOrderNonExist extends ExceptionTrade {
+    public $message = 'This order doesn\'t exist';
+}

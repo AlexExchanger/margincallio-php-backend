@@ -145,7 +145,19 @@ class Order extends CActiveRecord {
                 break;
         }
         
-        return $result;
+        $order = new Order();
+        $order->coreId = $result[0];
+        $order->type = $type;
+        $order->side = $side;
+        $order->size = $amount;
+        $order->price = isset($offset)?$offset:$rate;
+        $order->userId = $userId;
+        $order->guid = Guid::generate();
+        $order->status = 'accepted';
+        $order->createdAt = TIME;
+        $order->updatedAt = null;
+
+        return $order->save();
     }
     
     public static function cancelConditionalOrder($userId, $orderId, $type) {
@@ -153,6 +165,16 @@ class Order extends CActiveRecord {
         $conector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
         
         //find by database
+        $order = Order::model()->findByAttributes(array(
+            'userId'=>$userId,
+            'coreId'=>$orderId,
+            'type'=>$type,
+            ));
+        
+        if(!$order || $order->status != 'accepted') {
+            throw new ExceptionOrderNonExist();
+        }
+        
         
         $result = false;
         switch($type) {
@@ -166,7 +188,11 @@ class Order extends CActiveRecord {
                 $result = $conector->sendRequest(array(TcpRemoteClient::FUNC_CANCEL_TS, $userId, $orderId));
                 break;
         }
-        return $result;
+        
+        $order->status = 'cancelled';
+        $order->updatedAt = TIME;
+        
+        return $order->save();
     }
 
 }

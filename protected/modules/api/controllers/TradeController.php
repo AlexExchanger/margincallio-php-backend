@@ -134,6 +134,4 @@ class TradeController extends CController {
         print Response::ResponseSuccess();
     }
     
-    
-    
 }
