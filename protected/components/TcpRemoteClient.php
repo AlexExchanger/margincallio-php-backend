@@ -38,6 +38,7 @@ class TcpRemoteClient extends CComponent {
     
     const FUNC_GET_ACCOUNT_INFO = 19;
     const FUNC_GET_ACTIVE_ORDERS = 20;
+    const FUNC_GET_ACTIVE_CONDITIONAL_ORDER = 21;
     
     //ErrorCodes
     const ErrorAccountAlreadyExists = 1;
@@ -136,7 +137,7 @@ class TcpRemoteClient extends CComponent {
         $result = '';
         fwrite($this->_tcpResource, $request);
         $result .= fread($this->_tcpResource, 1024);
-
+        
         return $this->parseResponse($result);
     }
 

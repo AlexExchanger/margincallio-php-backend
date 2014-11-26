@@ -195,4 +195,9 @@ class Order extends CActiveRecord {
         return $order->save();
     }
 
+    public static function getActiveConditionalOrders($userId) {
+        $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
+        return $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACTIVE_CONDITIONAL_ORDER, $userId));
+    }
+    
 }

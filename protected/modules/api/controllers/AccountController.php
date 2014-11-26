@@ -118,7 +118,28 @@ class AccountController extends CController {
         print Response::ResponseSuccess($orders);
     }
     
-    public function actionGetActiveconditional() {
+    public function actionGetActiveСonditional() {
+        
+        try {
+            $orders = Order::getActiveConditionalOrders($this->user->id);
+        } catch (Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+                print TcpErrorHandler::TcpHandle($e->errorType);
+                exit();
+            }
+        }
+        
+        /**
+            array order: buy sl, sell sl, buy tp, sell tp, buy ts, sell ts
+
+            47   - id
+            1    - amount
+            240  - rate
+            635526147353410000 - datetime at ticks
+          
+         */
+        
+        print Response::ResponseSuccess($orders);
         
     }
     
