@@ -2,6 +2,28 @@
 
 class User extends CActiveRecord {
 
+    public static $typeOptions = array(
+        'trader',
+        'market.maker',
+        'partner',
+        'support',
+        'admin',
+        'senior.accountant',
+        'internal.accountant',
+        'gateway.accountant',
+        'gateway.treasurer',
+        'reserve.treasurer',
+        'verifier',
+        'general.verifier',
+        'admin.stat.observer',
+    );
+    public static $verifiedStatusOptions = array(
+        'waitingForDocuments',
+        'waitingForModeration', 
+        'accepted',
+        'rejected',
+    );
+    
     public static function model($className = __CLASS__) {
         return parent::model($className);
     }
@@ -14,6 +36,8 @@ class User extends CActiveRecord {
         return array(
             array('email', 'required'),
             array('email', 'email'),
+            array('type', 'in', 'allowEmpty' => false, 'range' => self::$typeOptions, 'strict' => true),
+            array('verifiedStatus', 'in', 'allowEmpty' => false, 'range' => self::$verifiedStatusOptions, 'strict' => true),
             array('id','numerical', 'integerOnly'=>true),
             array('id, password, email', 'safe'),
         );
@@ -121,6 +145,8 @@ class User extends CActiveRecord {
         
         $user->password = UserIdentity::trickyPasswordEncoding($user->email, $password);
         $user->emailVerification = null;
+        $user->verifiedStatus = 'waitingForDocuments';
+        $user->type = 'trader';
         
         if(!$user->save()) {
             throw new ExceptionUserSave();
@@ -176,6 +202,77 @@ class User extends CActiveRecord {
     
     public static function get($userId) {
         return self::model()->findByPk($userId);
+    }
+    
+    public static function getCurrent() {
+        if(Yii::app()->user->isGuest) {
+            return false;
+        }
+        
+        return self::get(Yii::app()->user->id);
+    }
+    
+    public static function LockUser($userId) {
+        $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
+        $connector->sendRequest(array(TcpRemoteClient::FUNC_LOCK_TRADE_ACCOUNT, $userId));
+        
+        $user = User::model()->findByPk($userId);
+        $user->blocked = true;
+        $result = $user->save();
+        return $result;
+    }
+    
+    public static function UnlockUser($userId) {
+        $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
+        $connector->sendRequest(array(TcpRemoteClient::FUNC_UNLOCK_TRADE_ACCOUNT, $userId));
+        
+        $user = User::model()->findByPk($userId);
+        $user->blocked = false;
+        $result = $user->save();
+        return $result;
+    }
+    
+    public static function RemoveUser($userId) {
+        $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
+        $connector->sendRequest(array(TcpRemoteClient::FUNC_REMOVE_TRADE_ACCOUNT, $userId));
+        
+        $user = User::model()->findByPk($userId);
+        $accounts = Account::model()->findAllByAttributes(array('userId'=>$userId));
+        foreach($accounts as $value) {
+            $value->delete();
+        }
+        
+        $userPhone = UserPhone::model()->findByPk(UserIdentity::trickyPasswordEncoding($user->email, $user->id));
+        if($userPhone) {
+            $userPhone->delete();
+        }
+        
+        $result = $user->delete();
+        
+        return $result;
+    }
+    
+    public static function getLoginData($user) {
+        $supportedPair = Yii::app()->params->supportedPair;
+        
+        return array(
+            'id' => $user->id,
+            'supportedPair' => $supportedPair,
+            'defaultPair' => $supportedPair[0],
+            '2fa' => $user->twoFA,
+            'verified' => ($user->verifiedStatus == 'accepted')? true:false
+        );
+    }
+    
+    public static function getGeneralStatistic() {
+        $user = self::getCurrent();
+        
+        $stats = Transaction::getStats(array(
+            'accountId' => $user->id,
+            'dateFrom' => $user->lastLoginAt,
+        ));
+        
+        return $stats;
     }
     
 }

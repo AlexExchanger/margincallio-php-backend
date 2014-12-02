@@ -3,7 +3,7 @@
 class UserController extends CController {
 
     private $guestControl = array('login', 'register', 'activate', 'continueregister', 'lostpassword', 'changepassword', 'changepasswordrequest');
-
+    
     public function beforeAction($action) {
         if(!(Yii::app()->user->isGuest ^ in_array($action->id, $this->guestControl))) {
             return true;
@@ -11,6 +11,14 @@ class UserController extends CController {
         
         print Response::ResponseError('Access denied');
         return false;
+    }
+    
+    public function actions() {
+        return array(
+            'captcha'=>array(
+                'class'=>'CCaptchaAction',
+            ),
+        );
     }
     
     public function actionActivate($id) {
@@ -124,7 +132,11 @@ class UserController extends CController {
         $auth = new UserIdentity($email, $password);
         if($auth->authenticate()) {
             Yii::app()->user->login($auth);
-            print Response::ResponseSuccess(array(), 'User has logged');
+            $user = User::getCurrent();
+            $user->lastLoginAt = TIME;
+            $user->save(true, array('lastLoginAt'));
+            $data = User::getLoginData($user);
+            print Response::ResponseSuccess($data, 'User has logged');
         } else {
             print Response::ResponseError('Error: '.$auth->errorMessage);
         }
@@ -132,11 +144,16 @@ class UserController extends CController {
 
     public function actionLogout() {
         if(!Yii::app()->user->isGuest) {
+            $stats = User::getGeneralStatistic();
             Yii::app()->user->logout();
-            print Response::ResponseSuccess();
+            print Response::ResponseSuccess($stats);
         } else {
             print Response::ResponseError('User is guest');
         }
+    }
+    
+    public function actionGetCaptcha() {
+        $this->render('captcha');
     }
 
 }

@@ -23,7 +23,7 @@ class Transaction extends CActiveRecord
         ];
     }
 
-    public function beforeSave()
+    /*public function beforeSave()
     {
         $string = join(':', [
             $this->accountId,
@@ -37,12 +37,12 @@ class Transaction extends CActiveRecord
         ]);
         $this->hash = substr(md5($string), -16);
         return parent::beforeSave();
-    }
+    }*/
 
     public function checkGuid($attribute, $params)
     {
         if (!Guid::validate($this->$attribute)) {
-            $this->addError($this->$attribute, _('Guid invalid'));
+            $this->addError($this->$attribute, 'Guid invalid');
         }
     }
 
@@ -102,7 +102,7 @@ class Transaction extends CActiveRecord
         $filters['direction'] = 'spend';
         $criteria = self::getListCriteria($filters);
         $result['spend'] = (int)self::model()->count($criteria);
-
+        
         $filters['direction'] = 'earn';
         $criteria = self::getListCriteria($filters);
         $result['earn'] = (int)self::model()->count($criteria);
@@ -134,8 +134,8 @@ class Transaction extends CActiveRecord
             }
         }
 
-        \ListCriteria::dateCriteria($criteria, $dateFrom, $dateTo);
-
+        ListCriteria::timestampCriteria($criteria, $dateFrom, $dateTo);
+        
         return $criteria;
     }
 }

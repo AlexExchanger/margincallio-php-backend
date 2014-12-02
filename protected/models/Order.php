@@ -114,7 +114,7 @@ class Order extends CActiveRecord {
             throw $e;
         }
 
-        $result = Order::create($data, $userId);
+        Order::create($data, $userId);
         return $resultCore;
     }
 
@@ -199,5 +199,4 @@ class Order extends CActiveRecord {
         $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
         return $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACTIVE_CONDITIONAL_ORDER, $userId));
     }
-    
 }

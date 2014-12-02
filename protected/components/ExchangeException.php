@@ -3,6 +3,25 @@
 //common
 class ExceptionWrongInputData extends CException {}
 
+class ModelException extends Exception {
+    private $errors = array();
+
+    function __construct($message, $errors = [])
+    {
+        if (is_array($message) && $errors === []) {
+            $errors = $message;
+            $message = '';
+        }
+        $this->errors = $errors;
+        parent::__construct($message);
+    }
+
+    public function getErrors()
+    {
+        return $this->errors;
+    }
+}
+
 //TcpRemoteClient
 class ExceptionTcpRemoteClient extends CException {
     public $errorType;
@@ -61,6 +80,10 @@ class ExceptionWrongCurrency extends ExceptionAccount {
 
 class ExceptionNoMoney extends ExceptionAccount {
     public $message = 'This wallet has no money';
+}
+
+class ExceptionWrongTicketId extends ExceptionAccount {
+    public $message = 'Wrong ticket ID';    
 }
 
 //External Gateway

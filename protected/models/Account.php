@@ -290,6 +290,9 @@ class Account extends CActiveRecord {
         $wallets['user.trading']->balance = bcsub($wallets['user.trading']->balance, $amount);
         $wallets['user.safeWallet']->balance = bcadd($wallets['user.safeWallet']->balance, $amount);
         
+        $systemsAccounts = self::getSystemAccount($currency);
+        $systemsAccounts['system.gateway.internal']->balance = bcsub($systemsAccounts['system.gateway.internal']->balance, $amount);
+        
         if(in_array($currency, array('USD', 'BTC'))) {
             $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
             $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_REPLENISH_SAFE_ACCOUNT, $user->id, ($currency == 'USD')?1:0, $amount));
@@ -300,7 +303,7 @@ class Account extends CActiveRecord {
         
         self::createTransaction($wallets, $amount, 1);
         
-        if(!$wallets['user.safeWallet']->save() || !$wallets['user.trading']->save()) {
+        if(!$wallets['user.safeWallet']->save() || !$wallets['user.trading']->save() || !$systemsAccounts['system.gateway.internal']->save()) {
             throw new ExceptionAccount(); 
         }
         
@@ -317,9 +320,11 @@ class Account extends CActiveRecord {
         }
         
         //TODO: add commision
-        
         $wallets['user.safeWallet']->balance = bcsub($wallets['user.safeWallet']->balance, $amount);
         $wallets['user.trading']->balance = bcadd($wallets['user.trading']->balance, $amount);
+        
+        $systemsAccounts = self::getSystemAccount($currency);
+        $systemsAccounts['system.gateway.internal']->balance = bcadd($systemsAccounts['system.gateway.internal']->balance, $amount);
         
         if(in_array($currency, array('USD', 'BTC'))) {
             $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
@@ -331,7 +336,7 @@ class Account extends CActiveRecord {
         
         self::createTransaction($wallets, $amount, 0);
         
-        if(!$wallets['user.safeWallet']->save() || !$wallets['user.trading']->save()) {
+        if(!$wallets['user.safeWallet']->save() || !$wallets['user.trading']->save() || !$systemsAccounts['system.gateway.internal']->save()) {
             throw new ExceptionAccount(); 
         }
         
@@ -361,4 +366,50 @@ class Account extends CActiveRecord {
     }
     
     
+    //external methods
+    public static function transferToExternal($currency, $userId, $amount) {
+        $currencyName = mb_strtolower($currency);
+        
+        $userAccount = Account::model()->findByAttributes(array(
+            'userId' => $userId,
+            'currency' => $currency,
+            'type' => 'user.safeWallet'
+        ));
+        
+        if(!$userAccount || (bccomp($userAccount, $amount)<0)) {
+            return false;
+        }
+        
+        $externalGateway = GatewayFactory::create($currencyName);
+        $externalResult = $externalGateway->transferTo($address, $amount);
+        
+        if(!$externalResult) {
+            return false;
+        }
+        
+        $systemAccount = self::getSystemAccount($currency);
+        $systemAccount['system.gateway.external']->balance = bcsub($systemAccount['system.gateway.external']->balance, $amount);
+        $systemAccount['system.gateway.external.universe']->balance = bcsub($systemAccount['system.gateway.external.universe']->balance, $amount);
+        $internalResult = ($systemAccount['system.gateway.external']->save() && $systemAccount['system.gateway.external.universe']->save());
+        
+        return $internalResult;
+    }
+    
+    public static function transferFromExternal($currency, $userId, $amount) {
+        $currencyName = mb_strtolower($currency);
+        
+        $externalGateway = GatewayFactory::create($currencyName);
+        $externalResult = $externalGateway->transferFrom($address, $amount);
+        
+        if(!$externalResult) {
+            return false;
+        }
+        
+        $systemAccount = self::getSystemAccount($currency);
+        $systemAccount['system.gateway.external']->balance = bcadd($systemAccount['system.gateway.external']->balance, $amount);
+        $systemAccount['system.gateway.external.universe']->balance = bcadd($systemAccount['system.gateway.external.universe']->balance, $amount);
+        $internalResult = ($systemAccount['system.gateway.external']->save() && $systemAccount['system.gateway.external.universe']->save());
+        
+        return $internalResult;
+    }
 }

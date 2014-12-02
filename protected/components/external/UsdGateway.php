@@ -1,13 +1,13 @@
 <?php
 
-class Bitcoin extends ExternalGateway {
+class UsdGateway extends ExternalGateway {
     
     public function __construct($userId) {
-        $this->currencyId = 'BTC';
+        $this->currencyId = 'USD';
         
         $account = Account::model()->findByAttributes(array(
             'type' => 'user.trading',
-            'currency' => 'BTC',
+            'currency' => 'USD',
             'userId' => $userId
         ));
         
@@ -18,12 +18,12 @@ class Bitcoin extends ExternalGateway {
         $this->account = $account;
     }
     
-    public function transferTo($count) {
+    public function transferTo($address, $count) {
         //some transfer actions
         return true;
     }
     
-    public function transferFrom($count) {
+    public function transferFrom($address, $count) {
         //some transfer actions
         return true;
     }

@@ -11,6 +11,7 @@ return array(
     
     'currentUrl' => 'http://site.exchange/',
     
-    'supportedCurrency' => array('USD', 'EUR', 'BTC'),
+    'supportedCurrency' => array('BTC', 'USD', 'EUR'),
+    'supportedPair' => array('BTC/USD'),
     
 );

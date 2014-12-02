@@ -12,9 +12,12 @@ return array(
     ), require 'import.php'),
 
     'defaultController'=>'site',
-
+    
     'modules' => require 'modules.php',
     'components'=>array(
+        'errorHandler'=>array(
+            'errorAction'=>'site/error',
+        ),
         'db' => array(
             'class' => 'CDbConnection',
             'connectionString' => 'pgsql:host=127.0.0.1;port=5432;dbname=exchange_stock',

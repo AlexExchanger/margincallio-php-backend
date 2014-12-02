@@ -143,5 +143,60 @@ class AccountController extends CController {
         
     }
     
+    /* Ticket system */
+    
+    public function actionCreateTicket() {
+        
+        $text = Yii::app()->request->getParam('text');
+        
+        try {
+            $ticket = Ticket::create(array(
+                'title' => Yii::app()->request->getParam('title'),
+                'department' => Yii::app()->request->getParam('department', 'general'),
+            ), $text, $this->user->id);
+        } catch (Exception $e) {
+            print Response::ResponseError();
+            exit();
+        }
+        
+        print Response::ResponseSuccess();
+    }
+    
+    public function actionGetTicket() {
+        $ticketId = Yii::app()->request->getParam('ticketId');
+        
+        try {
+            $ticket = Ticket::getByUser($ticketId, $this->user->id);
+        } catch(Exception $e) {
+            print Response::ResponseError($e->getMessage());
+            exit();
+        }
+        $messages = array();
+        foreach($ticket->messages as $value) {
+            $messages[] = array(
+                'id' => $value->id,
+                'createdBy' => $value->createdBy,
+                'createdAt' => $value->createdAt,
+                'text' => $value->text);
+        }
+        
+        print Response::ResponseSuccess(array('ticket'=>$ticket, 'messages'=>$messages));
+    }
+    
+    public function actionReplyForTicket() {
+        
+        $ticketId = Yii::app()->request->getParam('ticketId');
+        $text = Yii::app()->request->getParam('text');
+        
+        try {
+            $ticket = Ticket::getByUser($ticketId, $this->user->id);
+            Ticket::modify($ticket, array(), $text, $this->user->id);
+        } catch (Exception $e) {
+            print Response::ResponseError();
+            exit();
+        }
+        
+        print Response::ResponseSuccess();   
+    }
     
 }
