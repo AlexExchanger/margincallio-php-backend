@@ -14,4 +14,8 @@ return array(
     'supportedCurrency' => array('BTC', 'USD', 'EUR'),
     'supportedPair' => array('BTC/USD'),
     
+    'bitcoinService' => array(
+        'url'=>'http://bitconidservice/'
+    ),
+    
 );

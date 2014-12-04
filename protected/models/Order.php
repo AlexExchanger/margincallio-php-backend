@@ -123,7 +123,7 @@ class Order extends CActiveRecord {
         $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
         return $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACTIVE_ORDERS, $userId));
     }
-
+    
     public static function createConditionalOrder($userId, $data) {
 
         $type = ArrayHelper::getFromArray($data, 'type');
@@ -199,4 +199,52 @@ class Order extends CActiveRecord {
         $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
         return $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACTIVE_CONDITIONAL_ORDER, $userId));
     }
+    
+    public static function getList(array $filters, array &$pagination)
+    {
+        
+        $limit = ArrayHelper::getFromArray($pagination, 'limit');
+        $offset = ArrayHelper::getFromArray($pagination, 'offset');
+        $sort = ArrayHelper::getFromArray($pagination, 'sort');
+
+        $criteria = self::getListCriteria($filters);
+        
+        if ($limit) {
+            $pagination['total'] = (int)self::model()->count($criteria);
+            $criteria->limit = $limit;
+            $criteria->offset = $offset;
+        }
+
+        ListCriteria::sortCriteria($criteria, $sort, ['id']);
+        return self::model()->findAll($criteria);
+    }
+    
+    private static function getListCriteria(array $filters)
+    {
+        $accountId = ArrayHelper::getFromArray($filters, 'userId');
+        $dateFrom = ArrayHelper::getFromArray($filters, 'dateFrom');
+        $dateTo = ArrayHelper::getFromArray($filters, 'dateTo');
+        $types = ArrayHelper::getFromArray($filters, 'types');
+       
+        $criteria = new CDbCriteria();
+        $conditions = array();
+        $typeParams = array();
+        foreach($types as $key=>$value) {
+            $conditions[] = '("status"=:cond'.$key.')';
+            $typeParams[':cond'.$key] = $value;
+        }
+
+        $criteria->condition .= implode(' OR ', $conditions);
+        $criteria->params = array_merge($criteria->params, $typeParams);
+       
+       
+        if (!empty($accountId)) {
+            $criteria->compare('userId', $accountId);
+        }
+
+        ListCriteria::timestampCriteria($criteria, $dateFrom, $dateTo);
+        
+        return $criteria;
+    }
+    
 }

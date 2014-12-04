@@ -3,16 +3,21 @@
 class AccountController extends CController {
 
     private $user = null;
+    public $paginationOptions;
     
     public function beforeAction($action) {
-    
-        if(!Yii::app()->user->isGuest) {
-            $this->user = Yii::app()->user;
-            return true;
+        if(Yii::app()->user->isGuest) {
+            print Response::ResponseError('Access denied');
+            return false;
         }
+
+        $this->user = Yii::app()->user;
         
-        print Response::ResponseError('Access denied');
-        return false;
+        $this->paginationOptions['limit'] = Yii::app()->request->getParam('limit', false);
+        $this->paginationOptions['offset'] = Yii::app()->request->getParam('offset', false);
+        $this->paginationOptions['sort'] = Yii::app()->request->getParam('sort', false);
+        
+        return true;
     }
     
     public function actionGetWalletList() {
@@ -198,5 +203,24 @@ class AccountController extends CController {
         
         print Response::ResponseSuccess();   
     }
+    
+    public function actionGetOrders() {
+        
+        $filter = array(
+            'types' => array('accepted'),
+            'userId' => $this->user->id,
+        );
+        
+        try {
+            $orders = Order::getList($filter, $this->paginationOptions);
+        } catch (Exception $e) {
+            print_r($e->getMessage()); die();
+            print Response::ResponseError();
+            exit();
+        }
+        
+        print Response::ResponseSuccess($orders);
+    }
+    
     
 }
