@@ -5,4 +5,5 @@ return array(
     'api',
     'auth',
     'notification',
+    'service'
 );

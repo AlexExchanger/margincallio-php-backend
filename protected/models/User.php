@@ -43,10 +43,10 @@ class User extends CActiveRecord {
         );
     }
     
-    private function createTradeAccount($userId) {
+    private function createAccountWallet($userId) {
         //currency by default
         $defaultCurrency = array('USD', 'BTC');
-        $defaultTypes = array('user.safeWallet', 'user.trading', 'user.withdrawWallet');
+        $defaultTypes = array('user.safeWallet', 'user.withdrawWallet');
         
         foreach($defaultTypes as $type) {
             foreach($defaultCurrency as $value) {
@@ -59,11 +59,29 @@ class User extends CActiveRecord {
             }
         }
         
+        return true;
+    }
+    
+    private static function createTradeAccountWallet($userId) {
+        //currency by default
+        $defaultCurrency = array('USD', 'BTC');
+        $type = 'user.trading';
+        
+        foreach($defaultCurrency as $value) {
+            Account::create(array(
+                'userId' => $userId,
+                'currency' => $value,
+                'status' => 'opened',
+                'type' => 'user.trading'
+            ));
+        }
+
         $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
         $result = $connector->sendRequest(array(TcpRemoteClient::FUNC_CREATE_TRADE_ACCOUNT, $userId));
         
         return $result;
     }
+    
     
     public function registerByInvite($inviteCode) {
         $userInvite = UserInvite::model()->findByPk($inviteCode);
@@ -85,7 +103,7 @@ class User extends CActiveRecord {
         }
         try {
             $this->save();
-            $this->createTradeAccount($this->id);
+            $this->createAccountWallet($this->id);
         } catch(Exception $e) {
             if($e instanceof ExceptionTcpRemoteClient) {
                throw $e;
@@ -126,13 +144,14 @@ class User extends CActiveRecord {
     public static function verifyNewUser($code) {
         
         //TODO: Action for frond-end.
-        /*$user = User::model()->findByAttributes(array('emailVerification'=>$code));
+        $user = User::model()->findByAttributes(array('emailVerification'=>$code));
         if(!$user) {
             throw new ExceptionUserVerification();
         }
         
         $user->emailVerification = null;
-        $user->save();*/
+        $user->save();
+        
         return true;
     }
     
@@ -274,5 +293,62 @@ class User extends CActiveRecord {
         
         return $stats;
     }
+    
+    public static function getForModeration($pagination) {
+        $limit = ArrayHelper::getFromArray($pagination, 'limit');
+        $offset = ArrayHelper::getFromArray($pagination, 'offset');
+        $sort = ArrayHelper::getFromArray($pagination, 'sort');
+
+        $criteria = new CDbCriteria();
+        if ($limit) {
+            $criteria->limit = $limit;
+            $criteria->offset = $offset;
+        }
+
+        ListCriteria::sortCriteria($criteria, $sort, ['id']);
+        $criteria->addCondition('"verifiedStatus"=\'waitingForModeration\'', 'AND');
+        $users = self::model()->findAll($criteria);
+        
+        $data = array();
+        foreach($users as $value) {
+            $data[] = array(
+                'id' => $value->id,
+                'email' => $value->email,
+                'type' => $value->type,
+                'createdAt' => $value->createdAt,
+                'lastLoginAt' => $value->lastLoginAt,
+            );
+        }
+        
+        return $data;
+    }
+
+    public static function verify($userId) {
+        $adminId = Yii::app()->user->id;
+        
+        $user = self::get($userId);
+        $user->verifiedBy = $adminId;
+        $user->verifiedAt = TIME;
+        $user->verifiedStatus = 'accepted';
+        
+        if($user->save()) {
+            return self::createTradeAccountWallet($userId);
+        }
+        
+        return false;
+    }
+    
+    public static function refuse($userId, $reason) {
+        $adminId = Yii::app()->user->id;
+        
+        $user = self::get($userId);
+        $user->verifiedBy = $adminId;
+        $user->verifiedAt = TIME;
+        $user->verifiedStatus = 'rejected';
+        $user->verifiedReason = $reason;
+        
+        return $user->save();
+    }
+    
     
 }

@@ -22,6 +22,26 @@ class ModelException extends Exception {
     }
 }
 
+class SystemException extends Exception
+{
+    private $errors = array();
+
+    function __construct($message, $errors = [])
+    {
+        if (is_array($message) && $errors === []) {
+            $errors = $message;
+            $message = '';
+        }
+        $this->errors = $errors;
+        parent::__construct($message);
+    }
+
+    public function getErrors()
+    {
+        return $this->errors;
+    }
+}
+
 //TcpRemoteClient
 class ExceptionTcpRemoteClient extends CException {
     public $errorType;
