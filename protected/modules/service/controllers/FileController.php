@@ -1,6 +1,6 @@
 <?php
 
-class FileController extends ApiController
+class FileController extends CController
 {
 
     public function filters()

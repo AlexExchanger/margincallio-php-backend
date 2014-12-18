@@ -1,6 +1,6 @@
 <?php
 
-class BitcoinController extends ApiController
+class BitcoinController extends CController
 {
 
     public function filters()

@@ -1,11 +1,13 @@
 <?php
 
-class TicketController extends CController {
+class TicketController extends AdminController {
     
     public $paginationOptions;
     
     public function beforeAction($action) {
-        parent::beforeAction($action);
+        if(!parent::beforeAction($action)) {
+            return false;
+        }
 
         $this->paginationOptions['limit'] = Yii::app()->request->getParam('limit', false);
         $this->paginationOptions['offset'] = Yii::app()->request->getParam('offset', false);
@@ -57,6 +59,9 @@ class TicketController extends CController {
         try {
             $ticket = Ticket::get($ticketId);
             Ticket::modify($ticket, array(), $text, 0);
+            
+            $logMessage = 'Reply for ticket with id "'.$ticketId.'" with message: '.$text;
+            Loger::logAdmin(Yii::app()->user->id, $logMessage);
         } catch (Exception $e) {
             print Response::ResponseError();
             exit();

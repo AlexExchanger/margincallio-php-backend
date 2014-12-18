@@ -46,6 +46,8 @@ class VerificationController extends CController {
         
         try {
             $status = User::verify($userId);
+            $logMessage = 'Verifying user with "'.$userId.'"';
+            Loger::logAdmin(Yii::app()->user->id, $logMessage, 'accountVerified');
         } catch(Exception $e) {
             print Response::ResponseError();
             exit();
@@ -60,6 +62,8 @@ class VerificationController extends CController {
         
         try {
             $status = User::refuse($userId, $reason);
+            $logMessage = 'Refuse user with "'.$userId.'". Reason: '.$reason;
+            Loger::logAdmin(Yii::app()->user->id, $logMessage, 'accountRejected');
         } catch(Exception $e) {
             print Response::ResponseError();
             exit();

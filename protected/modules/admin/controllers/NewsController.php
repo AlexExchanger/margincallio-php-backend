@@ -1,11 +1,13 @@
 <?php
 
-class NewsController extends CController {
+class NewsController extends AdminController {
  
     public $paginationOptions;
     
     public function beforeAction($action) {
-        parent::beforeAction($action);
+        if(!parent::beforeAction($action)) {
+            return false;
+        }
 
         $this->paginationOptions['limit'] = Yii::app()->request->getParam('limit', false);
         $this->paginationOptions['offset'] = Yii::app()->request->getParam('offset', false);
@@ -28,6 +30,8 @@ class NewsController extends CController {
         
        try {
            $result = News::create($data, Yii::app()->user->id);
+           $logMessage = 'Add new news with title "'.$result->id.'"';
+           Loger::logAdmin(Yii::app()->user->id, $logMessag, 'news');
        } catch(Exception $e) {
            print Response::ResponseError();
            exit();
@@ -54,13 +58,15 @@ class NewsController extends CController {
            if(!$news) {
                throw new Exception();
            }
-           
            $result = News::modify($news, $data, Yii::app()->user->id, null);
+           
+           $logMessage = 'Modify news with id "'.$data['id'].'"';
+           Loger::logAdmin(Yii::app()->user->id, $logMessage, 'news');
        } catch(Exception $e) {
            print Response::ResponseError($e->getMessage());
            exit();
        }
-       
+      
        print Response::ResponseSuccess();
         
     }
@@ -83,5 +89,43 @@ class NewsController extends CController {
        print Response::ResponseSuccess($result);
         
     }
+    
+    public function actionGetPdf() {
+        
+        $id = Yii::app()->request->getParam('id', false);
+        try {
+            if(!$id) {
+                throw new Exception();
+            }
 
+            include Yii::getPathOfAlias('webroot').'/protected/extensions/pdfConverter/mpdf.php';
+
+            $news = News::model()->findByPk($id);
+
+            if(!$news) {
+                throw new Exception();
+            }
+
+            $html = $this->render('newsTemplate', array(
+                'imgPath' => Yii::getPathOfAlias('webroot').'/protected/extensions/pdfConverter/examples/',
+                'title' => $news->title,
+                'content' => $news->content
+            ), true);
+
+            $mpdf=new mPDF('utf-8'); 
+
+            $mpdf->SetDisplayMode('fullpage');
+
+            $stylesheet = file_get_contents(Yii::getPathOfAlias('webroot').'/protected/extensions/pdfConverter/examples/mpdfstyleA4.css');
+            $mpdf->WriteHTML($stylesheet,1);
+            $mpdf->WriteHTML($html);
+            $mpdf->Output();
+            
+        } catch (Exception $e) {
+            print Response::ResponseError();
+            exit();
+        }
+
+    }
+    
 }

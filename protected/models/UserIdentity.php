@@ -24,14 +24,32 @@ class UserIdentity extends CUserIdentity {
         $finalPass = hash('sha512', $finalUserName.$password);
         return $finalPass;
     }
-
+    
+    
+    public static function generateAlarmCodes($userId, $email) {
+        
+        $generator = hash('sha512', (($userId*3)/2).$email);
+        $code = array();
+        for($i=0; $i<10; $i++) {
+            if($i%2 != 0) {
+                $code[] = hash('sha512', md5($i).$generator);
+            } else {
+                $code[] = hash('sha512', $generator.md5($i));
+            }
+        }
+        
+        return $code;
+    }
+    
 
     public function authenticate() {
         $record = User::model()->findByAttributes(array('email'=>$this->username));
         if($record === null) {
             $this->errorCode = self::ERROR_USERNAME_INVALID;
+            $this->errorMessage = 'Invalid username or password';
         } else if($record->password !== self::trickyPasswordEncoding($this->username, $this->password)) {
             $this->errorCode = self::ERROR_PASSWORD_INVALID;
+            $this->errorMessage = 'Invalid username or password';
         } else {
             $this->_id = $record->id;
             $this->errorCode = self::ERROR_NONE;

@@ -38,7 +38,7 @@ class Ticket extends CActiveRecord
         return Ticket::model()->findByAttributes(array('id'=>$id, 'createdBy'=>$userId));
     }
 
-    public static function create(array $data, $text, $userId, File $file = null) {
+    public static function create(array $data, $text, $userId, $file = null) {
         
         $ticket = new Ticket();
         $ticket->title = ArrayHelper::getFromArray($data, 'title');
@@ -219,4 +219,36 @@ class Ticket extends CActiveRecord
         }
         return $statuses;
     }
+    
+    public static function getTicketsWithLastMessage($userId, $status) {
+        
+        if(!is_numeric($userId) || !in_array($status, Ticket::$statusOptions)) {
+            return false;
+        }
+        
+        $query = <<<HEREDOC
+                SELECT 
+                    t.*,
+                    tm."text" as lastMessageText,
+                    tm."id" as lastMessageId
+                FROM 
+                    ticket t
+                JOIN ticket_message tm
+                ON t.id=tm."ticketId"
+                WHERE
+                    t."userId"='$userId' 
+                    AND t."status"='$status'
+                    AND tm."createdAt" = (
+                            SELECT 
+                                    MAX("createdAt")
+                            FROM
+                                    ticket_message tm_two 
+                            WHERE 
+                                    tm_two."ticketId"=t."id"
+                    )
+HEREDOC;
+        
+        return Yii::app()->db->createCommand($query)->queryAll();
+    }
+    
 }

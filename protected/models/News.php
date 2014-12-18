@@ -168,5 +168,5 @@ class News extends CActiveRecord {
 
         return $criteria;
     }
-
+    
 }

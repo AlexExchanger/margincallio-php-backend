@@ -130,7 +130,6 @@ class File extends CActiveRecord {
         return $file;
     }
     
-    
     public static function getUserDoc($userId) {
         $result = self::model()->findAllByAttributes(array(
             'createdBy' => $userId

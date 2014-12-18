@@ -34,24 +34,14 @@ class TradeController extends CController {
         
         try {
             $result = Order::createOrder($this->user->id, $data);
+
+            $logMessage = 'Created '.$data['side'].' order. Type: '.$data['type'].'. Amount: '.$amount.'.';
+            $logMessage .= ($rate)? 'Rate: '.$rate.'.':'';
+            Loger::logUser(Yii::app()->user->id, $logMessage, 'makeOrder');
         } catch (Exception $e) {
             print Response::ResponseError($e->getMessage());
             exit();
         }
-
-        /*
-            Result:
-                11, - id trade
-                18, - buyer id
-                18, - seller id
-                0, - initiator kind (0 - buy order, 1 - sell order)
-                1, - amount
-                340, - rate
-                0.002, - buyer fee
-                0.68, - seller fee
-                635524470082470000 - ticks datetime
-         */
-        
         print Response::ResponseSuccess($result);
     }
     
@@ -61,6 +51,8 @@ class TradeController extends CController {
         
         try {
             Order::cancelOrder($this->user->id, $orderId);
+            $logMessage = 'Order with id '.$this->user->id.' canceled.';
+            Loger::logUser(Yii::app()->user->id, $logMessage, 'cancelOrder');
         } catch (Exception $e) {
             if($e instanceof ExceptionTcpRemoteClient) {
                 print TcpErrorHandler::TcpHandle($e->errorType);
@@ -95,6 +87,11 @@ class TradeController extends CController {
         
         try {
             $result = Order::createConditionalOrder($this->user->id, $data);
+            
+            $logMessage = 'Created '.$data['side'].' conditional order. Type: '.$data['type'].'. Amount: '.$data['amount'].'.';
+            $logMessage .= ($data['rate'])? 'Rate: '.$data['rate'].'.':'';
+            $logMessage .= ($data['offset'])? 'Offset: '.$data['offset'].'.':'';
+            Loger::logUser(Yii::app()->user->id, $logMessage, 'makeConditional');
         } catch (Exception $e) {
             if($e instanceof ExceptionTcpRemoteClient) {
                 print TcpErrorHandler::TcpHandle($e->errorType);
@@ -122,6 +119,9 @@ class TradeController extends CController {
         
         try {
             Order::cancelConditionalOrder($this->user->id, $orderId, $type);
+            
+            $logMessage = 'Conditional order with id '.$this->user->id.' canceled.';
+            Loger::logUser(Yii::app()->user->id, $logMessage, 'cancelConditional');
         } catch (Exception $e) {
             if($e instanceof ExceptionTcpRemoteClient) {
                 print TcpErrorHandler::TcpHandle($e->errorType);

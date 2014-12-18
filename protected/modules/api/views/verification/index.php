@@ -6,17 +6,17 @@
 )); ?>
     <?php /* поле для загрузки файла */ ?>
     <div class="field">
-        <?php if($model->fileItem): ?>
-            <p><?php echo CHtml::encode($model->fileItem); ?></p>
-        <?php endif; ?>
-        <?php echo $form->labelEx($model,'fileItem'); ?>
-        <?php echo $form->fileField($model,'fileItem'); ?>
-        <?php echo $form->error($model,'fileItem'); ?>
+        <label for="file-first">File Item first</label>
+        <input id="fileItem1" type="hidden" value="" name="fileItem1">
+        <input name="fileItem1" id="yfileItem1" type="file">
+        <label for="file-second">File Item second</label>
+        <input id="fileItem2" type="hidden" value="" name="fileItem2">
+        <input name="fileItem2" id="yfileItem2" type="file">
     </div>
     
     <?php /* кнопка отправки */ ?>
     <div class="button">
-        <?php echo CHtml::submitButton($model->isNewRecord ? 'Создать' : 'Сохранить'); ?>
+        <?php echo CHtml::submitButton('Сохранить'); ?>
     </div>
 <?php $this->endWidget(); ?>
 <?php endif; ?>

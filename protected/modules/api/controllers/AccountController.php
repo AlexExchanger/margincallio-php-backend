@@ -58,6 +58,7 @@ class AccountController extends CController {
             'balance' => (string)bcadd($remoteAccountInfo['secondAvailable'],0)
         );
         
+        Loger::logUser(Yii::app()->user->id, 'Requested wallets list');
         print Response::ResponseSuccess($data);
     }
     
@@ -86,11 +87,15 @@ class AccountController extends CController {
                 throw new Exception('Wrong amount');
             }
             
+            $logMessage = '';
             if($type) {
                 Account::transferToSafe($currency, $amount);
+                $logMessage = 'Transfer '.$currency.' funds from trade to safe. Amount: '.$amount;
             } else {
-                Account::transferToTrade($currency, $amount);   
+                Account::transferToTrade($currency, $amount);
+                $logMessage = 'Transfer '.$currency.' funds from safe to trade. Amount: '.$amount;
             }
+            Loger::logUser(Yii::app()->user->id, $logMessage, 'fundsTransferred');
         } catch(Exception $e) {
             print Response::ResponseError($e->getMessage());
             exit();
@@ -110,16 +115,6 @@ class AccountController extends CController {
             }
         }
         
-        /**
-            first array - buy, second array - sell 
-          
-            22  - order ID
-            1   - original amount
-            1   - actual amount
-            340 - rate
-            635524464736530000 - ticks 
-         */
-        
         print Response::ResponseSuccess($orders);
     }
     
@@ -134,22 +129,11 @@ class AccountController extends CController {
             }
         }
         
-        /**
-            array order: buy sl, sell sl, buy tp, sell tp, buy ts, sell ts
-
-            47   - id
-            1    - amount
-            240  - rate
-            635526147353410000 - datetime at ticks
-          
-         */
-        
         print Response::ResponseSuccess($orders);
         
     }
     
     /* Ticket system */
-    
     public function actionCreateTicket() {
         
         $text = Yii::app()->request->getParam('text');
@@ -159,6 +143,8 @@ class AccountController extends CController {
                 'title' => Yii::app()->request->getParam('title'),
                 'department' => Yii::app()->request->getParam('department', 'general'),
             ), $text, $this->user->id);
+            $logMessage = 'Create ticket with id: '.$ticket->id.', for '.$ticket->department.' department.';
+            Loger::logUser(Yii::app()->user->id, $logMessage);
         } catch (Exception $e) {
             print Response::ResponseError();
             exit();
@@ -196,6 +182,9 @@ class AccountController extends CController {
         try {
             $ticket = Ticket::getByUser($ticketId, $this->user->id);
             Ticket::modify($ticket, array(), $text, $this->user->id);
+            
+            $logMessage = 'Replying for ticket with id: '.$ticket->id.'.';
+            Loger::logUser(Yii::app()->user->id, $logMessage);
         } catch (Exception $e) {
             print Response::ResponseError();
             exit();

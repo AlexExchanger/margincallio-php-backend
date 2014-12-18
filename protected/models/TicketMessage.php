@@ -26,7 +26,7 @@ class TicketMessage extends CActiveRecord {
         return (int)TicketMessage::model()->countByAttributes(array('ticketId' => $ticket->id));
     }
 
-    public static function create(Ticket $ticket, array $data, $userId, File $file = null) {
+    public static function create(Ticket $ticket, array $data, $userId, $file = null) {
         $text = ArrayHelper::getFromArray($data, 'text', '');
         $ticketMessage = new TicketMessage();
         $ticketMessage->createdBy = $userId;
@@ -36,7 +36,13 @@ class TicketMessage extends CActiveRecord {
         try {
             if ($ticketMessage->save()) {
                 if ($file) {
-                    //File::assign($ticketMessage, $file, $userId);
+                    if(is_array($file)) {
+                        foreach ($file as $item) {
+                            $ticketMessage->assign($item->id);
+                        }
+                    } else {
+                        $ticketMessage->assign($item->id);
+                    }
                 }
                 return $ticketMessage;
             } else {
@@ -50,4 +56,37 @@ class TicketMessage extends CActiveRecord {
             throw $e;
         }
     }
+    
+    public function assign($fileId) {
+        if(!$this->id) {
+            return false;
+        }
+        
+        $currentFiles = explode(',', $this->files);
+        if(!in_array($fileId, $currentFiles)) {
+            array_push($currentFiles, $fileId);
+        }
+        
+        $this->files = implode(',', $currentFiles);
+        return $this->save(true, array('files'));
+    }
+    
+    
+    public function unassign($fileId) {
+        if(!$this->id) {
+            return false;
+        }
+        
+        $currentFiles = explode(',', $this->files);
+        $position = array_search($fileId, $currentFiles);
+        
+        if(in_array($fileId, $currentFiles)) {
+            unset($currentFiles[$position]);
+        }
+        
+        $this->files = implode(',', $currentFiles);
+        return $this->save(true, array('files'));
+    }
+    
+    
 }

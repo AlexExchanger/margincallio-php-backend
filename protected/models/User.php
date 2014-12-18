@@ -4,18 +4,15 @@ class User extends CActiveRecord {
 
     public static $typeOptions = array(
         'trader',
-        'market.maker',
-        'partner',
-        'support',
         'admin',
-        'senior.accountant',
-        'internal.accountant',
-        'gateway.accountant',
-        'gateway.treasurer',
-        'reserve.treasurer',
+        'support',
+        'ssupport',
+        'accountant',
+        'saccountant',
+        'treasurer',
+        'streasurer',
         'verifier',
-        'general.verifier',
-        'admin.stat.observer',
+        'sverifier'
     );
     public static $verifiedStatusOptions = array(
         'waitingForDocuments',
@@ -36,7 +33,6 @@ class User extends CActiveRecord {
         return array(
             array('email', 'required'),
             array('email', 'email'),
-            array('type', 'in', 'allowEmpty' => false, 'range' => self::$typeOptions, 'strict' => true),
             array('verifiedStatus', 'in', 'allowEmpty' => false, 'range' => self::$verifiedStatusOptions, 'strict' => true),
             array('id','numerical', 'integerOnly'=>true),
             array('id, password, email', 'safe'),
@@ -177,7 +173,7 @@ class User extends CActiveRecord {
         
         $userPhone->addPhone();
         
-        return true;
+        return $user;
     }
     
     public static function changeLostPassword($cid, $password) {
@@ -200,6 +196,8 @@ class User extends CActiveRecord {
     public function registerUser($email) {
         $this->email = $email;
         $this->emailVerification = UserIdentity::trickyPasswordEncoding($email, rand(0, PHP_INT_MAX));
+        $this->verifiedStatus = 'waitingForDocuments';
+        $this->type = 'trader';
         
         if(!$this->validate()) {
             $errorList = $this->getErrors();
@@ -208,8 +206,9 @@ class User extends CActiveRecord {
         }
         try {
             $this->save();
-            $this->createTradeAccount($this->id);
+            $this->createAccountWallet($this->id);
         } catch(Exception $e) {
+            print_r($e->getMessage()); die();
             if($e instanceof ExceptionTcpRemoteClient) {
                throw $e;
             }
@@ -273,13 +272,15 @@ class User extends CActiveRecord {
     
     public static function getLoginData($user) {
         $supportedPair = Yii::app()->params->supportedPair;
+        $openTickets = Ticket::getTicketsWithLastMessage($user->id, 'waitForUser');
         
         return array(
             'id' => $user->id,
             'supportedPair' => $supportedPair,
             'defaultPair' => $supportedPair[0],
             '2fa' => $user->twoFA,
-            'verified' => ($user->verifiedStatus == 'accepted')? true:false
+            'verified' => $user->verifiedStatus,
+            'openTickets' => $openTickets
         );
     }
     
