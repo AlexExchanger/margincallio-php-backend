@@ -101,12 +101,17 @@ class Transaction extends CActiveRecord {
     private static function getListCriteria(array $filters) {
         $accountId = ArrayHelper::getFromArray($filters, 'accountId');
         $direction = ArrayHelper::getFromArray($filters, 'direction');
+        $currency = ArrayHelper::getFromArray($filters, 'currency');
         $dateFrom = ArrayHelper::getFromArray($filters, 'dateFrom');
         $dateTo = ArrayHelper::getFromArray($filters, 'dateTo');
 
         $criteria = new CDbCriteria();
         if (!empty($accountId)) {
-            $criteria->compare('accountId', $accountId);
+            $criteria->compare('userId', $accountId);
+        }
+        
+        if (!empty($currency) && in_array($currency, Yii::app()->params['supportedCurrency'])) {
+            $criteria->compare('currency', $currency);
         }
 
         if (!empty($direction)) {

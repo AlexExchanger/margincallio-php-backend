@@ -34,7 +34,6 @@ class Account extends CActiveRecord {
             array('currency', 'in', 'allowEmpty' => false, 'range' => self::$currencyOptions, 'strict' => true),
             array('type', 'in', 'allowEmpty' => false, 'range' => array_merge(self::$typeOptions, self::$systemTypeOptions), 'strict' => true),
             array('status', 'in', 'allowEmpty' => false, 'range' => self::$statusOptions, 'strict' => true),
-            array('creditLimit', 'numerical', 'allowEmpty' => false, 'min' => 0, 'max' => 100000, 'integerOnly' => false),
         );
     }
 
@@ -155,7 +154,8 @@ class Account extends CActiveRecord {
                 throw new SystemException(_('Something wrong with transaction creating'), $transaction->getErrors());
             }
 
-            $transaction = new Transaction();
+            unset($transaction->id);
+            $transaction->isNewRecord = true;
             $transaction->accountId = $accountTo->id;
             $transaction->debit = $amount;
             $transaction->credit = 0;
@@ -198,15 +198,17 @@ class Account extends CActiveRecord {
         
         foreach(self::$systemTypeOptions as $wallet) {
             $account->setIsNewRecord(true);
+            unset($account->id);
             $account->type = $wallet;
             $account->guid = Guid::generate();
             $account->save();
             array_push($accountList, $account);
         }
+        return $accountList;
     }
     
     public static function getSystemAccount($currency) {
-        if(!in_array($currency, $currencyOptions)) {
+        if(!in_array($currency, self::$currencyOptions)) {
             return false;
         }
         
@@ -216,7 +218,7 @@ class Account extends CActiveRecord {
             'currency'=>$currency
         ));
         
-        if(!$accounts) {
+        if(!count($accounts)) {
             $accounts = self::createSystemAccount($currency);
         }
         
@@ -248,7 +250,7 @@ class Account extends CActiveRecord {
         return $wallets;
     }
         
-    private static function createTransaction($wallets, $amount, $type) {
+    private static function createTransaction($wallets, $amount, $type, $currency) {
         
         $groupId = Guid::generate();
 
@@ -261,6 +263,7 @@ class Account extends CActiveRecord {
         $transaction->credit = $amount;
         $transaction->createdAt = TIME;
         $transaction->groupId = $groupId;
+        $transaction->currency = $currency;
         if (!$transaction->save()) {
             throw new SystemException(_('Something wrong with transaction creating'), $transaction->getErrors());
         }
@@ -271,6 +274,7 @@ class Account extends CActiveRecord {
         $transaction->credit = 0;
         $transaction->createdAt = TIME;
         $transaction->groupId = $groupId;
+        $transaction->currency = $currency;
         if (!$transaction->save()) {
             throw new SystemException(_('Something wrong with transaction creating'), $transaction->getErrors());
         }
@@ -301,7 +305,7 @@ class Account extends CActiveRecord {
             }
         }
         
-        self::createTransaction($wallets, $amount, 1);
+        self::createTransaction($wallets, $amount, 1, $currency);
         
         if(!$wallets['user.safeWallet']->save() || !$wallets['user.trading']->save() || !$systemsAccounts['system.gateway.internal']->save()) {
             throw new ExceptionAccount(); 
@@ -326,15 +330,15 @@ class Account extends CActiveRecord {
         $systemsAccounts = self::getSystemAccount($currency);
         $systemsAccounts['system.gateway.internal']->balance = bcadd($systemsAccounts['system.gateway.internal']->balance, $amount);
         
-        if(in_array($currency, array('USD', 'BTC'))) {
-            $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
-            $result = $connector->sendRequest(array(TcpRemoteClient::FUNC_REPLENISH_TRADE_ACCOUNT, $user->id, ($currency == 'USD')?1:0, $amount));
-            if($result != array()) {
-                return false;
-            }
-        }
+//        if(in_array($currency, array('USD', 'BTC'))) {
+//            $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
+//            $result = $connector->sendRequest(array(TcpRemoteClient::FUNC_REPLENISH_TRADE_ACCOUNT, $user->id, ($currency == 'USD')?1:0, $amount));
+//            if($result != array()) {
+//                return false;
+//            }
+//        }
         
-        self::createTransaction($wallets, $amount, 0);
+        self::createTransaction($wallets, $amount, 0, $currency);
         
         if(!$wallets['user.safeWallet']->save() || !$wallets['user.trading']->save() || !$systemsAccounts['system.gateway.internal']->save()) {
             throw new ExceptionAccount(); 

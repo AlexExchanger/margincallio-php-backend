@@ -20,8 +20,30 @@ class AdminController extends CController {
         'support' => array(
             'ticket' => array('ViewActiveTickets', 'ViewTicket', 'ReplyForTickets'),
         ),
+        'ssupport' => array(
+            'ticket' => array('ViewActiveTickets', 'ViewTicket', 'ReplyForTickets'),
+        ),
+        'accountant' => array(
+            'stat' => array('ByFiatAddress'),
+        ),
+        'saccountant' => array(
+            'stat' => array('ByFiatAddress'),
+        ),
+        'treasurer' => array(
+            'transaction' => array('ExternalTransactions', 'AproveTransaction', 'RejectTransaction'),
+        ),
+        'streasurer' => array(
+            'transaction' => array('ExternalTransactions', 'AproveTransaction', 'RejectTransaction'),
+        ),
+        'verifier' => array(
+            'verification' => array('ViewUserForMoredation', 'GetUserDoc', 'VerifyUser', 'RefuseUser'),
+        ),
+        'sverifier' => array(
+            'verification' => array('ViewUserForMoredation', 'GetUserDoc', 'VerifyUser', 'RefuseUser'),
+        ),
         'admin' => array(
-            'news' => array('GetPdf'),
+            'news' => array('AddNews', 'ModifyNews','GetPdf', 'GetAllNews'),
+            'user' => array('SendInviteByEmail', 'LockUser', 'UnlockUser', 'RemoveUser'),
         )
     );
     

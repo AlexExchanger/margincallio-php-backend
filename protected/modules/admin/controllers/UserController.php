@@ -1,6 +1,6 @@
 <?php
 
-class UserController extends CController {
+class UserController extends AdminController {
     
     public function beforeAction($action) {
         if(!parent::beforeAction($action)) {

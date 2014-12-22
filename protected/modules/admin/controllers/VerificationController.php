@@ -1,6 +1,6 @@
 <?php
 
-class VerificationController extends CController {
+class VerificationController extends AdminController {
     
     public $paginationOptions;
     

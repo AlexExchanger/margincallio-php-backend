@@ -112,4 +112,33 @@ class TransactionExternal extends CActiveRecord {
         return $criteria;
     }
 
+    public static function aproveTransaction($id) {
+        
+        $transaction = self::model()->findByPk($id);
+        
+        if(!$transaction) {
+            return false;
+        }
+        
+        $transaction->verifierId = Yii::app()->user->id;
+        $transaction->status = 'done';
+        
+        return $transaction->save(true, ['verifierId', 'status']);
+    }
+    
+    public static function rejectTransaction($id) {
+        
+        $transaction = self::model()->findByPk($id);
+        
+        if(!$transaction) {
+            return false;
+        }
+        
+        $transaction->verifierId = Yii::app()->user->id;
+        $transaction->status = 'rejected';
+        
+        return $transaction->save(true, ['verifierId', 'status']);
+    }
+    
+
 }

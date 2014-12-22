@@ -74,7 +74,4 @@ class AdminControlController extends AdminController {
         
         print Response::ResponseSuccess();
     }
-    
-    
-    
 }

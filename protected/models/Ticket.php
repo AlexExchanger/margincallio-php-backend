@@ -7,6 +7,8 @@ class Ticket extends CActiveRecord
     public static $statusOptions = ['waitForUser', 'waitForSupport', 'closed'];
     public static $departmentOptions = ['general', 'finance', 'verification', 'security', 'partners'];
 
+    public static $importance = ['urgent', 'normal', 'low'];
+    
     public static function model($className = __CLASS__) {
         return parent::model($className);
     }
@@ -29,7 +31,13 @@ class Ticket extends CActiveRecord
         );
     }
     
-
+    public function beforeSave() {
+        if(!in_array($this->importance, self::$importance)) {
+            $this->importance = 'normal';
+        }
+        return parent::beforeSave();
+    }
+    
     public static function get($id) {
         return Ticket::model()->findByPk($id);
     }

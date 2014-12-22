@@ -15,27 +15,34 @@ class StatController extends AdminController {
 
         return true;
     }
-
-    /*
-      public function actionGet()
-      {
-      $json = [
-      'totalRegCount' => Stat::getTotalRegCount(),
-      'directRegCount' => Stat::getDirectRegCount(),
-      'referralRegCount' => Stat::getReferralRegCount(),
-      'verifiedWaitingForModerationCount' => Stat::getVerifiedWaitingForModerationCount(),
-      'verifiedRejectedCount' => Stat::getVerifiedRejectedCount(),
-      'verifiedAcceptedCount' => Stat::getVerifiedAcceptedCount(),
-      ];
-      $this->json($json);
-      } */
-
+    
+    public function actionGatewayStat() {
+        $currency = Yii::app()->request->getParam('currency', false);
+        
+        $data = [
+            'common' => array(
+                'dateFrom' => Yii::app()->request->getParam('dateFrom'),
+                'dateTo' => Yii::app()->request->getParam('dateTo'),
+                'currency' => $currency,
+            ),
+            'pagination' => $this->paginationOptions,
+        ];
+        
+        try {
+            $stat = Stat::getStatByGateway($currency, $data);
+        } catch (Exception $e) {
+             print Response::ResponseError();
+             exit();
+        }
+        
+        print Response::ResponseSuccess($stat);
+    }
+    
     public function actionByFiatAddress() {
 
         $data = [
             'userId' => Yii::app()->request->getParam('userId'),
-            'address' => Yii::app()->request->getParam('address'),
-            
+            'address' => Yii::app()->request->getParam('address'),    
         ];
         
         try {

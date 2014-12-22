@@ -47,4 +47,51 @@ class Stat extends CActiveRecord {
         return $list;
     }
     
+    public static function getStatByGateway($currency, $filters) {
+        
+        if(!$currency) {
+            throw new Exception('Currency non set');
+        }
+        
+        $gatewaysAll = Account::getSystemAccount($currency);
+        
+        $internalTransactions = Transaction::getList($filters['common'], $filters['pagination']);
+        $externalTransactions = TransactionExternal::getList($filters['common'], $filters['pagination']);
+        
+        $gateways = array();
+        foreach($gatewaysAll as $value) {
+            $gateways[] = array(
+                'type' => $value->type,
+                'guid' => $value->guid,
+                'balance' => $value->balance
+            );
+        }
+        
+        $internal = array(
+            'credit' => 0,
+            'debit' => 0,
+            'count' => count($internalTransactions)
+        );
+        $external = array(
+            'credit' => 0,
+            'debit' => 0,
+            'count' => count($internalTransactions),
+        );
+        
+        foreach($internalTransactions as $value) {
+            $internal['credit'] += $value->credit;
+            $internal['debit'] += $value->debit;
+        }
+        
+        foreach($externalTransactions as $value) {
+            $external['credit'] += $value->credit;
+            $external['debit'] += $value->debit;
+        }
+        
+        return array(
+            'gateways' => $gateways,
+            'internal' => $internal,
+            'external' => $external,
+        );
+    }
 }
