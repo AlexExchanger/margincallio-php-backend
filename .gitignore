@@ -3,3 +3,6 @@ framework/
 files/
 assets/
 logs/
+www/
+index.php
+protected/config/main.php
