@@ -1,10 +1,14 @@
 <?php
 
-class UserController extends CController {
+class UserController extends MainController {
 
     private $guestControl = array('login', 'register', 'activate', 'continueregister', 'lostpassword', 'changepassword', 'changepasswordrequest', 'repairbyalarm');
     
     public function beforeAction($action) {
+        if(!parent::beforeAction($action)) {
+            return false;
+        }
+        
         if(!(Yii::app()->user->isGuest ^ in_array(mb_strtolower($action->id), $this->guestControl))) {
             return true;
         }
@@ -41,17 +45,17 @@ class UserController extends CController {
     
     public function actionRegister() {
         
-        $email = Yii::app()->request->getParam('email');
-        $inviteCode = Yii::app()->request->getParam('invite');
+        $email = $this->getPost('email');
+        $password = $this->getPost('password');
+        $inviteCode = $this->getPost('invite', false);
         
         $user = new User();
         try {
-            if(Yii::app()->params->registerByInvite || isset($inviteCode)) {
+            if(Yii::app()->params->registerByInvite || ($inviteCode!=false)) {
                 $status = $user->registerByInvite($inviteCode);
             } else {
-                $status = $user->registerUser($email);
+                $status = $user->registerUser($email, $password);
             }
-            
         } catch(Exception $e) {
             print Response::ResponseError('Error: '.$e->getMessage());
             return;
@@ -142,7 +146,6 @@ class UserController extends CController {
             Loger::logUser(Yii::app()->user->id, 'User has logged in', 'login');
             print Response::ResponseSuccess($data, 'User has logged');
         } else {
-            //Loger::errorLog($auth->errorMessage);
             print Response::ResponseError();
         }
     }

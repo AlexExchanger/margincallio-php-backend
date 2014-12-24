@@ -107,7 +107,7 @@ class Transaction extends CActiveRecord {
 
         $criteria = new CDbCriteria();
         if (!empty($accountId)) {
-            $criteria->compare('userId', $accountId);
+            $criteria->compare('accountId', $accountId);
         }
         
         if (!empty($currency) && in_array($currency, Yii::app()->params['supportedCurrency'])) {
