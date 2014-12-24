@@ -1,6 +1,6 @@
 <?php
 
-class AdminController extends CController {
+class AdminController extends MainController {
     
     private $roles = array(
         'trader',
@@ -64,6 +64,10 @@ class AdminController extends CController {
     }
     
     public function beforeAction($action) {
+        if(!parent::beforeAction($action)) {
+            return false;
+        }
+        
         $controller = $action->getController()->id;
         $method = $action->id;
         

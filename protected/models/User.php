@@ -193,8 +193,9 @@ class User extends CActiveRecord {
         return true;
     }
     
-    public function registerUser($email) {
+    public function registerUser($email, $password) {
         $this->email = $email;
+        $this->password = UserIdentity::trickyPasswordEncoding($email, $password);
         $this->emailVerification = UserIdentity::trickyPasswordEncoding($email, rand(0, PHP_INT_MAX));
         $this->verifiedStatus = 'waitingForDocuments';
         $this->type = 'trader';
@@ -208,7 +209,6 @@ class User extends CActiveRecord {
             $this->save();
             $this->createAccountWallet($this->id);
         } catch(Exception $e) {
-            print_r($e->getMessage()); die();
             if($e instanceof ExceptionTcpRemoteClient) {
                throw $e;
             }
@@ -350,6 +350,5 @@ class User extends CActiveRecord {
         
         return $user->save();
     }
-    
     
 }
