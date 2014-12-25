@@ -30,6 +30,12 @@ class Loger extends CComponent {
     
     public static function logUser($userId, $message, $secure = null) {
         $fileName = date('d-m-Y').'.log';
+        
+        $dir = implode(DIRECTORY_SEPARATOR, array(Yii::getPathOfAlias('webroot'), 'logs', 'user', $userId));
+        if(!file_exists($dir)) {
+            mkdir($dir, 0777);
+        }
+        
         $dir = implode(DIRECTORY_SEPARATOR, array(Yii::getPathOfAlias('webroot'), 'logs', 'user', $userId, date('Y-m')));
         if(!file_exists($dir)) {
             mkdir($dir, 0777);
@@ -45,6 +51,12 @@ class Loger extends CComponent {
     
     public static function logAdmin($userId, $message, $secure = null) {
         $fileName = date('d-m-Y').'.log';
+        
+        $dir = implode(DIRECTORY_SEPARATOR, array(Yii::getPathOfAlias('webroot'), 'logs', 'admin', $userId));
+        if(!file_exists($dir)) {
+            mkdir($dir, 0777);
+        }
+        
         $dir = implode(DIRECTORY_SEPARATOR, array(Yii::getPathOfAlias('webroot'), 'logs', 'admin', $userId, date('Y-m')));
         if(!file_exists($dir)) {
             mkdir($dir, 0777);

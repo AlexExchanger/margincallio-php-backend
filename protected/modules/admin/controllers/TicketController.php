@@ -46,6 +46,46 @@ class TicketController extends AdminController {
         print Response::ResponseSuccess($messages);
     }
     
+    private function view($type) {
+        $userId = Yii::app()->request->getParam('userId', false);
+        $status = Yii::app()->request->getParam('status', 'waitForSupport');
+        
+        try {
+            $filters = array(
+                'status' => $status,
+                'userId' => ($userId != false) ? $userId : null,
+                'department' => $type,
+            );
+
+            $tickets = Ticket::getList($filters, $this->paginationOptions);
+        } catch (Exception $e) {
+            print Response::ResponseError('Unknow error');
+            exit();
+        }
+        
+        print Response::ResponseSuccess($tickets);
+    }
+    
+    public function acitonViewGeneral() {
+        $this->view('general');
+    }
+    
+    public function acitonViewFinance() {
+        $this->view('finance');
+    }
+    
+    public function acitonViewVerification() {
+        $this->view('verification');
+    }
+    
+    public function acitonViewSecurity() {
+        $this->view('security');
+    }
+    
+    public function acitonViewPartners() {
+        $this->view('partners');
+    }
+    
     public function actionReplyForTicket() {
         
         $ticketId = Yii::app()->request->getParam('ticketId', false);

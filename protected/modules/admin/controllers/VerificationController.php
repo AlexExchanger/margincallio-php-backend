@@ -56,6 +56,8 @@ class VerificationController extends AdminController {
         print Response::ResponseSuccess($status);
     }
     
+    
+    
     public function actionRefuseUser() {
         $userId = Yii::app()->request->getParam('id');
         $reason = Yii::app()->request->getParam('reason');

@@ -227,7 +227,7 @@ class User extends CActiveRecord {
             return false;
         }
         
-        return self::get(Yii::app()->user->id);
+        return self::get(Yii::app()->user->id); 
     }
     
     public static function LockUser($userId) {
