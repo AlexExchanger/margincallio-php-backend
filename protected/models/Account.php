@@ -323,20 +323,19 @@ class Account extends CActiveRecord {
             throw new ExceptionNoMoney();
         }
         
-        //TODO: add commision
         $wallets['user.safeWallet']->balance = bcsub($wallets['user.safeWallet']->balance, $amount);
         $wallets['user.trading']->balance = bcadd($wallets['user.trading']->balance, $amount);
         
         $systemsAccounts = self::getSystemAccount($currency);
         $systemsAccounts['system.gateway.internal']->balance = bcadd($systemsAccounts['system.gateway.internal']->balance, $amount);
         
-//        if(in_array($currency, array('USD', 'BTC'))) {
-//            $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
-//            $result = $connector->sendRequest(array(TcpRemoteClient::FUNC_REPLENISH_TRADE_ACCOUNT, $user->id, ($currency == 'USD')?1:0, $amount));
-//            if($result != array()) {
-//                return false;
-//            }
-//        }
+        if(in_array($currency, array('USD', 'BTC'))) {
+            $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
+            $result = $connector->sendRequest(array(TcpRemoteClient::FUNC_REPLENISH_TRADE_ACCOUNT, $user->id, ($currency == 'USD')?1:0, $amount));
+            if($result != array()) {
+                return false;
+            }
+        }
         
         self::createTransaction($wallets, $amount, 0, $currency);
         
@@ -353,10 +352,16 @@ class Account extends CActiveRecord {
             return false;
         }
         
+        $pair = Yii::app()->request->getParam('pair', 'BTC,USD');
+        $accountList = Account::model()->findAllByAttributes(array(
+            'userId'=>$user->id,
+            'type'=> array('user.safeWallet'),
+            ));
+        
         $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
         $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_INFO, $user->id));
-        
-        $data = array(
+
+        $remoteAccountInfo = array(
             'firstAvailable' => $resultCore[0],
             'firstBlocked' => $resultCore[1],
             'secondAvailable' => $resultCore[2],
@@ -365,10 +370,30 @@ class Account extends CActiveRecord {
             'unknow' => $resultCore[5],
             'marginCall' => $resultCore[6],
         );
+
+        $data = array();
+        foreach($accountList as $key=>$value) {
+            $data[] = array(
+                'type' => 'safe',
+                'currency' => $value->currency,
+                'balance' => $value->balance, 
+            );
+        }
         
+        $data[] = array(
+            'type' => 'trade',
+            'currency' => explode(',', $pair)[0],
+            'balance' => (string)bcadd($remoteAccountInfo['firstAvailable'], 0)
+        );
+        
+        $data[] = array(
+            'type' => 'trade',
+            'currency' => explode(',', $pair)[1],
+            'balance' => (string)bcadd($remoteAccountInfo['secondAvailable'],0)
+        );
+
         return $data;
     }
-    
     
     //external methods
     public static function transferToExternal($currency, $userId, $amount) {
