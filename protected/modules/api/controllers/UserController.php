@@ -13,7 +13,7 @@ class UserController extends MainController {
             return true;
         }
         
-        print Response::ResponseError('Access denied');
+        Response::GetResponseError('Access denied');
         return false;
     }
     
@@ -36,11 +36,10 @@ class UserController extends MainController {
                 $resultMessage = 'Unknow error';
             }
             
-            print Response::ResponseError($resultMessage);
-            exit();
+            Response::ResponseError($resultMessage);
         }
         
-        print Response::ResponseSuccess(array(), 'Successfuly verified');
+        Response::ResponseSuccess(array(), 'Successfuly verified');
     }
     
     public function actionRegister() {
@@ -57,14 +56,13 @@ class UserController extends MainController {
                 $status = $user->registerUser($email, $password);
             }
         } catch(Exception $e) {
-            print Response::ResponseError('Error: '.$e->getMessage());
-            return;
+            Response::ResponseError('Error: '.$e->getMessage());
         }
     
         if($status) {
-            print Response::ResponseSuccess(array(), 'User has registered');
+            Response::ResponseSuccess(array(), 'User has registered');
         } else {
-            print Response::ResponseError('Unknow error');
+            Response::ResponseError('Unknow error');
         }
     }
     
@@ -79,17 +77,16 @@ class UserController extends MainController {
         $newPasswordConfurm = Yii::app()->request->getParam('newPasswordConfurm', false);
         
         if($newPassword != $newPasswordConfurm) {
-            print Response::ResponseError('Passwords are not equal');
-            exit();
+            Response::ResponseError('Passwords are not equal');
         }
         
         try {
             User::changeLostPassword($cid, $newPassword);
         } catch(ExceptionWrongInputData $e) {
-            print Response::ResponseError('Wrong data');
+            Response::ResponseError('Wrong data');
         }
         
-        print Response::ResponseSuccess(array(),'Password successfuly changed');
+        Response::ResponseSuccess(array(),'Password successfuly changed');
     }
     
     public function actionContinueRegister() {
@@ -100,8 +97,7 @@ class UserController extends MainController {
         $phoneNumber = Yii::app()->request->getParam('phone', false);
         
         if($password != $passwordConfirm) {
-            print Response::ResponseError('Passwords are not equal');
-            exit();
+            Response::ResponseError('Passwords are not equal');
         } else {
             try {
                 $user = User::continueVerifying($cid, $password, $phoneNumber);
@@ -109,11 +105,10 @@ class UserController extends MainController {
                 AlarmCode::saveCodes($user->id, $codes);
                 
             } catch(Exception $e) {
-                print Response::ResponseError($e->getMessage());
-                exit();
+                Response::ResponseError($e->getMessage());
             }
         }
-        print Response::ResponseSuccess(array('codes'=>$codes), 'Register complete');
+        Response::ResponseSuccess(array('codes'=>$codes), 'Register complete');
     }
     
     public function actionLostPassword() {
@@ -123,11 +118,10 @@ class UserController extends MainController {
         try {
             User::lostPassword($email, $phone);
         } catch(ExceptionUserVerification $e) {
-            print Response::ResponseError($e->getMessage());
+            Response::ResponseError($e->getMessage());
         }
         
-        print Response::ResponseSuccess();
-        
+        Response::ResponseSuccess();
     }
     
     public function actionLogin() {
@@ -144,9 +138,9 @@ class UserController extends MainController {
             $data = User::getLoginData($user);
             
             Loger::logUser(Yii::app()->user->id, 'User has logged in', 'login');
-            print Response::ResponseSuccess($data, 'User has logged');
+            Response::ResponseSuccess($data, 'User has logged');
         } else {
-            print Response::ResponseError();
+            Response::ResponseError();
         }
     }
 
@@ -156,9 +150,9 @@ class UserController extends MainController {
             $id = Yii::app()->user->id;
             Yii::app()->user->logout();
             Loger::logUser($id, 'User has logged out');
-            print Response::ResponseSuccess($stats);
+            Response::ResponseSuccess($stats);
         } else {
-            print Response::ResponseError('User is guest');
+            Response::ResponseError('User is guest');
         }
     }
     
@@ -173,10 +167,9 @@ class UserController extends MainController {
         
         if($password == $passwordConfirm) {
             if(AlarmCode::accessByCode($alarmCode, $password)) {
-                print Response::ResponseSuccess();
-                exit();
+                Response::ResponseSuccess();
             }
         }
-        print Response::ResponseError();
+        Response::ResponseError();
     }
 }

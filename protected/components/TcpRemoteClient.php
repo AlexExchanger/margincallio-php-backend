@@ -17,7 +17,7 @@ class TcpRemoteClient extends CComponent {
     const TCP_CONNECTION_TIMEOUT = 10;
 
     //Remote funcitons
-    const FUNC_CREATE_TRADE_ACCOUNT = 1;
+    const FUNC_CREATE_TRADE_ACCOUNT = 100;
     const FUNC_LOCK_TRADE_ACCOUNT = 2;
     const FUNC_UNLOCK_TRADE_ACCOUNT = 3;
     const FUNC_REMOVE_TRADE_ACCOUNT = 4;
@@ -111,11 +111,10 @@ class TcpRemoteClient extends CComponent {
         return $requestString;
     }
     
-    private function parseResponse($response) {
+    private function parseResponse($response, $status) {
         $responseArray = json_decode($response, true);
-        if(!isset($responseArray[0]) || $responseArray[0] != 0) {
+        if(!isset($responseArray[0]) || $responseArray[0] != $status) {
             $e = new ExceptionTcpRemoteClient();
-            $e->errorType = (isset($responseArray[0]))?$responseArray[0]:99;
             throw $e;
         }
         array_shift($responseArray);
@@ -128,17 +127,30 @@ class TcpRemoteClient extends CComponent {
         return $data;
     }
     
+    public function checkResponse($status) {
+        $statusArray = json_decode($status, true);
+        if(!isset($statusArray[0]) || $statusArray[0] != 0) {
+            $e = new ExceptionTcpRemoteClient();
+            $e->errorType = (isset($responseArray[0]))?$responseArray[0]:99;
+            throw $e;
+        }
+        
+        return (isset($statusArray[1]))? $statusArray[1]:false;
+    }
+    
     public function sendRequest($inputArray) {
         $request = $this->makeRequestString($inputArray);
         if(!$this->_isConnetctionEstablished) {
             throw new ExceptionNotConnected();
         }
 
-        $result = '';
         fwrite($this->_tcpResource, $request);
-        $result .= fread($this->_tcpResource, 1024);
         
-        return $this->parseResponse($result);
+        $result[] = fgets($this->_tcpResource, 4096);
+        $result[] = fgets($this->_tcpResource, 4096);
+        $status = $this->checkResponse($result[0]);
+        
+        return $this->parseResponse($result[1], $status);
     }
 
     public function getIsConnectionEstablished() {

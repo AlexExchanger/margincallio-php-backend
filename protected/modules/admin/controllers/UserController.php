@@ -16,11 +16,10 @@ class UserController extends AdminController {
             $logMessage = 'Send an email to "'.$email.'"';
             Loger::logAdmin(Yii::app()->user->id, $logMessage);
         } catch(Exception $e) {
-            print Response::ResponseError('Unknow error');
-            exit();
+            Response::ResponseError('Unknow error');
         }
         
-        print Response::ResponseSuccess(array(), 'Invite successfuly sended');
+        Response::ResponseSuccess(array(), 'Invite successfuly sended');
     }
     
     public function actionLockUser() {
@@ -31,11 +30,10 @@ class UserController extends AdminController {
             $logMessage = 'Lock user with id "'.$userId.'"';
             Loger::logAdmin(Yii::app()->user->id, $logMessage, 'accountLocked');
         } catch(Exception $e) {
-            print Response::ResponseError('Unknow error');
-            exit();
+            Response::ResponseError('Unknow error');
         }
         
-        print Response::ResponseSuccess(array(), 'User locked');
+        Response::ResponseSuccess(array(), 'User locked');
     }
     
     public function actionUnlockUser() {
@@ -47,11 +45,10 @@ class UserController extends AdminController {
             $logMessage = 'Unlock user with id "'.$userId.'"';
             Loger::logAdmin(Yii::app()->user->id, $logMessage, 'accountUnlocked');
         } catch(Exception $e) {
-            print Response::ResponseError('Unknow error');
-            exit();
+            Response::ResponseError('Unknow error');
         }
         
-        print Response::ResponseSuccess(array(), 'User unlocked');
+        Response::ResponseSuccess(array(), 'User unlocked');
     }
     
     public function actionRemoveUser() {
@@ -63,10 +60,9 @@ class UserController extends AdminController {
             $logMessage = 'Remove user with id "'.$userId.'"';
             Loger::logAdmin(Yii::app()->user->id, $logMessage, 'accountRemoved');
         } catch(Exception $e) {
-            print Response::ResponseError('Unknow error');
-            exit();
+            Response::ResponseError('Unknow error');
         }
         
-        print Response::ResponseSuccess(array(), 'User removed');
+        Response::ResponseSuccess(array(), 'User removed');
     }
 }

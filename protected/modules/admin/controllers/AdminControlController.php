@@ -7,8 +7,7 @@ class AdminControlController extends AdminController {
         $role = Yii::app()->request->getParam('role');
         
         if($role == 'super') {
-            print Response::ResponseError();
-            exit();
+            Response::ResponseError();
         }
         
         try {
@@ -31,11 +30,10 @@ class AdminControlController extends AdminController {
             Loger::logAdmin(Yii::app()->user->id, $logMessage);
             
         } catch(Exception $e) {
-            print Response::ResponseError();
-            exit();
+            Response::ResponseError();
         }
         
-        print Response::ResponseSuccess();
+        Response::ResponseSuccess();
     }
     
     public function actionRevokeRole() {
@@ -43,8 +41,7 @@ class AdminControlController extends AdminController {
         $role = Yii::app()->request->getParam('role');
         
         if($role == 'super') {
-            print Response::ResponseError();
-            exit();
+            Response::ResponseError();
         }
         
         try {
@@ -68,10 +65,9 @@ class AdminControlController extends AdminController {
             Loger::logAdmin(Yii::app()->user->id, $logMessage);
             
         } catch(Exception $e) {
-            print Response::ResponseError();
-            exit();
+            Response::ResponseError();
         }
         
-        print Response::ResponseSuccess();
+        Response::ResponseSuccess();
     }
 }

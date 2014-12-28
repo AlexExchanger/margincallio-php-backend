@@ -7,7 +7,7 @@ class Response extends CComponent {
     const RESPONSE_NOT_FOUND = 2;
 
 
-    public static function ResponseSuccess($data=array(), $message='') {
+    public static function GetResponseSuccess($data=array(), $message='') {
         return CJSON::encode(array(
             'status' => self::RESPONSE_SUCCESS,
             'data' => $data,
@@ -15,11 +15,20 @@ class Response extends CComponent {
         ));
     }
 
-    public static function ResponseError($message=''){
+    public static function GetResponseError($message=''){
         return CJSON::encode(array(
             'status' => self::RESPONSE_ERROR,
             'message' => $message
         ));
     }
+    
+    public static function ResponseSuccess($data=array(), $message='') {
+        print self::GetResponseSuccess($data, $message);
+        exit();
+    }
 
+    public static function ResponseError($message=''){
+        print self::GetResponseError($message);
+        exit();
+    }
 }

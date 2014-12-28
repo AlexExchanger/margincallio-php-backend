@@ -33,11 +33,10 @@ class NewsController extends AdminController {
            $logMessage = 'Add new news with title "'.$result->id.'"';
            Loger::logAdmin(Yii::app()->user->id, $logMessag, 'news');
        } catch(Exception $e) {
-           print Response::ResponseError();
-           exit();
+           Response::ResponseError();
        }
        
-       print Response::ResponseSuccess();
+       Response::ResponseSuccess();
     }
     
     public function actionModifyNews() {
@@ -63,11 +62,10 @@ class NewsController extends AdminController {
            $logMessage = 'Modify news with id "'.$data['id'].'"';
            Loger::logAdmin(Yii::app()->user->id, $logMessage, 'news');
        } catch(Exception $e) {
-           print Response::ResponseError($e->getMessage());
-           exit();
+           Response::ResponseError($e->getMessage());
        }
       
-       print Response::ResponseSuccess();
+       Response::ResponseSuccess();
         
     }
     
@@ -82,12 +80,10 @@ class NewsController extends AdminController {
         try {
            $result = News::getList($data, $this->paginationOptions);
        } catch(Exception $e) {
-           print Response::ResponseError();
-           exit();
+           Response::ResponseError();
        }
        
-       print Response::ResponseSuccess($result);
-        
+       Response::ResponseSuccess($result);
     }
     
     public function actionGetPdf() {
@@ -122,10 +118,7 @@ class NewsController extends AdminController {
             $mpdf->Output();
             
         } catch (Exception $e) {
-            print Response::ResponseError();
-            exit();
+            Response::ResponseError();
         }
-
     }
-    
 }

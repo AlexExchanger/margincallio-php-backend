@@ -11,6 +11,8 @@ class Account extends CActiveRecord {
         'system.gateway.external.universe.unknown', // неизвестные платежи
         'system.gateway.external', // всегда плюс, реальный внешний кошелек/банк
         'system.gateway.internal', // оборот по шлюзу (при внешнем поступлении минус)
+        'system.gateway.cold',
+        'system.gateway.hot',
     ];
     
     public static $typeOptions = [
@@ -108,69 +110,6 @@ class Account extends CActiveRecord {
         }
 
         return $account;
-    }
-
-    public static function transferOwnFunds(Account $accountFrom, Account $accountTo, $amount) {
-        try {
-            // It's necessary to get $accountFrom again with lock
-            $accountFrom = self::getForUpdate($accountFrom->id);
-            if ($accountFrom->currency != $accountTo->currency) {
-                throw new ModelException(_('Different currencies'));
-            }
-            if ($accountFrom->userId != $accountTo->userId) {
-                throw new ModelException(_('Different users'));
-            }
-            // For BTC account is available up to 4 digits after point
-            if ($accountFrom->currency == 'BTC') {
-                if (!preg_match('~^\d+(\.\d{1,4})?$~', $amount)) {
-                    throw new ModelException(_('Wrong amount'));
-                }
-            } // For other currencies only up to 2 digits after point
-            elseif (!preg_match('~^\d+(\.\d{1,2})?$~', $amount)) {
-                throw new ModelException(_('Wrong amount'));
-            }
-            if (bccomp($accountFrom->balance, $amount) === -1) {
-                throw new ModelException(_('It is not enough funds on account'));
-            }
-            if (!in_array($accountFrom->type, ['user.wallet', 'user.trading', 'user.merchant', 'user.partnerCommission'])) {
-                throw new ModelException(_('You can\'t send funds from this type account'));
-            }
-            if (!in_array($accountTo->type, ['user.wallet', 'user.trading'])) {
-                throw new ModelException(_('You can\'t send funds to this type account'));
-            }
-
-            $accountFrom->saveCounters(['balance' => "-$amount"]);
-            $accountTo->saveCounters(['balance' => "$amount"]);
-
-            $groupId = Guid::generate();
-
-            $transaction = new Transaction();
-            $transaction->accountId = $accountFrom->id;
-            $transaction->debit = 0;
-            $transaction->credit = $amount;
-            $transaction->createdAt = TIME;
-            $transaction->groupId = $groupId;
-            if (!$transaction->save()) {
-                throw new SystemException(_('Something wrong with transaction creating'), $transaction->getErrors());
-            }
-
-            unset($transaction->id);
-            $transaction->isNewRecord = true;
-            $transaction->accountId = $accountTo->id;
-            $transaction->debit = $amount;
-            $transaction->credit = 0;
-            $transaction->createdAt = TIME;
-            $transaction->groupId = $groupId;
-            if (!$transaction->save()) {
-                throw new SystemException(_('Something wrong with transaction creating'), $transaction->getErrors());
-            }
-
-        }
-        catch (Exception $e) {
-            throw $e;
-        }
-
-        return true;
     }
 
     public function setBalance($balance) {
@@ -441,4 +380,70 @@ class Account extends CActiveRecord {
         
         return $internalResult;
     }
+    
+    public static function checkHot($hotId) {   
+        $hotWallet = self::model()->findByPk($hotId);
+        $coldWallet = self::model()->findByAttributes(array(
+            'type' => 'system.gateway.cold'
+        ));
+        
+        if(!$hotWallet || !$coldWallet) {
+            return false;
+        }
+        
+        //system parameter
+        $normalHotBalance = bcmul($coldWalelt->balance, 0.1);
+        if(bccomp($normalHotBalance, $hotWalelt->balance)) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    public static function getHot($currency, $gateway = false) {
+        
+        $conditions = array(
+            'type' => 'system.gateway.hot',
+            'currency' => $currency,
+        );
+        
+        if($gateway) {
+            $conditions['gateway'] = $gateway;
+        }        
+        
+        return Account::model()->findAllByAttributes($conditions);
+    }
+
+    public static function createHot($currency) {
+        
+        $count = self::model()->countByAttributes(array(
+            'type' => 'system.gateway.hot',
+            'currency' => $currency
+        ));
+        
+        $newAccountName = 'hw'.$count.rand(1, 100);
+        
+        try {
+            BtcGateway::callBtcd('createHot', ['name'=>$newAccountName]);
+
+            $wallet = new Account();
+            $wallet->type = 'system.gateway.hot';
+            $wallet->currency = $currency;
+            $wallet->status = 'opened';
+            $wallet->gateway = $newAccountName;
+            $wallet->guid = Guid::generate();
+            $wallet->createdAt = TIME;
+            
+        } catch(Exception $e) {
+            return false;
+        }
+        
+        if(!$wallet->save()) {            
+            Loger::errorLog($wallet->getErrors());
+            return false;
+        }
+        
+        return true;
+    }
+    
 }

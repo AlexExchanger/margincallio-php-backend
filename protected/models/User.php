@@ -94,8 +94,7 @@ class User extends CActiveRecord {
         
         if(!$this->validate()) {
             $errorList = $this->getErrors();
-            print Response::ResponseError(json_encode($errorList));
-            exit();
+            Response::ResponseError(json_encode($errorList));
         }
         try {
             $this->save();
@@ -202,8 +201,7 @@ class User extends CActiveRecord {
         
         if(!$this->validate()) {
             $errorList = $this->getErrors();
-            print Response::ResponseError(json_encode($errorList));
-            exit();
+            Response::ResponseError(json_encode($errorList));
         }
         try {
             $this->save();

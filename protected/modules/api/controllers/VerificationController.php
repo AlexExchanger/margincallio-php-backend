@@ -11,7 +11,7 @@ class VerificationController extends CController {
             return true;
         }
         
-        print Response::ResponseError('Access denied');
+        Response::GetResponseError('Access denied');
         return false;
     }
     
@@ -45,8 +45,7 @@ class VerificationController extends CController {
                 $path = Yii::getPathOfAlias('webroot').DIRECTORY_SEPARATOR.'files'.DIRECTORY_SEPARATOR.$file_first->uid;
                 $file_first->fileItem->saveAs($path);
             } else {
-                print Response::ResponseError($file_first->getErrors());
-                exit();
+                Response::ResponseError($file_first->getErrors());
             }
             
             $file_second->save();
@@ -54,8 +53,7 @@ class VerificationController extends CController {
                 $path = Yii::getPathOfAlias('webroot').DIRECTORY_SEPARATOR.'files'.DIRECTORY_SEPARATOR.$file_second->uid;
                 $file_second->fileItem->saveAs($path);
             } else {
-                print Response::ResponseError($file_first->getErrors());
-                exit();
+                Response::ResponseError($file_first->getErrors());
             }
             
             $ticket = Ticket::create(array(

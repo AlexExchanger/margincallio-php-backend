@@ -7,7 +7,7 @@ class AccountController extends CController {
     
     public function beforeAction($action) {
         if(Yii::app()->user->isGuest) {
-            print Response::ResponseError('Access denied');
+            Response::ResponseError('Access denied');
             return false;
         }
 
@@ -27,11 +27,10 @@ class AccountController extends CController {
             $accountInfo = Account::getAccountInfo($pair);
             Loger::logUser(Yii::app()->user->id, 'Requested wallets list');
         } catch(Exception $e) {
-            print Response::ResponseError();
-            exit();
+            Response::ResponseError();
         }
         
-        print Response::ResponseSuccess($accountInfo);
+        Response::ResponseSuccess($accountInfo);
     }
     
     //type 0 = s to t, type 1 = t to s 
@@ -41,13 +40,11 @@ class AccountController extends CController {
         $amount = Yii::app()->request->getParam('amount', false);
         
         if(!isset($type)) {
-            print Response::ResponseError('No type');
-            exit();
+            Response::ResponseError('No type');
         }
         
         if(!in_array($currency, Yii::app()->params->supportedCurrency)) {
-            print Response::ResponseError('Currency doesn\'t support');
-            exit();
+            Response::ResponseError('Currency doesn\'t support');
         }
         
         try {
@@ -69,11 +66,10 @@ class AccountController extends CController {
             }
             Loger::logUser(Yii::app()->user->id, $logMessage, 'fundsTransferred');
         } catch(Exception $e) {
-            print Response::ResponseError($e->getMessage());
-            exit();
+            Response::ResponseError($e->getMessage());
         }
         
-        print Response::ResponseSuccess();
+        Response::ResponseSuccess();
     }   
     
     public function actionGetActiveOrders() {
@@ -87,7 +83,7 @@ class AccountController extends CController {
             }
         }
         
-        print Response::ResponseSuccess($orders);
+        Response::ResponseSuccess($orders);
     }
     
     public function actionGetActiveСonditional() {
@@ -101,7 +97,7 @@ class AccountController extends CController {
             }
         }
         
-        print Response::ResponseSuccess($orders);
+        Response::ResponseSuccess($orders);
         
     }
     
@@ -118,11 +114,10 @@ class AccountController extends CController {
             $logMessage = 'Create ticket with id: '.$ticket->id.', for '.$ticket->department.' department.';
             Loger::logUser(Yii::app()->user->id, $logMessage);
         } catch (Exception $e) {
-            print Response::ResponseError();
-            exit();
+            Response::ResponseError();
         }
         
-        print Response::ResponseSuccess();
+        Response::ResponseSuccess();
     }
     
     public function actionGetTicket() {
@@ -131,8 +126,7 @@ class AccountController extends CController {
         try {
             $ticket = Ticket::getByUser($ticketId, $this->user->id);
         } catch(Exception $e) {
-            print Response::ResponseError($e->getMessage());
-            exit();
+            Response::ResponseError($e->getMessage());
         }
         $messages = array();
         foreach($ticket->messages as $value) {
@@ -143,7 +137,7 @@ class AccountController extends CController {
                 'text' => $value->text);
         }
         
-        print Response::ResponseSuccess(array('ticket'=>$ticket, 'messages'=>$messages));
+        Response::ResponseSuccess(array('ticket'=>$ticket, 'messages'=>$messages));
     }
     
     public function actionReplyForTicket() {
@@ -158,11 +152,10 @@ class AccountController extends CController {
             $logMessage = 'Replying for ticket with id: '.$ticket->id.'.';
             Loger::logUser(Yii::app()->user->id, $logMessage);
         } catch (Exception $e) {
-            print Response::ResponseError();
-            exit();
+            Response::ResponseError();
         }
         
-        print Response::ResponseSuccess();   
+        Response::ResponseSuccess();   
     }
     
     public function actionGetOrders() {
@@ -175,12 +168,10 @@ class AccountController extends CController {
         try {
             $orders = Order::getList($filter, $this->paginationOptions);
         } catch (Exception $e) {
-            print_r($e->getMessage()); die();
-            print Response::ResponseError();
-            exit();
+            Response::ResponseError();
         }
         
-        print Response::ResponseSuccess($orders);
+        Response::ResponseSuccess($orders);
     }
     
     

@@ -31,11 +31,10 @@ class StatController extends AdminController {
         try {
             $stat = Stat::getStatByGateway($currency, $data);
         } catch (Exception $e) {
-             print Response::ResponseError();
-             exit();
+            Response::ResponseError();
         }
         
-        print Response::ResponseSuccess($stat);
+        Response::ResponseSuccess($stat);
     }
     
     public function actionByFiatAddress() {
@@ -55,11 +54,10 @@ class StatController extends AdminController {
             'pagination' => $this->paginationOptions,
         ]);
         } catch(Exception $e) {
-            print Response::ResponseError();
-            exit;
+            Response::ResponseError();
         }
         
-        print Response::ResponseSuccess($stat);
+        Response::ResponseSuccess($stat);
     }
 
 }

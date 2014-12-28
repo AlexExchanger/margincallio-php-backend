@@ -15,7 +15,9 @@ class Loger extends CComponent {
 
         $actionMessage = ($action != null)? 'Action: '.$action.'. ':'';
         $userMessage = ($userId != null)? 'User: '.$userId.'. ':'';
-        $fullMessage = self::getMessageHeader().$userMessage.$actionMessage.$message."\r\n";
+        
+        $msg = is_array($message)? implode("\r\n", $message):$message;
+        $fullMessage = self::getMessageHeader().$userMessage.$actionMessage.$msg."\r\n";
         
         file_put_contents($dir.DIRECTORY_SEPARATOR.$fileName, $fullMessage, FILE_APPEND | LOCK_EX);        
     }

@@ -11,7 +11,7 @@ class TradeController extends CController {
             return true;
         }
         
-        print Response::ResponseError('Access denied');
+        Response::GetResponseError('Access denied');
         return false;
     }
     
@@ -39,10 +39,9 @@ class TradeController extends CController {
             $logMessage .= ($rate)? 'Rate: '.$rate.'.':'';
             Loger::logUser(Yii::app()->user->id, $logMessage, 'makeOrder');
         } catch (Exception $e) {
-            print Response::ResponseError($e->getMessage());
-            exit();
+            Response::ResponseError($e->getMessage());
         }
-        print Response::ResponseSuccess($result);
+        Response::ResponseSuccess($result);
     }
     
     public function actionCancelOrder() {
@@ -58,11 +57,10 @@ class TradeController extends CController {
                 print TcpErrorHandler::TcpHandle($e->errorType);
                 exit();
             }
-            print Response::ResponseError();
-            exit();
+            Response::ResponseError();
         }
         
-        print Response::ResponseSuccess();
+        Response::ResponseSuccess();
     }
     
     public function actionAddConditionalOrder() {
@@ -73,8 +71,7 @@ class TradeController extends CController {
         $type = mb_strtoupper(Yii::app()->request->getParam('type'));
         
         if(!in_array($type, $availableTypes)) {
-            print Response::ResponseError('Wrong type for conditional order');
-            exit();
+            Response::ResponseError('Wrong type for conditional order');
         }
         
         $data = array(
@@ -97,11 +94,10 @@ class TradeController extends CController {
                 print TcpErrorHandler::TcpHandle($e->errorType);
                 exit();
             }
-            print Response::ResponseError();
-            exit();
+            Response::ResponseError();
         }
         
-        print Response::ResponseSuccess();
+        Response::ResponseSuccess();
     }
     
     public function actionCancelConditionalOrder() {
@@ -113,8 +109,7 @@ class TradeController extends CController {
         $orderId = Yii::app()->request->getParam('orderId');
         
         if(!in_array($type, $availableTypes)) {
-            print Response::ResponseError('Wrong type for conditional order');
-            exit();
+            Response::ResponseError('Wrong type for conditional order');
         }
         
         try {
@@ -127,11 +122,10 @@ class TradeController extends CController {
                 print TcpErrorHandler::TcpHandle($e->errorType);
                 exit();
             }
-            print Response::ResponseError();
-            exit();
+            Response::ResponseError();
         }
         
-        print Response::ResponseSuccess();
+        Response::ResponseSuccess();
     }
     
 }

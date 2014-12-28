@@ -26,11 +26,10 @@ class TicketController extends AdminController {
             
             $tickets = Ticket::getList($filters, $this->paginationOptions);
         } catch (Exception $e) {
-            print Response::ResponseError('Unknow error');
-            exit();
+            Response::ResponseError('Unknow error');
         }
-
-        print Response::ResponseSuccess($tickets);
+        
+        Response::ResponseSuccess($tickets);
     }
     
     public function actionViewTicket() {        
@@ -39,11 +38,10 @@ class TicketController extends AdminController {
         try {
             $messages = Ticket::getMessageList($ticketId, $this->paginationOptions);
         } catch (Exception $e) {
-            print Response::ResponseError('Unknow error');
-            exit();
+            Response::ResponseError('Unknow error');
         }
 
-        print Response::ResponseSuccess($messages);
+        Response::ResponseSuccess($messages);
     }
     
     private function view($type) {
@@ -59,11 +57,10 @@ class TicketController extends AdminController {
 
             $tickets = Ticket::getList($filters, $this->paginationOptions);
         } catch (Exception $e) {
-            print Response::ResponseError('Unknow error');
-            exit();
+            Response::ResponseError('Unknow error');
         }
         
-        print Response::ResponseSuccess($tickets);
+        Response::ResponseSuccess($tickets);
     }
     
     public function acitonViewGeneral() {
@@ -92,8 +89,7 @@ class TicketController extends AdminController {
         $text = Yii::app()->request->getParam('text');
         
         if(!$ticketId) {
-            print Response::ResponseError();
-            exit();
+            Response::ResponseError();
         }
         
         try {
@@ -103,11 +99,10 @@ class TicketController extends AdminController {
             $logMessage = 'Reply for ticket with id "'.$ticketId.'" with message: '.$text;
             Loger::logAdmin(Yii::app()->user->id, $logMessage);
         } catch (Exception $e) {
-            print Response::ResponseError();
-            exit();
+            Response::ResponseError();
         }
         
-        print Response::ResponseSuccess();   
+        Response::ResponseSuccess();   
     }
     
 }

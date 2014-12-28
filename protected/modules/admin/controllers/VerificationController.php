@@ -21,11 +21,10 @@ class VerificationController extends AdminController {
         try {
             $users = User::getForModeration($this->paginationOptions);
         } catch(Exception $e) {
-            print Response::ResponseError();
-            exit();
+            Response::ResponseError();
         }
         
-        print Response::ResponseSuccess($users);
+        Response::ResponseSuccess($users);
     }
     
     public function actionGetUserDoc() {
@@ -34,11 +33,10 @@ class VerificationController extends AdminController {
         try {
             $files = File::getUserDoc($userId);
         } catch(Exception $e) {
-            print Response::ResponseError();
-            exit();
+            Response::ResponseError();
         }
         
-        print Response::ResponseSuccess($files);
+        Response::ResponseSuccess($files);
     }
     
     public function actionVerifyUser() {
@@ -49,11 +47,10 @@ class VerificationController extends AdminController {
             $logMessage = 'Verifying user with "'.$userId.'"';
             Loger::logAdmin(Yii::app()->user->id, $logMessage, 'accountVerified');
         } catch(Exception $e) {
-            print Response::ResponseError();
-            exit();
+            Response::ResponseError();
         }
         
-        print Response::ResponseSuccess($status);
+        Response::ResponseSuccess($status);
     }
     
     
@@ -67,11 +64,10 @@ class VerificationController extends AdminController {
             $logMessage = 'Refuse user with "'.$userId.'". Reason: '.$reason;
             Loger::logAdmin(Yii::app()->user->id, $logMessage, 'accountRejected');
         } catch(Exception $e) {
-            print Response::ResponseError();
-            exit();
+            Response::ResponseError();
         }
         
-        print Response::ResponseSuccess($status);
+        Response::ResponseSuccess($status);
     }
     
     

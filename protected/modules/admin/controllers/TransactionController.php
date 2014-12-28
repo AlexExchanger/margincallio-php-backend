@@ -27,11 +27,10 @@ class TransactionController extends AdminController {
         try {
             $transactions = TransactionExternal::getList($data, $this->paginationOptions);
         } catch(Exception $e) {
-            print Response::ResponseError();
-            exit;
+            Response::ResponseError();
         }
         
-        print Response::ResponseSuccess($transactions);
+        Response::ResponseSuccess($transactions);
     }
     
     public function actionAproveTransaction() {
@@ -40,11 +39,10 @@ class TransactionController extends AdminController {
         try {
             TransactionExternal::aproveTransaction($id);
         } catch(Exception $e) {
-            print Response::ResponseError();
-            exit;
+            Response::ResponseError();
         }
         
-        print Response::ResponseSuccess();
+        Response::ResponseSuccess();
     }
     
     public function actionRejectTransaction() {
@@ -53,11 +51,10 @@ class TransactionController extends AdminController {
         try {
             TransactionExternal::rejectTransaction($id);
         } catch(Exception $e) {
-            print Response::ResponseError();
-            exit;
+            Response::ResponseError();
         }
         
-        print Response::ResponseSuccess();
+        Response::ResponseSuccess();
     }
     
     

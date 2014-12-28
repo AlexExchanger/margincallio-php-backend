@@ -6,7 +6,7 @@ class WalletController extends CController {
     
     public function beforeAction($action) {
         if(Yii::app()->user->isGuest) {
-            print Response::ResponseError('Access denied');
+            Response::GetResponseError('Access denied');
             return false;
         }
         
@@ -19,20 +19,18 @@ class WalletController extends CController {
         $gateway = GatewayFactory::create('Btc', $this->user->id);
         
         if(!$gateway) {
-            print Response::ResponseError();
-            exit();
+            Response::ResponseError();
         }
         
         $address = $gateway->transferTo();
-        print Response::ResponseSuccess(array('address'=>$address));
+        Response::ResponseSuccess(array('address'=>$address));
     }
 
     public function actionReplenishWallet() {
         
         $currency = Yii::app()->request->getParam('currency');
         if(!$currency) {
-            print Response::ResponseError();
-            exit();
+            Response::ResponseError();
         }
         
         $currency = ucfirst(mb_strtolower($currency));

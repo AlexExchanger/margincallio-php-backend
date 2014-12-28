@@ -19,21 +19,6 @@ class Transaction extends CActiveRecord {
         ];
     }
 
-    /* public function beforeSave()
-      {
-      $string = join(':', [
-      $this->accountId,
-      $this->debit, // todo округлить
-      $this->credit,
-      $this->createdAt,
-      $this->groupId,
-      $this->transactionOrderId,
-      $this->orderId,
-      Yii::app()->securityManager->encryptionKey
-      ]);
-      $this->hash = substr(md5($string), -16);
-      return parent::beforeSave();
-      } */
 
     public function checkGuid($attribute, $params) {
         if (!Guid::validate($this->$attribute)) {

@@ -26,11 +26,10 @@ class NewsController extends MainController {
         try {
             $result = News::getList($data, $this->paginationOptions);
         } catch (Exception $e) {
-            print Response::ResponseError();
-            exit();
+            Response::ResponseError();
         }
 
-        print Response::ResponseSuccess($result);
+        Response::ResponseSuccess($result);
     }
 
     public function actionNews() {
@@ -39,11 +38,10 @@ class NewsController extends MainController {
         try {
             $result = News::getOne($id);
         } catch (Exception $e) {
-            print Response::ResponseError();
-            exit();
+            Response::ResponseError();
         }
 
-        print Response::ResponseSuccess($result);
+        Response::ResponseSuccess($result);
     }
 
     public function actionGetPdf() {
@@ -77,8 +75,7 @@ class NewsController extends MainController {
             $mpdf->Output();
             
         } catch (Exception $e) {
-            print Response::ResponseError();
-            exit();
+            Response::ResponseError();
         }
     }
     
