@@ -23,11 +23,13 @@ class Response extends CComponent {
     }
     
     public static function ResponseSuccess($data=array(), $message='') {
+        header('Content-Type: application/json');
         print self::GetResponseSuccess($data, $message);
         exit();
     }
 
     public static function ResponseError($message=''){
+        header('Content-Type: application/json');
         print self::GetResponseError($message);
         exit();
     }

@@ -28,7 +28,7 @@ class VerificationController extends AdminController {
     }
     
     public function actionGetUserDoc() {
-        $userId = Yii::app()->request->getParam('id');
+        $userId = Yii::app()->request->getParam('userId');
         
         try {
             $files = File::getUserDoc($userId);
@@ -40,7 +40,7 @@ class VerificationController extends AdminController {
     }
     
     public function actionVerifyUser() {
-        $userId = Yii::app()->request->getParam('id');
+        $userId = Yii::app()->request->getParam('userId');
         
         try {
             $status = User::verify($userId);

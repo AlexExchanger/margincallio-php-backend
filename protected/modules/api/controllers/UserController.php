@@ -13,7 +13,7 @@ class UserController extends MainController {
             return true;
         }
         
-        Response::GetResponseError('Access denied');
+        Response::ResponseError('Access denied');
         return false;
     }
     
