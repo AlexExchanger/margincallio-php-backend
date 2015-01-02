@@ -3,13 +3,14 @@
 class UserController extends MainController {
 
     private $guestControl = array('login', 'register', 'activate', 'continueregister', 'lostpassword', 'changepassword', 'changepasswordrequest', 'repairbyalarm');
+    private $fullControl = array('islogged');
     
     public function beforeAction($action) {
         if(!parent::beforeAction($action)) {
             return false;
         }
         
-        if(!(Yii::app()->user->isGuest ^ in_array(mb_strtolower($action->id), $this->guestControl))) {
+        if(!(Yii::app()->user->isGuest ^ in_array(mb_strtolower($action->id), $this->guestControl)) || in_array(mb_strtolower($action->id), $this->fullControl)) {
             return true;
         }
         
@@ -23,6 +24,15 @@ class UserController extends MainController {
                 'class'=>'CCaptchaAction',
             ),
         );
+    }
+    
+    public function actionIsLogged() {
+        $response = array('logged' => !Yii::app()->user->isGuest);
+        if ($response['logged']) {
+            $data = User::getLoginData(User::getCurrent());
+            $response = array_merge($response, $data);
+        }
+        Response::ResponseSuccess($response);
     }
     
     public function actionActivate($id) {
