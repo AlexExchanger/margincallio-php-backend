@@ -31,7 +31,7 @@ class NewsController extends AdminController {
        try {
            $result = News::create($data, Yii::app()->user->id);
            $logMessage = 'Add new news with title "'.$result->id.'"';
-           Loger::logAdmin(Yii::app()->user->id, $logMessag, 'news');
+           Loger::logAdmin(Yii::app()->user->id, $logMessage, 'news');
        } catch(Exception $e) {
            Response::ResponseError();
        }

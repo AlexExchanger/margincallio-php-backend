@@ -16,9 +16,4 @@ return array(
     'bitcoinService' => array(
         'url'=>'http://bitconidservice/'
     ),
-    'allowDomains' => array(
-        'http://dev.admin.stock.bit/*',
-        'http://admin.stock.bit/*'
-    )
-    
 );

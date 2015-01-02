@@ -18,6 +18,12 @@ class System extends CActiveRecord {
         return parent::model($className);
     }
     
+    public static function getSystemParams($name) {
+        return self::model()->findAllByAttributes(array('name'=>$name));
+    }
+    
+    public static function getSystemParamsById($id) {
+        return self::model()->findAllByPk($id);
+    }
+    
 }
-    
-    
