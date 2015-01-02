@@ -9,7 +9,8 @@ class Response extends CComponent {
     
     public static function setHeaders() {
         header('Content-Type: application/json');
-        header('Access-Control-Allow-Origin: '.implode(' ', Yii::app()->params['allowDomains']));
+        //header('Access-Control-Allow-Origin: '.implode(' ', Yii::app()->params['allowDomains']));
+        header('Access-Control-Allow-Origin: http://'.$_SERVER['HTTP_HOST'].'/*');
     }
     
     public static function GetResponseSuccess($data=array(), $message='') {
