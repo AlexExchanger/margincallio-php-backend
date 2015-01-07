@@ -16,7 +16,6 @@ class Funds extends CModel {
         return true;
     }
 
-
     public function attributeNames() {
         return array(
             'id' => 'Id',

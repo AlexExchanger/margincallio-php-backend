@@ -69,6 +69,24 @@ class NewsController extends AdminController {
         
     }
     
+    public function actionNews() {
+        $id = $this->getParam('id', false);
+        if(!$id) {
+            Response::ResponseError();
+        }
+        
+        try {
+            $news = News::getOne($id);
+        } catch(Exception $e) {
+            if($e instanceof NoDataException) { 
+                Response::ResponseError('No data');
+            }
+            Response::ResponseError();
+        }
+        
+        Response::ResponseSuccess($news);
+    }
+    
     public function actionGetAllNews() {
 
         $data = array(

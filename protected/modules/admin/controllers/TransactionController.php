@@ -57,5 +57,14 @@ class TransactionController extends AdminController {
         Response::ResponseSuccess();
     }
     
+    public function actionAll() {
+        try {
+            $result = Transaction::getList([], $this->paginationOptions);
+        } catch(Exception $e) {
+            Response::ResponseError();
+        }
+        
+        Response::ResponseSuccess($result);
+    }
     
 }

@@ -228,6 +228,24 @@ class User extends CActiveRecord {
         return self::get(Yii::app()->user->id); 
     }
     
+    public static function getList(array $pagination) {
+        $limit = ArrayHelper::getFromArray($pagination, 'limit');
+        $offset = ArrayHelper::getFromArray($pagination, 'offset');
+        $sort = ArrayHelper::getFromArray($pagination, 'sort');
+
+        $criteria = new CDbCriteria();
+        if ($limit) {
+            $pagination['total'] = (int)self::model()->count($criteria);
+            $criteria->limit = $limit;
+            $criteria->offset = $offset;
+        }
+        
+        $criteria->select = 't."id", t."email", t."lastLoginAt", t."blocked", t."type", t."verifiedBy", t."verifiedAt", t."verifiedData", t."verifiedStatus", t."verifiedReason", t."twoFA"';
+        
+        ListCriteria::sortCriteria($criteria, $sort, ['id']);
+        return self::model()->findAll($criteria);
+    }
+    
     public static function LockUser($userId) {
         $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
         $connector->sendRequest(array(TcpRemoteClient::FUNC_LOCK_TRADE_ACCOUNT, $userId));

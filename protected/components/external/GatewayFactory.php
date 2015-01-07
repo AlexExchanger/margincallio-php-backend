@@ -12,5 +12,4 @@ class GatewayFactory extends CComponent {
         }
         return false;
     }
-    
 }

@@ -6,7 +6,6 @@ class WalletsController extends AdminController{
         if(!parent::beforeAction($action)) {
             return false;
         }
-
         return true;
     }
     

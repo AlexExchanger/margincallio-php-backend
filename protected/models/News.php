@@ -38,11 +38,11 @@ class News extends CActiveRecord {
         $news->preview = ArrayHelper::getFromArray($data, 'preview');
         $news->category = ArrayHelper::getFromArray($data, 'category');
         $news->releaseDate = ArrayHelper::getFromArray($data, 'releaseDate');
-        $news->isActive = ArrayHelper::getFromArray($data, 'isActive');
+        $news->isActive = (ArrayHelper::getFromArray($data, 'isActive'))? 1:0;
         $news->number = ArrayHelper::getFromArray($data, 'number');
         $news->createdAt = TIME;
         $news->createdBy = $userId;
-
+        
         if (!strtotime($news->releaseDate)) {
             $news->releaseDate = date('Y-m-d');
         }
@@ -178,7 +178,6 @@ class News extends CActiveRecord {
         $criteria->params = array(':id'=>$id);
         
         $news = self::model()->find($criteria);
-        
         if(!$news) {
             throw new NoDataException();
         }

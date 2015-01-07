@@ -38,6 +38,9 @@ class NewsController extends MainController {
         try {
             $result = News::getOne($id);
         } catch (Exception $e) {
+            if($e instanceof NoDataException) { 
+                Response::ResponseError('No data');
+            }
             Response::ResponseError();
         }
 

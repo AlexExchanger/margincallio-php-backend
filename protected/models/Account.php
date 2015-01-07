@@ -53,6 +53,22 @@ class Account extends CActiveRecord {
     public static function getMany(array $ids) {
         return $ids ? self::model()->findAllByPk($ids) : [];
     }
+    
+    public static function getList(array $pagination) {
+        $limit = ArrayHelper::getFromArray($pagination, 'limit');
+        $offset = ArrayHelper::getFromArray($pagination, 'offset');
+        $sort = ArrayHelper::getFromArray($pagination, 'sort');
+
+        $criteria = new CDbCriteria();
+        if ($limit) {
+            $pagination['total'] = (int)self::model()->count($criteria);
+            $criteria->limit = $limit;
+            $criteria->offset = $offset;
+        }
+        
+        ListCriteria::sortCriteria($criteria, $sort, ['id']);
+        return self::model()->findAll($criteria);
+    }
 
     public static function create(array $data) {
         $account = new self();

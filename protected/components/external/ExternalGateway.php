@@ -14,5 +14,4 @@ abstract class ExternalGateway extends CComponent{
     public function getType() {
         return $this->currencyId;
     }
-    
 }
