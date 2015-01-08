@@ -105,7 +105,6 @@ class Order extends CActiveRecord {
                 throw new ExceptionUnknowOrderType();
             }
 
-            $data['status'] = 'accepted';
         } catch (Exception $e) {
             if ($e instanceof ExceptionTcpRemoteClient) {
                 print TcpErrorHandler::TcpHandle($e->errorType);
@@ -150,10 +149,10 @@ class Order extends CActiveRecord {
         $order->type = $type;
         $order->side = $side;
         $order->size = $amount;
+        $order->rate = $rate;
         $order->price = isset($offset)?$offset:$rate;
         $order->userId = $userId;
         $order->guid = Guid::generate();
-        $order->status = 'accepted';
         $order->createdAt = TIME;
         $order->updatedAt = null;
 
@@ -171,7 +170,7 @@ class Order extends CActiveRecord {
             'type'=>$type,
             ));
         
-        if(!$order || $order->status != 'accepted') {
+        if(!$order) {
             throw new ExceptionOrderNonExist();
         }
         

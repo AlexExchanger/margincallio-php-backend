@@ -18,27 +18,34 @@ class TcpRemoteClient extends CComponent {
 
     //Remote funcitons
     const FUNC_CREATE_TRADE_ACCOUNT = 100;
-    const FUNC_LOCK_TRADE_ACCOUNT = 2;
-    const FUNC_UNLOCK_TRADE_ACCOUNT = 3;
-    const FUNC_REMOVE_TRADE_ACCOUNT = 4;
-    const FUNC_REPLENISH_TRADE_ACCOUNT = 5;
-    const FUNC_REPLENISH_SAFE_ACCOUNT = 6;
+    const FUNC_LOCK_TRADE_ACCOUNT = 200;
+    const FUNC_UNLOCK_TRADE_ACCOUNT = 300;
+    const FUNC_REMOVE_TRADE_ACCOUNT = 400;
+    const FUNC_REPLENISH_TRADE_ACCOUNT = 500;
+    const FUNC_REPLENISH_SAFE_ACCOUNT = 600;
     
-    const FUNC_CREATE_LIMIT_ORDER = 7;
-    const FUNC_CREATE_MARKET_ORDER = 8;
-    const FUNC_CREATE_INSTANT_ORDER = 9;
-    const FUNC_CANCEL_ORDER = 10;
+    const FUNC_CREATE_LIMIT_ORDER = 700;
+    const FUNC_CREATE_MARKET_ORDER = 800;
+    const FUNC_CREATE_INSTANT_ORDER = 900;
+    const FUNC_CANCEL_ORDER = 1000;
     
-    const FUNC_CREATE_SL = 11;
-    const FUNC_CREATE_TP = 12;
-    const FUNC_CREATE_TS = 13;
-    const FUNC_CANCEL_SL = 14;
-    const FUNC_CANCEL_TP = 15;
-    const FUNC_CANCEL_TS = 16;
+    const FUNC_CREATE_SL = 1100;
+    const FUNC_CREATE_TP = 1200;
+    const FUNC_CREATE_TS = 1300;
+    const FUNC_CANCEL_SL = 1400;
+    const FUNC_CANCEL_TP = 1500;
+    const FUNC_CANCEL_TS = 1600;
     
-    const FUNC_GET_ACCOUNT_INFO = 19;
-    const FUNC_GET_ACTIVE_ORDERS = 20;
-    const FUNC_GET_ACTIVE_CONDITIONAL_ORDER = 21;
+    const FUNC_CREATE_FIX_ACCOUNT = 1700;
+    const FUNC_GENERATE_NEW_FIX_PASSWORD = 1800;
+    const FUNC_GET_FIX_ACCOUNT = 1900;
+    const FUNC_CANCEL_FIX_ACCOUNT = 2000;
+    
+    
+    
+    const FUNC_GET_ACCOUNT_INFO = 2400;
+    const FUNC_GET_ACTIVE_ORDERS = 2500;
+    const FUNC_GET_ACTIVE_CONDITIONAL_ORDER = 2600;
     
     //ErrorCodes
     const ErrorAccountAlreadyExists = 1;
