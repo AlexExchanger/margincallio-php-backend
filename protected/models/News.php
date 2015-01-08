@@ -169,12 +169,14 @@ class News extends CActiveRecord {
         return $criteria;
     }
     
-    public static function getOne($id) {
+    public static function getOne($id, $active = false) {
         
         $criteria = new CDbCriteria();
         $criteria->select = 't."title", t."category", t."content", t."preview", t."createdAt"';
         $criteria->addCondition('t."id"=:id');
-        $criteria->addCondition('t."isActive" = 1');
+        if(!$active) {
+            $criteria->addCondition('t."isActive" = 1');
+        }
         $criteria->params = array(':id'=>$id);
         
         $news = self::model()->find($criteria);

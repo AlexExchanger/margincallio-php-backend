@@ -76,7 +76,7 @@ class NewsController extends AdminController {
         }
         
         try {
-            $news = News::getOne($id);
+            $news = News::getOne($id, true);
         } catch(Exception $e) {
             if($e instanceof NoDataException) { 
                 Response::ResponseError('No data');
