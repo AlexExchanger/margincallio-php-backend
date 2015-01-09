@@ -64,7 +64,10 @@ class TransactionController extends AdminController {
             Response::ResponseError();
         }
         
-        Response::ResponseSuccess($result);
+        Response::ResponseSuccess(array(
+            'count' => isset($this->paginationOptions['total']) ? $this->paginationOptions['total'] : '',
+            'data' => $result
+        ));
     }
     
 }

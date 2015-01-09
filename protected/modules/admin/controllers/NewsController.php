@@ -88,23 +88,25 @@ class NewsController extends AdminController {
         Response::ResponseSuccess($news);
     }
     
-    public function actionGetAllNews() {
-
+    public function actionAll() {
         $data = array(
             'query' => Yii::app()->request->getParam('query'),
             'isActive' => Yii::app()->request->getParam('isActive'),
             'category' => Yii::app()->request->getParam('category'),
         );
-        
+
         try {
-           $result = News::getList($data, $this->paginationOptions);
-       } catch(Exception $e) {
-           Response::ResponseError();
-       }
-       
-       Response::ResponseSuccess($result);
+            $result = News::getList($data, $this->paginationOptions);
+        } catch (Exception $e) {
+            Response::ResponseError();
+        }
+
+        Response::ResponseSuccess(array(
+            'count' => isset($this->paginationOptions['total']) ? $this->paginationOptions['total'] : '',
+            'data' => $result
+        ));
     }
-    
+
     public function actionGetPdf() {
         
         $id = Yii::app()->request->getParam('id', false);

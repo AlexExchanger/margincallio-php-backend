@@ -54,14 +54,14 @@ class Account extends CActiveRecord {
         return $ids ? self::model()->findAllByPk($ids) : [];
     }
     
-    public static function getList(array $pagination) {
+    public static function getList(array &$pagination) {
         $limit = ArrayHelper::getFromArray($pagination, 'limit');
         $offset = ArrayHelper::getFromArray($pagination, 'offset');
         $sort = ArrayHelper::getFromArray($pagination, 'sort');
 
         $criteria = new CDbCriteria();
+        $pagination['total'] = (int)self::model()->count($criteria);
         if ($limit) {
-            $pagination['total'] = (int)self::model()->count($criteria);
             $criteria->limit = $limit;
             $criteria->offset = $offset;
         }
