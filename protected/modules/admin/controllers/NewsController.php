@@ -71,6 +71,7 @@ class NewsController extends AdminController {
     
     public function actionNews() {
         $id = $this->getParam('id', false);
+        
         if(!$id) {
             Response::ResponseError();
         }

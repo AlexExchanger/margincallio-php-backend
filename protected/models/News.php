@@ -172,7 +172,7 @@ class News extends CActiveRecord {
     public static function getOne($id, $active = false) {
         
         $criteria = new CDbCriteria();
-        $criteria->select = 't."title", t."category", t."content", t."preview", t."createdAt"';
+        $criteria->select = 't."title", t."category", t."content", t."preview", t."createdAt", t."isActive"';
         $criteria->addCondition('t."id"=:id');
         if(!$active) {
             $criteria->addCondition('t."isActive" = 1');
@@ -190,6 +190,7 @@ class News extends CActiveRecord {
             'content' => $news->content,
             'preview' => $news->preview,
             'createdAt' => $news->createdAt,
+            'isActive' => $news->isActive,
         );
     }
     

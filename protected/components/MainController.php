@@ -21,7 +21,7 @@ class MainController extends CController {
         return true;
     }
     
-    protected function getParam($item, $default=false) {
+    protected function getParam($item, $default=null) {
         if(isset($this->getResource[$item])) {
             return $this->getResource[$item];
         }
@@ -29,7 +29,7 @@ class MainController extends CController {
         return $default;
     }
     
-    protected function getPost($item, $default=false) {
+    protected function getPost($item, $default=null) {
         if(isset($this->resource[$item])) {
             return $this->resource[$item];
         }
