@@ -26,6 +26,13 @@ class News extends CActiveRecord {
         ];
     }
 
+    public function relations() {
+        return array(
+            'user' => array(self::BELONGS_TO, 'User', 'createdBy'),
+            'upUser' => array(self::BELONGS_TO, 'User', 'updatedBy'),
+        );
+    }
+    
     public static function get($newsId) {
         return self::model()->findByPk($newsId);
     }
@@ -132,6 +139,31 @@ class News extends CActiveRecord {
         return false;
     }
 
+    public static function getFullList(array $filters, array &$pagination) {
+       $data = array();
+        
+       $result = self::getList($filters, $pagination);
+       foreach($result as $value) {
+           $data[] = array_merge($value->attributes, array(
+               'createdUser' => array(
+                   'id' => $value->user->id,
+                   'email' => $value->user->email,
+                   'lastLoginAt' => $value->user->lastLoginAt,
+                   'type' => $value->user->type,
+               ),
+               'updatedUser' => ($value->upUser != null)? array(
+                   'id' => $value->upUser->id,
+                   'email' => $value->upUser->email,
+                   'lastLoginAt' => $value->upUser->lastLoginAt,
+                   'type' => $value->upUser->type,
+               ) : array()
+               ));
+       }
+       
+       return $data;
+    } 
+    
+    
     public static function getList(array $filters, array &$pagination) {
         $limit = ArrayHelper::getFromArray($pagination, 'limit');
         $offset = ArrayHelper::getFromArray($pagination, 'offset');

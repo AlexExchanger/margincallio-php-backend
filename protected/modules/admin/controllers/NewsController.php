@@ -96,7 +96,7 @@ class NewsController extends AdminController {
         );
 
         try {
-            $result = News::getList($data, $this->paginationOptions);
+            $result = News::getFullList($data, $this->paginationOptions);
         } catch (Exception $e) {
             Response::ResponseError();
         }
