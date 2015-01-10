@@ -36,12 +36,16 @@ class TicketController extends AdminController {
         $ticketId = Yii::app()->request->getParam('ticketId', false);
         
         try {
+            $ticket = Ticket::model()->findByPk($ticketId);
             $messages = Ticket::getMessageList($ticketId, $this->paginationOptions);
         } catch (Exception $e) {
             Response::ResponseError('Unknow error');
         }
 
-        Response::ResponseSuccess($messages);
+        Response::ResponseSuccess(array(
+            'ticket' =>  $ticket,
+            'messages' => $messages
+        ));
     }
     
     private function view($type) {
