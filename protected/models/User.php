@@ -303,9 +303,8 @@ class User extends CActiveRecord {
     
     public static function getGeneralStatistic() {
         $user = self::getCurrent();
-        
         $stats = Transaction::getStats(array(
-            'accountId' => $user->id,
+            'account_from' => $user->id,
             'dateFrom' => $user->lastLoginAt,
         ));
         

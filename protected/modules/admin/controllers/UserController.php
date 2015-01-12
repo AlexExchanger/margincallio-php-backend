@@ -86,4 +86,24 @@ class UserController extends AdminController {
             'data' => $result
         ));
     }
+    
+    public function actionCreateUser() {
+        $data = array(
+            'email' => $this->getParam('email'),
+            'password' => $this->getParam('password'),
+            'type'  => $this->getParam('role'),
+        );
+        
+        try {
+            $user = new User();
+            $user->registerUser($data['email'], $data['password']);
+
+            
+            
+            //cid, password, phone
+        } catch(Exception $e) {
+            
+        }
+    }
+    
 }

@@ -12,9 +12,8 @@ class Transaction extends CActiveRecord {
 
     public function rules() {
         return [
-            ['accountId', 'numerical', 'allowEmpty' => false, 'min' => 1, 'integerOnly' => true],
-            ['debit', 'numerical', 'allowEmpty' => false, 'min' => 0, 'max' => 1000000, 'integerOnly' => false],
-            ['credit', 'numerical', 'allowEmpty' => false, 'min' => 0, 'max' => 1000000, 'integerOnly' => false],
+            ['account_from, account_to, user_from, user_to', 'numerical', 'allowEmpty' => false, 'min' => 1, 'integerOnly' => true],
+            ['amount', 'numerical', 'allowEmpty' => false, 'min' => 0, 'max' => 1000000, 'integerOnly' => false],
             ['groupId', 'checkGuid'],
         ];
     }
@@ -32,10 +31,17 @@ class Transaction extends CActiveRecord {
 
     public static function create(array $data) {
         $model = new Transaction();
-        $model->accountId = ArrayHelper::getFromArray($data, 'accountId');
-        $model->debit = ArrayHelper::getFromArray($data, 'debit');
-        $model->credit = ArrayHelper::getFromArray($data, 'credit');
-        $model->groupId = ArrayHelper::getFromArray($data, 'groupId');
+        
+        $model->account_from = ArrayHelper::getFromArray($data, 'account_from');
+        $model->account_to = ArrayHelper::getFromArray($data, 'account_to');
+        $model->amount = ArrayHelper::getFromArray($data, 'amount');
+        
+        $user_from = ArrayHelper::getFromArray($data, 'user_from', false);
+        $user_to = ArrayHelper::getFromArray($data, 'user_to', false);
+        
+        $model->user_from = (!$user_from)?Account::getUserByAccount($model->account_from):$user_from;
+        $model->user_to = (!$user_to)?Account::getUserByAccount($model->account_to):$user_to;
+        
         $model->createdAt = TIME;
 
         try {
@@ -71,45 +77,47 @@ class Transaction extends CActiveRecord {
             'spend' => 0,
             'earn' => 0,
         ];
-        $filters['direction'] = 'spend';
         $criteria = self::getListCriteria($filters);
         $result['spend'] = (int) self::model()->count($criteria);
-
-        $filters['direction'] = 'earn';
-        $criteria = self::getListCriteria($filters);
+        $filters['account_to'] = $filters['account_from'];
+        unset($filters['account_from']);
         $result['earn'] = (int) self::model()->count($criteria);
-
+        
         $result['all'] = $result['spend'] + $result['earn'];
+        
         return $result;
     }
 
     private static function getListCriteria(array $filters) {
-        $accountId = ArrayHelper::getFromArray($filters, 'accountId');
-        $direction = ArrayHelper::getFromArray($filters, 'direction');
+        $accountFrom = ArrayHelper::getFromArray($filters, 'account_from');
+        $accountTo = ArrayHelper::getFromArray($filters, 'account_to');
+
+        $userFrom = ArrayHelper::getFromArray($filters, 'user_from');
+        $userTo = ArrayHelper::getFromArray($filters, 'user_to');
+        
         $currency = ArrayHelper::getFromArray($filters, 'currency');
         $dateFrom = ArrayHelper::getFromArray($filters, 'dateFrom');
         $dateTo = ArrayHelper::getFromArray($filters, 'dateTo');
 
         $criteria = new CDbCriteria();
-        if (!empty($accountId)) {
-            $criteria->compare('accountId', $accountId);
+        
+        if (!empty($accountFrom)) {
+            $criteria->compare('account_from', $accountFrom);
+        }
+        if (!empty($accountTo)) {
+            $criteria->compare('account_to', $accountTo);
+        }
+        if (!empty($userFrom)) {
+            $criteria->compare('user_from', $accountFrom);
+        }
+        if (!empty($userTo)) {
+            $criteria->compare('user_to', $userTo);
         }
         
         if (!empty($currency) && in_array($currency, Yii::app()->params['supportedCurrency'])) {
             $criteria->compare('currency', $currency);
         }
-
-        if (!empty($direction)) {
-            switch ($direction) {
-                case 'spend':
-                    $criteria->addCondition('credit > 0');
-                    break;
-                case 'earn':
-                    $criteria->addCondition('debit > 0');
-                    break;
-            }
-        }
-
+        
         ListCriteria::timestampCriteria($criteria, $dateFrom, $dateTo);
 
         return $criteria;

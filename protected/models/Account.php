@@ -49,6 +49,10 @@ class Account extends CActiveRecord {
 
         return $account;
     }
+    
+    public static function getUserByAccount($accountId) {
+        return User::model()->findAllByPk($accountId);
+    }
 
     public static function getMany(array $ids) {
         return $ids ? self::model()->findAllByPk($ids) : [];
@@ -213,23 +217,12 @@ class Account extends CActiveRecord {
         $accountTo = ($type)?$wallets['user.safeWallet']:$wallets['user.trading'];
         
         $transaction = new Transaction();
-        $transaction->accountId = $accountFrom->id;
-        $transaction->debit = 0;
-        $transaction->credit = $amount;
+        $transaction->account_from = $accountFrom->id;
+        $transaction->account_to = $accountTo->id;
+        $transaction->amount = $amount;
         $transaction->createdAt = TIME;
-        $transaction->groupId = $groupId;
         $transaction->currency = $currency;
-        if (!$transaction->save()) {
-            throw new SystemException(_('Something wrong with transaction creating'), $transaction->getErrors());
-        }
-
-        $transaction = new Transaction();
-        $transaction->accountId = $accountTo->id;
-        $transaction->debit = $amount;
-        $transaction->credit = 0;
-        $transaction->createdAt = TIME;
-        $transaction->groupId = $groupId;
-        $transaction->currency = $currency;
+        
         if (!$transaction->save()) {
             throw new SystemException(_('Something wrong with transaction creating'), $transaction->getErrors());
         }

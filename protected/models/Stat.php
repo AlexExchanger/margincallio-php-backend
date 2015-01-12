@@ -58,40 +58,42 @@ class Stat extends CActiveRecord {
         $internalTransactions = Transaction::getList($filters['common'], $filters['pagination']);
         $externalTransactions = TransactionExternal::getList($filters['common'], $filters['pagination']);
         
-        $gateways = array();
-        foreach($gatewaysAll as $value) {
-            $gateways[] = array(
-                'type' => $value->type,
-                'guid' => $value->guid,
-                'balance' => $value->balance
-            );
-        }
+//        $gateways = array();
+//        foreach($gatewaysAll as $value) {
+//            $gateways[] = array(
+//                'type' => $value->type,
+//                'guid' => $value->guid,
+//                'balance' => $value->balance
+//            );
+//        }
+//        
+//        $internal = array(
+//            'credit' => 0,
+//            'debit' => 0,
+//            'count' => count($internalTransactions)
+//        );
+//        $external = array(
+//            'credit' => 0,
+//            'debit' => 0,
+//            'count' => count($internalTransactions),
+//        );
+//        
+//        foreach($internalTransactions as $value) {
+//            $internal['credit'] += $value->credit;
+//            $internal['debit'] += $value->debit;
+//        }
+//        
+//        foreach($externalTransactions as $value) {
+//            $external['credit'] += $value->credit;
+//            $external['debit'] += $value->debit;
+//        }
+//        
+//        return array(
+//            'gateways' => $gateways,
+//            'internal' => $internal,
+//            'external' => $external,
+//        );
         
-        $internal = array(
-            'credit' => 0,
-            'debit' => 0,
-            'count' => count($internalTransactions)
-        );
-        $external = array(
-            'credit' => 0,
-            'debit' => 0,
-            'count' => count($internalTransactions),
-        );
-        
-        foreach($internalTransactions as $value) {
-            $internal['credit'] += $value->credit;
-            $internal['debit'] += $value->debit;
-        }
-        
-        foreach($externalTransactions as $value) {
-            $external['credit'] += $value->credit;
-            $external['debit'] += $value->debit;
-        }
-        
-        return array(
-            'gateways' => $gateways,
-            'internal' => $internal,
-            'external' => $external,
-        );
+        return array();
     }
 }
