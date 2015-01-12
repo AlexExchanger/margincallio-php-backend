@@ -18,9 +18,15 @@ class TicketController extends AdminController {
 
     public function actionViewActiveTickets() {        
         $userId = Yii::app()->request->getParam('userId', false);
+        $status = YiiL::app()->request->getParam('status', 'waitForSupport');
+        
         try {
+            if(!in_array($status, Ticket::$statusOptions) || $status == 'closed') {
+                throw new Exception();
+            }
+            
             $filters = array(
-                'status' => 'waitForSupport',
+                'status' => $status,
                 'userId' => ($userId != false)? $userId: null
             );
             
