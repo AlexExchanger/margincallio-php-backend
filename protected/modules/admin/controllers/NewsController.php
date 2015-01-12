@@ -41,34 +41,33 @@ class NewsController extends AdminController {
     
     public function actionModifyNews() {
         $data = array(
-            'id' => Yii::app()->request->getParam('id'),
-            'title' => Yii::app()->request->getParam('title'),
-            'content' => Yii::app()->request->getParam('content'),
-            'preview' => Yii::app()->request->getParam('preview'),
-            'category' => Yii::app()->request->getParam('category'),
+            'id' => Yii::app()->request->getParam('id', null),
+            'title' => Yii::app()->request->getParam('title', null),
+            'content' => Yii::app()->request->getParam('content', null),
+            'preview' => Yii::app()->request->getParam('preview', null),
+            'category' => Yii::app()->request->getParam('category', null),
             'releaseData' => Yii::app()->request->getParam('releaseData', false),
-            'isActive' => Yii::app()->request->getParam('isActive', 0),
-            'number' => Yii::app()->request->getParam('number', 1),
+            'isActive' => Yii::app()->request->getParam('isActive', null),
+            'number' => Yii::app()->request->getParam('number', null),
         );
-        
-        
-       try {
-           $news = News::model()->findByPk($data['id']);
-           if(!$news) {
-               throw new Exception();
-           }
-           $result = News::modify($news, $data, Yii::app()->user->id, null);
-           
-           $logMessage = 'Modify news with id "'.$data['id'].'"';
-           Loger::logAdmin(Yii::app()->user->id, $logMessage, 'news');
-       } catch(Exception $e) {
-           Response::ResponseError($e->getMessage());
-       }
-      
-       Response::ResponseSuccess();
-        
+
+
+        try {
+            $news = News::model()->findByPk($data['id']);
+            if (!$news) {
+                throw new Exception();
+            }
+            $result = News::modify($news, $data, Yii::app()->user->id, null);
+
+            $logMessage = 'Modify news with id "' . $data['id'] . '"';
+            Loger::logAdmin(Yii::app()->user->id, $logMessage, 'news');
+        } catch (Exception $e) {
+            Response::ResponseError($e->getMessage());
+        }
+
+        Response::ResponseSuccess();
     }
-    
+
     public function actionNews() {
         $id = $this->getParam('id', false);
         

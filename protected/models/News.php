@@ -4,7 +4,7 @@ class News extends CActiveRecord {
 
     public $files;
     public static $categoryOptions = [
-        'security', 'info', 'trading'
+        'security', 'info', 'trading', 'news'
     ];
 
     public function tableName() {
@@ -22,7 +22,6 @@ class News extends CActiveRecord {
             ['number', 'length', 'allowEmpty' => false, 'min' => 1, 'max' => 255],
             ['content', 'length', 'allowEmpty' => true, 'min' => 0, 'max' => 65000],
             ['preview', 'length', 'allowEmpty' => true, 'min' => 0, 'max' => 65000],
-            ['isActive', 'numerical', 'allowEmpty' => false, 'min' => 0, 'max' => 1, 'integerOnly' => true],
         ];
     }
 
@@ -83,33 +82,33 @@ class News extends CActiveRecord {
         }
 
         $transaction = $news->dbConnection->beginTransaction();
-
+        
         try {
-            if (!empty($category) && $news->category !== $category) {
+            if (!empty($category) && $news->category !== $category && $category != null) {
                 $update['category'] = $category;
                 $news->category = $category;
             }
-            if (!empty($title) && $news->title !== $title) {
+            if (!empty($title) && $news->title !== $title && $title != null) {
                 $update['title'] = $title;
                 $news->title = $title;
             }
-            if (!empty($number) && $news->number !== $number) {
+            if (!empty($number) && $news->number !== $number && $number != null) {
                 $update[$number] = $number;
                 $news->number = $number;
             }
-            if (!empty($content) && $news->content !== $content) {
+            if (!empty($content) && $news->content !== $content && $content != null) {
                 $update['content'] = $content;
                 $news->content = $content;
             }
-            if (!empty($preview) && $news->preview !== $preview) {
+            if (!empty($preview) && $news->preview !== $preview && $preview != null) {
                 $update['preview'] = $preview;
                 $news->preview = $preview;
             }
-            if (!empty($releaseDate) && $news->releaseDate !== $releaseDate) {
+            if (!empty($releaseDate) && $news->releaseDate !== $releaseDate && $releaseDate != null) {
                 $update['releaseDate'] = $releaseDate;
                 $news->releaseDate = $releaseDate;
             }
-            if (is_numeric($isActive) && $news->isActive !== (string) $isActive) {
+            if ($news->isActive !== (string)$isActive && $isActive != null) {
                 $update['isActive'] = $isActive;
                 $news->isActive = $isActive;
             }
