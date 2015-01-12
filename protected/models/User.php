@@ -292,6 +292,7 @@ class User extends CActiveRecord {
         
         return array(
             'id' => $user->id,
+            'role' => $user->type,
             'supportedPair' => $supportedPair,
             'defaultPair' => $supportedPair[0],
             '2fa' => $user->twoFA,
