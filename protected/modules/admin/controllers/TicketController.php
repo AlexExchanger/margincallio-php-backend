@@ -67,23 +67,23 @@ class TicketController extends AdminController {
         Response::ResponseSuccess($tickets);
     }
     
-    public function acitonViewGeneral() {
+    public function actionViewGeneral() {
         $this->view('general');
     }
     
-    public function acitonViewFinance() {
+    public function actionViewFinance() {
         $this->view('finance');
     }
     
-    public function acitonViewVerification() {
+    public function actionViewVerification() {
         $this->view('verification');
     }
     
-    public function acitonViewSecurity() {
+    public function actionViewSecurity() {
         $this->view('security');
     }
     
-    public function acitonViewPartners() {
+    public function actionViewPartners() {
         $this->view('partners');
     }
     
