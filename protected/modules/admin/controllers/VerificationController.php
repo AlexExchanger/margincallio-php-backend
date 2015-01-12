@@ -16,7 +16,7 @@ class VerificationController extends AdminController {
         return true;
     }
     
-    public function actionViewUserForMoredation() {
+    public function actionViewUserForModeration() {
         
         try {
             $users = User::getForModeration($this->paginationOptions);
