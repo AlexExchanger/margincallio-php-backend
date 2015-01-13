@@ -102,4 +102,28 @@ class UserController extends AdminController {
         Response::ResponseSuccess();
     }
     
+    public function actionResetUserPassword() {
+        $id = $this->getParam('id');
+        
+        try {
+            User::resetPassword($id);
+        } catch (Exception $e){
+            Response::ResponseError();
+        }
+        
+        Response::ResponseSuccess();
+    }
+    
+    public function actionSetUserPassword() {
+        $id = $this->getParam('id');
+        
+        try {
+            User::setPassword($id);
+        } catch (Exception $e){
+            Response::ResponseError();
+        }
+        
+        Response::ResponseSuccess();
+    }
+    
 }

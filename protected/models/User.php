@@ -389,4 +389,36 @@ class User extends CActiveRecord {
         $user->createAccountWallet($user->id);
     }
     
+    public static function resetPassword($id) {
+        
+        $user = self::model()->findByPk($id);
+        
+        if(!$user) {
+            throw new Exception();
+        }
+        
+        $user->password = '';
+        
+        if(!$user->save(true, array('password'))) {
+            throw new Exception();
+        }
+    }
+    
+    public static function setPassword($id, $password) {
+        
+        $user = self::model()->findByPk($id);
+        
+        if(!$user || !$password) {
+            throw new Exception();
+        }
+        
+        $user->password = UserIdentity::trickyPasswordEncoding($user->email, $password);
+        
+        if(!$user->save(true, array('password'))) {
+            throw new Exception();
+        }
+    }
+    
+    
+    
 }
