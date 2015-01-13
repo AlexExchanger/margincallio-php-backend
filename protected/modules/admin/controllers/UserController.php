@@ -95,15 +95,11 @@ class UserController extends AdminController {
         );
         
         try {
-            $user = new User();
-            $user->registerUser($data['email'], $data['password']);
-
-            
-            
-            //cid, password, phone
+            User::create($data);
         } catch(Exception $e) {
-            
+            Response::ResponseSuccess();
         }
+        Response::ResponseSuccess();
     }
     
 }

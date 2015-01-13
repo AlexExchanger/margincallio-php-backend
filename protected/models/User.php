@@ -367,4 +367,26 @@ class User extends CActiveRecord {
         return $user->save();
     }
     
+    public static function create($data) {
+        
+        $user = new User();
+        $user->email = ArrayHelper::getFromArray($data, 'email', NULL);
+        
+        $password = ArrayHelper::getFromArray($data, 'password', NULL);
+        $user->password = UserIdentity::trickyPasswordEncoding($user->email, $password);
+        
+        $user->emailVerification = null;
+        $user->verifiedStatus = 'waitingForDocuments';
+        $user->type = ArrayHelper::getFromArray($data, 'role', 'trader');
+        
+        $codes = UserIdentity::generateAlarmCodes($user->id, $user->email);
+        AlarmCode::saveCodes($user->id, $codes);
+        
+        if(!$user->save()) {
+            throw new ExceptionUserSave();
+        }
+        
+        $user->createAccountWallet($user->id);
+    }
+    
 }
