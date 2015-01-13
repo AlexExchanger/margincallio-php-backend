@@ -419,6 +419,19 @@ class User extends CActiveRecord {
         }
     }
     
-    
+    public static function resetTwoFA($id) {
+        
+        $user = self::model()->findByPk($id);
+        
+        if(!$user) {
+            throw new Exception();
+        }
+        
+        $user->twoFA = false;
+        
+        if(!$user->save(true, array('twoFA'))) {
+            throw new Exception();
+        }
+    }
     
 }

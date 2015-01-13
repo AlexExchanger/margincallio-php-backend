@@ -127,4 +127,15 @@ class UserController extends AdminController {
         Response::ResponseSuccess();
     }
     
+    public function actionResetTwoFA() {
+        $id = $this->getParam('id');
+        
+        try {
+            User::resetTwoFA($id);
+        } catch (Exception $e){
+            Response::ResponseError();
+        }
+        
+        Response::ResponseSuccess();
+    }
 }
