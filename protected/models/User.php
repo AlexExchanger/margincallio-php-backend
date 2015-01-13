@@ -246,11 +246,26 @@ class User extends CActiveRecord {
         return self::model()->findAll($criteria);
     }
     
-    public static function LockUser($userId) {
+    public static function LockUser($userIdExternal, $email = null) {
+        
+        $user = false;
+        $userId = null;
+        
+        if($email != null) {
+            $user = User::model()->findByAttributes(array('email'=>$email));
+            
+            if(!$user) {
+                throw new Exception();
+            }
+            $userId = $user->id;
+        } else {
+            $userId = $userIdExternal;
+            $user = User::model()->findByPk($userId);
+        }
+        
         $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
         $connector->sendRequest(array(TcpRemoteClient::FUNC_LOCK_TRADE_ACCOUNT, $userId));
         
-        $user = User::model()->findByPk($userId);
         $user->blocked = true;
         $result = $user->save();
         return $result;

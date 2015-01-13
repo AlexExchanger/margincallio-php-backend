@@ -32,9 +32,10 @@ class UserController extends AdminController {
     
     public function actionLockUser() {
         $userId = Yii::app()->request->getParam('userId');
+        $email = $this->getParam('email');
         
         try {
-            User::LockUser($userId);
+            User::LockUser($userId, $email);
             $logMessage = 'Lock user with id "'.$userId.'"';
             Loger::logAdmin(Yii::app()->user->id, $logMessage, 'accountLocked');
         } catch(Exception $e) {
