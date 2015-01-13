@@ -116,9 +116,10 @@ class UserController extends AdminController {
     
     public function actionSetUserPassword() {
         $id = $this->getParam('id');
+        $password = $this->getParam('password', false);
         
         try {
-            User::setPassword($id);
+            User::setPassword($id, $password);
         } catch (Exception $e){
             Response::ResponseError();
         }
