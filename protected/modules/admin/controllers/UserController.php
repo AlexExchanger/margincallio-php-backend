@@ -138,4 +138,17 @@ class UserController extends AdminController {
         
         Response::ResponseSuccess();
     }
+    
+    public function actionChangeEmail() {
+        $id = $this->getParam('id');
+        $email = $this->getParam('email');
+        
+        try {
+            User::changeEmail($id, $email);
+        } catch (Exception $e){
+            Response::ResponseError();
+        }
+        
+        Response::ResponseSuccess();
+    }
 }

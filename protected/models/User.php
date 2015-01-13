@@ -434,4 +434,18 @@ class User extends CActiveRecord {
         }
     }
     
+    public static function changeEmail($id, $email) {
+        $user = self::model()->findByPk($id);
+        
+        if(!$user || !$email) {
+            throw new Exception();
+        }
+        
+        $user->email = $email;
+        
+        if(!$user->save(true, array('email'))) {
+            throw new Exception();
+        }
+    }
+    
 }
