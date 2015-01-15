@@ -21,7 +21,7 @@ class VerificationController extends AdminController {
         try {
             $users = User::getForModeration($this->paginationOptions);
             $data = array(
-                'count' => $this->paginationOptions['total'],
+                'count' => (isset($this->paginationOptions['total']))?$this->paginationOptions['total']:'',
                 'data' => $users
             );
         } catch(Exception $e) {

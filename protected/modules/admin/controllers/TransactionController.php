@@ -26,11 +26,16 @@ class TransactionController extends AdminController {
         
         try {
             $transactions = TransactionExternal::getList($data, $this->paginationOptions);
+            
+            $result = array(
+                'count' => (isset($this->paginationOptions['total']))?$this->paginationOptions['total']:'',
+                'data' => $transactions,
+            );
         } catch(Exception $e) {
             Response::ResponseError();
         }
         
-        Response::ResponseSuccess($transactions);
+        Response::ResponseSuccess($result);
     }
     
     public function actionAproveTransaction() {
