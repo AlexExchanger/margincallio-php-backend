@@ -20,11 +20,15 @@ class VerificationController extends AdminController {
         
         try {
             $users = User::getForModeration($this->paginationOptions);
+            $data = array(
+                'count' => $this->paginationOptions['total'],
+                'data' => $users
+            );
         } catch(Exception $e) {
             Response::ResponseError();
         }
         
-        Response::ResponseSuccess($users);
+        Response::ResponseSuccess($data);
     }
     
     public function actionGetUserDoc() {

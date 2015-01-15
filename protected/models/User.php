@@ -326,19 +326,21 @@ class User extends CActiveRecord {
         return $stats;
     }
     
-    public static function getForModeration($pagination) {
+    public static function getForModeration(array &$pagination) {
         $limit = ArrayHelper::getFromArray($pagination, 'limit');
         $offset = ArrayHelper::getFromArray($pagination, 'offset');
         $sort = ArrayHelper::getFromArray($pagination, 'sort');
 
         $criteria = new CDbCriteria();
+        $criteria->addCondition('"verifiedStatus"=\'waitingForModeration\'', 'AND');
+        $pagination['total'] = self::model()->count($criteria);
+        
         if ($limit) {
             $criteria->limit = $limit;
             $criteria->offset = $offset;
         }
 
         ListCriteria::sortCriteria($criteria, $sort, ['id']);
-        $criteria->addCondition('"verifiedStatus"=\'waitingForModeration\'', 'AND');
         $users = self::model()->findAll($criteria);
         
         $data = array();
