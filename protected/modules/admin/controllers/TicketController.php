@@ -66,11 +66,17 @@ class TicketController extends AdminController {
             );
 
             $tickets = Ticket::getList($filters, $this->paginationOptions);
+            
+            $ticketsData = array(
+                'count' => (isset($this->paginationOptions))?$this->paginationOptions['total']:'',
+                'data' => $tickets,
+            );
+            
         } catch (Exception $e) {
             Response::ResponseError('Unknow error');
         }
         
-        Response::ResponseSuccess($tickets);
+        Response::ResponseSuccess($ticketsData);
     }
     
     public function actionViewGeneral() {

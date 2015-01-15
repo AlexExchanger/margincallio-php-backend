@@ -180,8 +180,8 @@ class Ticket extends CActiveRecord
         $sort = ArrayHelper::getFromArray($pagination, 'sort');
 
         $criteria = self::getListCriteria($filters);
+        $pagination['total'] = (int)self::model()->count($criteria);
         if ($limit) {
-            $pagination['total'] = (int)self::model()->count($criteria);
             $criteria->limit = $limit;
             $criteria->offset = $offset;
         }
