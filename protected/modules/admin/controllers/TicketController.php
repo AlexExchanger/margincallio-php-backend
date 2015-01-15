@@ -99,6 +99,28 @@ class TicketController extends AdminController {
         $this->view('partners');
     }
     
+    public function actionAll() {
+        $userId = Yii::app()->request->getParam('userId', false);
+        
+        try {
+            $filters = array(
+                'userId' => ($userId != false) ? $userId : null,
+            );
+
+            $tickets = Ticket::getList($filters, $this->paginationOptions);
+            
+            $ticketsData = array(
+                'count' => (isset($this->paginationOptions))?$this->paginationOptions['total']:'',
+                'data' => $tickets,
+            );
+            
+        } catch (Exception $e) {
+            Response::ResponseError('Unknow error');
+        }
+        
+        Response::ResponseSuccess($ticketsData);
+    }
+    
     public function actionReplyForTicket() {
         
         $ticketId = Yii::app()->request->getParam('ticketId', false);
