@@ -18,12 +18,14 @@ class StatController extends AdminController {
     
     public function actionGatewayStat() {
         $currency = Yii::app()->request->getParam('currency', false);
+        $gatewayId = Yii::app()->request->getParam('gatewayId', false);
         
         $data = [
             'common' => array(
                 'dateFrom' => Yii::app()->request->getParam('dateFrom'),
                 'dateTo' => Yii::app()->request->getParam('dateTo'),
                 'currency' => $currency,
+                'gatewayId' => $gatewayId
             ),
             'pagination' => $this->paginationOptions,
         ];
@@ -37,6 +39,30 @@ class StatController extends AdminController {
         Response::ResponseSuccess($stat);
     }
     
+    public function actionByUser() {
+        
+        $data = array(
+            'userId' => $this->getParam('userId'),
+            'currency' => $this->getParam('currency'),
+        );
+        
+        try {
+            $stat = Stat::getFullStatByUser($data, [
+                'common' => [
+                    'dateFrom' => Yii::app()->request->getParam('dateFrom'),
+                    'dateTo' => Yii::app()->request->getParam('dateTo'),
+                    'status' => Yii::app()->request->getParam('status'),
+                ],
+                'pagination' => $this->paginationOptions,
+            ]);
+        } catch(Exception $e) {
+            Response::ResponseError();
+        }
+        
+        Response::ResponseSuccess($stat);
+    }
+    
+    
     public function actionByFiatAddress() {
 
         $data = [
@@ -45,14 +71,14 @@ class StatController extends AdminController {
         ];
         
         try {
-        $stat = Stat::getStatByFiat($data, [
-            'common' => [
-                'dateFrom' => Yii::app()->request->getParam('dateFrom'),
-                'dateTo' => Yii::app()->request->getParam('dateTo'),
-                'status' => Yii::app()->request->getParam('status'),
-            ],
-            'pagination' => $this->paginationOptions,
-        ]);
+            $stat = Stat::getStatByFiat($data, [
+                'common' => [
+                    'dateFrom' => Yii::app()->request->getParam('dateFrom'),
+                    'dateTo' => Yii::app()->request->getParam('dateTo'),
+                    'status' => Yii::app()->request->getParam('status'),
+                ],
+                'pagination' => $this->paginationOptions,
+            ]);
         } catch(Exception $e) {
             Response::ResponseError();
         }

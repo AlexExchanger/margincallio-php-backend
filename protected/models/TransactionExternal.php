@@ -86,15 +86,21 @@ class TransactionExternal extends CActiveRecord {
         $direction = ArrayHelper::getFromArray($filters, 'direction');
         $dateFrom = ArrayHelper::getFromArray($filters, 'dateFrom');
         $dateTo = ArrayHelper::getFromArray($filters, 'dateTo');
-        $status = ArrayHelper::getFromArray($filters, 'status');
+        $gatewayId = ArrayHelper::getFromArray($filters, 'gatewayId');
+        $currency = ArrayHelper::getFromArray($filters, 'currency');
+        
 
         $criteria = new CDbCriteria();
         if (!empty($accountId)) {
             $criteria->compare('accountId', $accountId);
         }
 
-        if(!empty($status)) {
-            $criteria->compare('status', $status);
+        if(!empty($gatewayId)) {
+            $criteria->compare('gatewayId', $gatewayId);
+        }
+
+        if(!empty($currency)) {
+            $criteria->compare('currency', $currency);
         }
         
         if (!empty($direction)) {

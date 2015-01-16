@@ -18,15 +18,53 @@ class Stat extends CActiveRecord {
         ];
     }
     
-    //external stat methods
-    /*
-     *  $data = [
-     *      'userId' => User ID (required)
-     *      'currency' => 
-     *      'status' => Range of statuses for searched transactions
-     *      'address' => Address (required or ID)
-     *  ]
-     */
+    public static function getFullStatByUser(array $data, array $filters) {
+        
+        $userId = ArrayHelper::getFromArray($data, 'userId');
+        $currency = ArrayHelper::getFromArray($data, 'currency', false);
+
+        $accountCriteria = array(
+            'userId' => $userId,
+            'type' => 'user.safeWallet'
+        );
+        
+        if($currency != false) {
+            $accountCriteria['currency'] = $currency;
+        }
+        
+        
+        $userAccountList = Account::model()->findAllByAttributes($accountCriteria);
+        
+        $data = array();
+        
+        foreach($userAccountList as $account) {
+            $filters['common']['accountId'] = $account->id;
+            $externalTransactions = TransactionExternal::getList($filters['common'], $filters['pagination']);
+            
+            $externalData = array(
+                'income' => array(
+                    'amount' => 0,
+                    'count' => 0
+                ),
+                'outcome' => array(
+                    'amount' => 0,
+                    'count' => 0
+                ),
+            );
+            
+            foreach($externalTransactions as $transaction) {
+                $type = ($transaction->type)? 'income':'outcome';
+
+                $externalData[$type]['count']++;
+                $externalData[$type]['amount'] = bcadd($externalData[$type]['amount'], $transaction->amount);
+            }
+            
+            $data['external'][$account->currency] = $externalData;
+        }
+        
+        return $data;
+    }
+    
     public static function getStatByFiat(array $data, array $filters) {
         
         $userId = ArrayHelper::getFromArray($data, 'userId');
@@ -53,47 +91,27 @@ class Stat extends CActiveRecord {
             throw new Exception('Currency non set');
         }
         
-        $gatewaysAll = Account::getSystemAccount($currency);
-        
-        $internalTransactions = Transaction::getList($filters['common'], $filters['pagination']);
         $externalTransactions = TransactionExternal::getList($filters['common'], $filters['pagination']);
         
-//        $gateways = array();
-//        foreach($gatewaysAll as $value) {
-//            $gateways[] = array(
-//                'type' => $value->type,
-//                'guid' => $value->guid,
-//                'balance' => $value->balance
-//            );
-//        }
-//        
-//        $internal = array(
-//            'credit' => 0,
-//            'debit' => 0,
-//            'count' => count($internalTransactions)
-//        );
-//        $external = array(
-//            'credit' => 0,
-//            'debit' => 0,
-//            'count' => count($internalTransactions),
-//        );
-//        
-//        foreach($internalTransactions as $value) {
-//            $internal['credit'] += $value->credit;
-//            $internal['debit'] += $value->debit;
-//        }
-//        
-//        foreach($externalTransactions as $value) {
-//            $external['credit'] += $value->credit;
-//            $external['debit'] += $value->debit;
-//        }
-//        
-//        return array(
-//            'gateways' => $gateways,
-//            'internal' => $internal,
-//            'external' => $external,
-//        );
+        $data = array(
+            'income' => array(
+                'amount' => 0,
+                'count' => 0
+            ),
+            'outcome' => array(
+                'amount' => 0,
+                'count' => 0
+            ),
+        );
         
-        return array();
+        foreach($externalTransactions as $value) {
+            $type = ($value->type)? 'income':'outcome';
+            
+            $data[$type]['count']++;
+            $data[$type]['amount'] = bcadd($data[$type]['amount'], $value->amount);
+        }
+        
+        
+        return $data;
     }
 }
