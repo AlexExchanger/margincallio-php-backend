@@ -107,12 +107,15 @@ class TicketController extends AdminController {
     
     public function actionAll() {
         $userId = Yii::app()->request->getParam('userId', false);
+        $status = Yii::app()->request->getParam('status', false);
         
         try {
-            $filters = array(
-                'userId' => ($userId != false) ? $userId : null,
-            );
+            $filters = array('userId' => ($userId != false) ? $userId : null);
 
+            if($status != false) {
+                $filters['status'] = $status;
+            }
+            
             $tickets = Ticket::getList($filters, $this->paginationOptions);
             
             $ticketsData = array(
