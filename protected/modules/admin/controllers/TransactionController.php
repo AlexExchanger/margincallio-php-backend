@@ -16,6 +16,35 @@ class TransactionController extends AdminController {
         return true;
     }
     
+    public function actionExternalIn() {
+        $userId = $this->getParam('id');
+        $status = $this->getParam('status', false);
+        
+        $accountCriteria = array(
+            'userId' => $userId,
+            'type' => 'user.safeWallet'
+        );
+        
+        
+        $userAccountList = Account::model()->findAllByAttributes($accountCriteria);
+        
+        $data  = array();
+        foreach($userAccountList as $account) {
+            $transactionCriteria = array(
+                'accountId'=>$account->id,
+                'type' => true
+            );
+            
+            if($status != false) {
+                $transactionCriteria['status'] = $status;
+            }
+            
+            $data[$account->currency] = TransactionExternal::getList($transactionCriteria, $this->paginationOptions);
+        }
+        
+        Response::ResponseSuccess($data);
+    }
+    
     public function actionExternalTransactions() {
         $data = [
             'accountId' => Yii::app()->request->getParam('userId'),

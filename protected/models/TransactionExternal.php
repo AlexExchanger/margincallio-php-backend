@@ -18,9 +18,9 @@ class TransactionExternal extends CActiveRecord {
 
     public function rules() {
         return [
-            ['accountId', 'numerical', 'allowEmpty' => false, 'min' => 1, 'integerOnly' => true],
-            ['debit', 'numerical', 'allowEmpty' => false, 'min' => 0, 'max' => 1000000, 'integerOnly' => false],
-            ['credit', 'numerical', 'allowEmpty' => false, 'min' => 0, 'max' => 1000000, 'integerOnly' => false],
+//            ['accountId', 'numerical', 'allowEmpty' => false, 'min' => 1, 'integerOnly' => true],
+//            ['debit', 'numerical', 'allowEmpty' => false, 'min' => 0, 'max' => 1000000, 'integerOnly' => false],
+//            ['credit', 'numerical', 'allowEmpty' => false, 'min' => 0, 'max' => 1000000, 'integerOnly' => false],
         ];
     }
 
@@ -86,6 +86,8 @@ class TransactionExternal extends CActiveRecord {
         $direction = ArrayHelper::getFromArray($filters, 'direction');
         $dateFrom = ArrayHelper::getFromArray($filters, 'dateFrom');
         $dateTo = ArrayHelper::getFromArray($filters, 'dateTo');
+        $status = ArrayHelper::getFromArray($filters, 'status');
+        $type = ArrayHelper::getFromArray($filters, 'type');
         $gatewayId = ArrayHelper::getFromArray($filters, 'gatewayId');
         $currency = ArrayHelper::getFromArray($filters, 'currency');
         
@@ -101,6 +103,14 @@ class TransactionExternal extends CActiveRecord {
 
         if(!empty($currency)) {
             $criteria->compare('currency', $currency);
+        }
+
+        if(!empty($status)) {
+            $criteria->compare('verifyStatus', $status);
+        }
+        
+        if(!empty($type)) {
+            $criteria->compare('type', $type);
         }
         
         if (!empty($direction)) {
