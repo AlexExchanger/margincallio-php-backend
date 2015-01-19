@@ -394,7 +394,7 @@ class User extends CActiveRecord {
         
         $user->emailVerification = null;
         $user->verifiedStatus = 'waitingForDocuments';
-        $user->type = ArrayHelper::getFromArray($data, 'role', 'trader');
+        $user->type = ArrayHelper::getFromArray($data, 'type', 'trader');
         
         $codes = UserIdentity::generateAlarmCodes($user->id, $user->email);
         AlarmCode::saveCodes($user->id, $codes);
