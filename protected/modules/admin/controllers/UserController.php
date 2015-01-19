@@ -152,4 +152,20 @@ class UserController extends AdminController {
         
         Response::ResponseSuccess();
     }
+    
+    public function actionGetById() {
+        
+        $id = $this->getParam('id');
+        
+        try {
+            $user = User::getList($this->paginationOptions, $id);
+            if(!$user) {
+                throw new Exception();
+            }
+        } catch(Exception $e) {
+            Response::ResponseError();
+        }
+        
+        Response::ResponseSuccess($user);
+    }
 }

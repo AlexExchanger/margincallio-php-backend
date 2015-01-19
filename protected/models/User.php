@@ -228,7 +228,7 @@ class User extends CActiveRecord {
         return self::get(Yii::app()->user->id); 
     }
     
-    public static function getList(array &$pagination) {
+    public static function getList(array &$pagination, $id = null) {
         $limit = ArrayHelper::getFromArray($pagination, 'limit');
         $offset = ArrayHelper::getFromArray($pagination, 'offset');
         $sort = ArrayHelper::getFromArray($pagination, 'sort');
@@ -238,6 +238,11 @@ class User extends CActiveRecord {
         if ($limit) {
             $criteria->limit = $limit;
             $criteria->offset = $offset;
+        }
+        
+        if($id != null) {
+            $criteria->addCondition('id=:id');
+            $criteria->params = array(':id'=>$id);
         }
         
         $criteria->select = 't."id", t."email", t."lastLoginAt", t."blocked", t."type", t."verifiedBy", t."verifiedAt", t."verifiedData", t."verifiedStatus", t."verifiedReason", t."twoFA"';
