@@ -87,7 +87,7 @@ class TransactionExternal extends CActiveRecord {
         $dateFrom = ArrayHelper::getFromArray($filters, 'dateFrom');
         $dateTo = ArrayHelper::getFromArray($filters, 'dateTo');
         $status = ArrayHelper::getFromArray($filters, 'status');
-        $type = ArrayHelper::getFromArray($filters, 'type');
+        $type = ArrayHelper::getFromArray($filters, 'type', null);
         $gatewayId = ArrayHelper::getFromArray($filters, 'gatewayId');
         $currency = ArrayHelper::getFromArray($filters, 'currency');
         
@@ -108,8 +108,8 @@ class TransactionExternal extends CActiveRecord {
         if(!empty($status)) {
             $criteria->compare('verifyStatus', $status);
         }
-        
-        if(!empty($type)) {
+
+        if(!is_null($type)) {
             $criteria->compare('type', $type);
         }
         
