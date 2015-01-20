@@ -75,29 +75,6 @@ class TicketController extends AdminController {
             $tickets = Ticket::getList($filters, $this->paginationOptions);
             $users = Ticket::getUsers($tickets);
             
-            foreach($tickets as $key=>$value) {
-                if(isset($value->createdBy) && $value->createdBy != null) {
-                    $tickets[$key]->createdBy = array(
-                        'id' => $users[$value->createdBy]->id,
-                        'email' => $users[$value->createdBy]->email,
-                    );
-                }
-                
-                if(isset($value->updatedBy) && $value->updatedBy != null) {
-                    $tickets[$key]->updatedBy = array(
-                        'id' => $users[$value->updatedBy]->id,
-                        'email' => $users[$value->updatedBy]->email,
-                    );
-                }
-                
-                if(isset($value->userId) && $value->userId != null) {
-                    $tickets[$key]->userId = array(
-                        'id' => $users[$value->userId]->id,
-                        'email' => $users[$value->userId]->email,
-                    );
-                }
-            }
-            
             $ticketsData = array(
                 'count' => (isset($this->paginationOptions))?$this->paginationOptions['total']:'',
                 'data' => $tickets,
@@ -142,30 +119,7 @@ class TicketController extends AdminController {
             }
             
             $tickets = Ticket::getList($filters, $this->paginationOptions);
-            $users = Ticket::getUsers($tickets);
-            
-            foreach($tickets as $key=>$value) {
-                if(isset($value->createdBy) && $value->createdBy != null) {
-                    $tickets[$key]->createdBy = array(
-                        'id' => $users[$value->createdBy]->id,
-                        'email' => $users[$value->createdBy]->email,
-                    );
-                }
-                
-                if(isset($value->updatedBy) && $value->updatedBy != null) {
-                    $tickets[$key]->updatedBy = array(
-                        'id' => $users[$value->updatedBy]->id,
-                        'email' => $users[$value->updatedBy]->email,
-                    );
-                }
-                
-                if(isset($value->userId) && $value->userId != null) {
-                    $tickets[$key]->userId = array(
-                        'id' => $users[$value->userId]->id,
-                        'email' => $users[$value->userId]->email,
-                    );
-                }
-            }
+            Ticket::getUsers($tickets);
             
             $ticketsData = array(
                 'count' => (isset($this->paginationOptions))?$this->paginationOptions['total']:'',

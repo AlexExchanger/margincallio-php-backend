@@ -228,7 +228,7 @@ class Ticket extends CActiveRecord
         return $statuses;
     }
     
-    public static function getUsers($tickets) {
+    public static function getUsers(&$tickets) {
         
         $users = array();
         foreach($tickets as $value) {
@@ -247,7 +247,28 @@ class Ticket extends CActiveRecord
             $users[$value->id] = $value;
         }
         
-        return $users;
+        foreach($tickets as $key=>$value) {
+            if(isset($value->createdBy) && $value->createdBy != null) {
+                $tickets[$key]->createdBy = array(
+                    'id' => isset($users[$value->createdBy])? $users[$value->createdBy]->id:'',
+                    'email' => isset($users[$value->createdBy])? $users[$value->createdBy]->email:'',
+                );
+            }
+
+            if(isset($value->updatedBy) && $value->updatedBy != null) {
+                $tickets[$key]->updatedBy = array(
+                    'id' => isset($users[$value->updatedBy])? $users[$value->updatedBy]->id:'',
+                    'email' => isset($users[$value->updatedBy])? $users[$value->updatedBy]->email:'',
+                );
+            }
+
+            if(isset($value->userId) && $value->userId != null) {
+                $tickets[$key]->userId = array(
+                    'id' => isset($users[$value->userId])? $users[$value->userId]->id:'',
+                    'email' => isset($users[$value->userId])? $users[$value->userId]->email:'',
+                );
+            }
+        }
     }
     
     
