@@ -41,4 +41,12 @@ class Response extends CComponent {
         print self::GetResponseError($message);
         exit();
     }
+    
+    public static function ResponseAccessDenied($message='Access denied'){
+        self::setHeaders();
+        http_response_code(403);
+        print self::GetResponseError($message);
+        exit();
+    }
+    
 }

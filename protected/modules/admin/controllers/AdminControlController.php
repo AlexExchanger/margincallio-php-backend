@@ -2,6 +2,14 @@
 
 class AdminControlController extends AdminController {
     
+    public function beforeAction($action) {
+        if(!parent::beforeAction($action)) {
+            Response::ResponseAccessDenied();
+            return false;
+        }
+        return true;
+    }
+    
     public function actionGrantRole() {
         $userId = Yii::app()->request->getParam('userId');
         $role = Yii::app()->request->getParam('role');

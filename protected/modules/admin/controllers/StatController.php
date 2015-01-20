@@ -6,6 +6,7 @@ class StatController extends AdminController {
 
     public function beforeAction($action) {
         if (!parent::beforeAction($action)) {
+            Response::ResponseAccessDenied();
             return false;
         }
 
