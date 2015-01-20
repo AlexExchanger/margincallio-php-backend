@@ -16,7 +16,7 @@ class AdminController extends MainController {
         'super'
     );
     
-    private $accessControl = array(
+    private static $accessControl = array(
         'support' => array(
             'ticket' => array('ViewActiveTickets', 'ViewTicket', 'ReplyForTickets'),
         ),
@@ -47,14 +47,21 @@ class AdminController extends MainController {
         )
     );
     
+    public static function getRules($role) {
+        if(isset(self::$accessControl[$role])) {
+            return self::$accessControl[$role];
+        }
+        return null;
+    }
+    
     private function checkAccess($role, $controller, $method) {
         if($role == 'super') {
             return true;
         }
         
-        if(isset($this->accessControl[$role])) {
-            if(isset($this->accessControl[$role][$controller])) {
-                if(in_array($method, $this->accessControl[$role][$controller])) {
+        if(isset(self::$accessControl[$role])) {
+            if(isset(self::$accessControl[$role][$controller])) {
+                if(in_array($method, self::$accessControl[$role][$controller])) {
                     return true;
                 }
             }

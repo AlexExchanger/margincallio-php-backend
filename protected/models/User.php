@@ -314,6 +314,7 @@ class User extends CActiveRecord {
             'id' => $user->id,
             'email' => $user->email,
             'role' => $user->type,
+            'access' => AdminController::getRules($user->type),
             'supportedPair' => $supportedPair,
             'defaultPair' => $supportedPair[0],
             '2fa' => $user->twoFA,
