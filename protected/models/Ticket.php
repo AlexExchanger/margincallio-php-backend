@@ -228,6 +228,29 @@ class Ticket extends CActiveRecord
         return $statuses;
     }
     
+    public static function getUsers($tickets) {
+        
+        $users = array();
+        foreach($tickets as $value) {
+            if(isset($value->createdBy) && $value->createdBy != null) {
+                $users[$value->createdBy] = $value->createdBy;
+            }
+            
+            if(isset($value->updatedBy) && $value->updatedBy != null) {
+                $users[$value->updatedBy] = $value->updatedBy;
+            }
+        }
+        
+        $usersObj = User::model()->findAllByAttributes(array('id'=>array_values($users)));
+        
+        foreach($usersObj as $value) {
+            $users[$value->id] = $value;
+        }
+        
+        return $users;
+    }
+    
+    
     public static function getTicketsWithLastMessage($userId, $status) {
         
         if(!is_numeric($userId) || !in_array($status, Ticket::$statusOptions)) {
