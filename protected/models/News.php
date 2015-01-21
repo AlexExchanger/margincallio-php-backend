@@ -49,10 +49,6 @@ class News extends CActiveRecord {
         $news->createdAt = TIME;
         $news->createdBy = $userId;
         
-        if (!strtotime($news->releaseDate)) {
-            $news->releaseDate = date('Y-m-d');
-        }
-
         try {
             if (!$news->save()) {
                 throw new ModelException('News did not created', $news->getErrors());
