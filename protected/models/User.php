@@ -356,7 +356,7 @@ class User extends CActiveRecord {
                 'id' => $value->id,
                 'email' => $value->email,
                 'type' => $value->type,
-                'createdAt' => $value->createdAt,
+                'createdAt' => strtotime($value->createdAt),
                 'lastLoginAt' => $value->lastLoginAt,
             );
         }
