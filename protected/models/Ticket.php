@@ -209,7 +209,28 @@ class Ticket extends CActiveRecord
         }
 
         ListCriteria::sortCriteria($criteria, $sort, ['id']);
-        return TicketMessage::model()->findAll($criteria);
+        $messages = TicketMessage::model()->findAll($criteria);
+        $allFiles = array();
+        foreach($messages as $key=>$value) {
+            if(!is_null($value->files)) {
+                $currentFiles = explode(',', $value->files);
+                $currentFilesObjects = array();
+                foreach($currentFiles as $oneFile) {
+                    if(!isset($allFiles[$oneFile])) {
+                        $file = File::model()->findByPk($oneFile);
+                        $allFiles[$oneFile] = array(
+                            'url' => '/files/'.$file->uid,
+                            'uid' => $file->uid,
+                            'type' => $file->entityType
+                        );
+                    }
+                    $currentFilesObjects[] = $allFiles[$oneFile];
+                }
+                $messages[$key]->files = $currentFilesObjects;
+            }
+        }
+        
+        return $messages;
     }
 
 
