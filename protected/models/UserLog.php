@@ -8,6 +8,7 @@ class UserLog extends CActiveRecord {
         'fundsWithdrawalRequest', // запрос на вывод средств
         'fundsWithdrawal', // фактический вывод средств
         'fundsTransferred', // перевод средств
+        'changePassword',
         'makeOrder',
         'cancelOrder',
         'makeConditional',
@@ -67,6 +68,15 @@ class UserLog extends CActiveRecord {
         if (isset($filters['userId'])) {
             $criteria->compare('userId', $filters['userId']);
         }
+        
+        if (isset($filters['action'])) {
+            $criteria->compare('action', $filters['action']);
+        }
+        
+        if (!is_null($filters['ip'])) {
+            $criteria->compare('ip', $filters['ip']);
+        }
+        
         if ($limit) {
             $pagination['total'] = (int) self::model()->count($criteria);
             $criteria->limit = $limit;

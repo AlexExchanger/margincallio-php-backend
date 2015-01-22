@@ -18,10 +18,10 @@ class TradeController extends CController {
 
     public function actionMakeOrder() {
         
-        $orderSide = Yii::app()->request->getParam('side');
-        $amount = Yii::app()->request->getParam('amount');
-        $rate = Yii::app()->request->getParam('rate');
-        $orderType = Yii::app()->request->getParam('type', false);
+        $orderSide = $this->getParam('side');
+        $amount = $this->getParam('amount');
+        $rate = $this->getParam('rate');
+        $orderType = $this->getParam('type', false);
         
         //todo: for USD/BTC only
         
@@ -46,7 +46,7 @@ class TradeController extends CController {
     
     public function actionCancelOrder() {
         
-        $orderId = Yii::app()->request->getParam('orderId');
+        $orderId = $this->getParam('orderId');
         
         try {
             Order::cancelOrder($this->user->id, $orderId);
@@ -68,7 +68,7 @@ class TradeController extends CController {
         //TODO: обсудить с фронтенд, как будет считаться направление условного ордера
         $availableTypes = array('STOPLOSS', 'TAKEPROFIT', 'TRAILINGSTOP');
         
-        $type = mb_strtoupper(Yii::app()->request->getParam('type'));
+        $type = mb_strtoupper($this->getParam('type'));
         
         if(!in_array($type, $availableTypes)) {
             Response::ResponseError('Wrong type for conditional order');
@@ -76,10 +76,10 @@ class TradeController extends CController {
         
         $data = array(
             'type' => $type,
-            'side' => Yii::app()->request->getParam('side'),
-            'amount' => Yii::app()->request->getParam('amount'),
-            'rate' => Yii::app()->request->getParam('rate'),
-            'offset' => Yii::app()->request->getParam('offset')
+            'side' => $this->getParam('side'),
+            'amount' => $this->getParam('amount'),
+            'rate' => $this->getParam('rate'),
+            'offset' => $this->getParam('offset')
          );
         
         try {
@@ -105,8 +105,8 @@ class TradeController extends CController {
         //TODO: обсудить с фронтенд, как будет считаться направление условного ордера
         $availableTypes = array('STOPLOSS', 'TAKEPROFIT', 'TRAILINGSTOP');
         
-        $type = mb_strtoupper(Yii::app()->request->getParam('type'));
-        $orderId = Yii::app()->request->getParam('orderId');
+        $type = mb_strtoupper($this->getParam('type'));
+        $orderId = $this->getParam('orderId');
         
         if(!in_array($type, $availableTypes)) {
             Response::ResponseError('Wrong type for conditional order');

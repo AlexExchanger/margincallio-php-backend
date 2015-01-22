@@ -11,8 +11,8 @@ class AdminControlController extends AdminController {
     }
     
     public function actionGrantRole() {
-        $userId = Yii::app()->request->getParam('userId');
-        $role = Yii::app()->request->getParam('role');
+        $userId = $this->getParam('userId');
+        $role = $this->getParam('role');
         
         if($role == 'super') {
             Response::ResponseError();
@@ -45,8 +45,8 @@ class AdminControlController extends AdminController {
     }
     
     public function actionRevokeRole() {
-        $userId = Yii::app()->request->getParam('userId');
-        $role = Yii::app()->request->getParam('role');
+        $userId = $this->getParam('userId');
+        $role = $this->getParam('role');
         
         if($role == 'super') {
             Response::ResponseError();

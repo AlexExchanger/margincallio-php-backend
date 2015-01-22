@@ -51,7 +51,7 @@ class AdminController extends MainController {
             'admincontrol' => array('grantrole', 'revokerole'),
             'funds' => array('addpair', 'convert', 'updatepair'),
             'news' => array('addnews', 'all', 'getpdf', 'modifynews', 'news'),
-            'stat' => array('byfiataddress', 'byuser', 'gatewaystat'),
+            'stat' => array('byfiataddress', 'byuser', 'gatewaystat', 'logstat'),
             'ticket' => array('all', 'replyforticket', 'viewactivetickets', 'viewgeneral', 'viewfinance', 'viewverification', 'viewsecurity', 'viewpartners', 'viewticket'),
             'transaction' => array('all', 'aprovetransaction', 'externalin', 'externalout', 'externaltransactions', 'rejecttransaction'),
             'user' => array('all', 'changeemail', 'createuser', 'getbyid', 'lockuser', 'removeuser', 'resettwofa', 'resetuserpassword', 'sendinvitebyemail', 'setuserpassword', 'unlockuser'),

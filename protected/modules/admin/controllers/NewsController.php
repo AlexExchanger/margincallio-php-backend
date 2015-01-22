@@ -10,9 +10,9 @@ class NewsController extends AdminController {
             return false;
         }
 
-        $this->paginationOptions['limit'] = Yii::app()->request->getParam('limit', false);
-        $this->paginationOptions['offset'] = Yii::app()->request->getParam('offset', false);
-        $this->paginationOptions['sort'] = Yii::app()->request->getParam('sort', false);
+        $this->paginationOptions['limit'] = $this->getParam('limit', false);
+        $this->paginationOptions['offset'] = $this->getParam('offset', false);
+        $this->paginationOptions['sort'] = $this->getParam('sort', false);
         
         return true;
     }
@@ -20,13 +20,13 @@ class NewsController extends AdminController {
     public function actionAddNews() {
         
         $data = array(
-            'title' => Yii::app()->request->getParam('title'),
-            'content' => Yii::app()->request->getParam('content'),
-            'preview' => Yii::app()->request->getParam('preview'),
-            'category' => Yii::app()->request->getParam('category'),
-            'releaseData' => Yii::app()->request->getParam('releaseData', false),
-            'isActive' => Yii::app()->request->getParam('isActive', 0),
-            'number' => Yii::app()->request->getParam('number', 1),
+            'title' => $this->getParam('title'),
+            'content' => $this->getParam('content'),
+            'preview' => $this->getParam('preview'),
+            'category' => $this->getParam('category'),
+            'releaseData' => $this->getParam('releaseData', false),
+            'isActive' => $this->getParam('isActive', 0),
+            'number' => $this->getParam('number', 1),
         );
         
        try {
@@ -42,14 +42,14 @@ class NewsController extends AdminController {
     
     public function actionModifyNews() {
         $data = array(
-            'id' => Yii::app()->request->getParam('id', null),
-            'title' => Yii::app()->request->getParam('title', null),
-            'content' => Yii::app()->request->getParam('content', null),
-            'preview' => Yii::app()->request->getParam('preview', null),
-            'category' => Yii::app()->request->getParam('category', null),
-            'releaseData' => Yii::app()->request->getParam('releaseData', false),
-            'isActive' => Yii::app()->request->getParam('isActive', null),
-            'number' => Yii::app()->request->getParam('number', null),
+            'id' => $this->getParam('id', null),
+            'title' => $this->getParam('title', null),
+            'content' => $this->getParam('content', null),
+            'preview' => $this->getParam('preview', null),
+            'category' => $this->getParam('category', null),
+            'releaseData' => $this->getParam('releaseData', false),
+            'isActive' => $this->getParam('isActive', null),
+            'number' => $this->getParam('number', null),
         );
 
 
@@ -90,9 +90,9 @@ class NewsController extends AdminController {
     
     public function actionAll() {
         $data = array(
-            'query' => Yii::app()->request->getParam('query'),
-            'isActive' => Yii::app()->request->getParam('isActive'),
-            'category' => Yii::app()->request->getParam('category'),
+            'query' => $this->getParam('query'),
+            'isActive' => $this->getParam('isActive'),
+            'category' => $this->getParam('category'),
         );
 
         try {
@@ -109,7 +109,7 @@ class NewsController extends AdminController {
 
     public function actionGetPdf() {
         
-        $id = Yii::app()->request->getParam('id', false);
+        $id = $this->getParam('id', false);
         try {
             if(!$id) {
                 throw new Exception();

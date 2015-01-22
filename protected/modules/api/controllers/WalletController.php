@@ -28,7 +28,7 @@ class WalletController extends CController {
 
     public function actionReplenishWallet() {
         
-        $currency = Yii::app()->request->getParam('currency');
+        $currency = $this->getParam('currency');
         if(!$currency) {
             Response::ResponseError();
         }

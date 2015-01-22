@@ -10,21 +10,21 @@ class StatController extends AdminController {
             return false;
         }
 
-        $this->paginationOptions['limit'] = Yii::app()->request->getParam('limit', false);
-        $this->paginationOptions['offset'] = Yii::app()->request->getParam('offset', false);
-        $this->paginationOptions['sort'] = Yii::app()->request->getParam('sort', false);
+        $this->paginationOptions['limit'] = $this->getParam('limit', false);
+        $this->paginationOptions['offset'] = $this->getParam('offset', false);
+        $this->paginationOptions['sort'] = $this->getParam('sort', false);
 
         return true;
     }
     
     public function actionGatewayStat() {
-        $currency = Yii::app()->request->getParam('currency', false);
-        $gatewayId = Yii::app()->request->getParam('gatewayId', false);
+        $currency = $this->getParam('currency', false);
+        $gatewayId = $this->getParam('gatewayId', false);
         
         $data = [
             'common' => array(
-                'dateFrom' => Yii::app()->request->getParam('dateFrom'),
-                'dateTo' => Yii::app()->request->getParam('dateTo'),
+                'dateFrom' => $this->getParam('dateFrom'),
+                'dateTo' => $this->getParam('dateTo'),
                 'currency' => $currency,
                 'gatewayId' => $gatewayId
             ),
@@ -50,9 +50,9 @@ class StatController extends AdminController {
         try {
             $stat = Stat::getFullStatByUser($data, [
                 'common' => [
-                    'dateFrom' => Yii::app()->request->getParam('dateFrom'),
-                    'dateTo' => Yii::app()->request->getParam('dateTo'),
-                    'status' => Yii::app()->request->getParam('status'),
+                    'dateFrom' => $this->getParam('dateFrom'),
+                    'dateTo' => $this->getParam('dateTo'),
+                    'status' => $this->getParam('status'),
                 ],
                 'pagination' => $this->paginationOptions,
             ]);
@@ -67,16 +67,16 @@ class StatController extends AdminController {
     public function actionByFiatAddress() {
 
         $data = [
-            'userId' => Yii::app()->request->getParam('userId'),
-            'address' => Yii::app()->request->getParam('address'),    
+            'userId' => $this->getParam('userId'),
+            'address' => $this->getParam('address'),    
         ];
         
         try {
             $stat = Stat::getStatByFiat($data, [
                 'common' => [
-                    'dateFrom' => Yii::app()->request->getParam('dateFrom'),
-                    'dateTo' => Yii::app()->request->getParam('dateTo'),
-                    'status' => Yii::app()->request->getParam('status'),
+                    'dateFrom' => $this->getParam('dateFrom'),
+                    'dateTo' => $this->getParam('dateTo'),
+                    'status' => $this->getParam('status'),
                 ],
                 'pagination' => $this->paginationOptions,
             ]);
@@ -86,5 +86,21 @@ class StatController extends AdminController {
         
         Response::ResponseSuccess($stat);
     }
+    
+    public function actionLogStat() {
+        try {
+            $filters = array(
+                'action' => $this->getParam('action'),
+                'userId' => $this->getParam('userId', NULL),
+                'ip' => $this->getParam('ip', NULL)
+            );
 
+            $logs = UserLog::getList($filters, $this->paginationOptions);
+        } catch(Exception $e) {
+            Response::ResponseError();
+        }
+        
+        Response::ResponseSuccess($logs);
+    }
+    
 }

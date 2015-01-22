@@ -10,16 +10,16 @@ class TicketController extends AdminController {
             return false;
         }
 
-        $this->paginationOptions['limit'] = Yii::app()->request->getParam('limit', false);
-        $this->paginationOptions['offset'] = Yii::app()->request->getParam('offset', false);
-        $this->paginationOptions['sort'] = Yii::app()->request->getParam('sort', false);
+        $this->paginationOptions['limit'] = $this->getParam('limit', false);
+        $this->paginationOptions['offset'] = $this->getParam('offset', false);
+        $this->paginationOptions['sort'] = $this->getParam('sort', false);
         
         return true;
     }
 
     public function actionViewActiveTickets() {        
-        $userId = Yii::app()->request->getParam('userId', false);
-        $status = Yii::app()->request->getParam('status', 'waitForSupport');
+        $userId = $this->getParam('userId', false);
+        $status = $this->getParam('status', 'waitForSupport');
         
         try {
             if(!in_array($status, Ticket::$statusOptions) || $status == 'closed') {
@@ -46,7 +46,7 @@ class TicketController extends AdminController {
     }
     
     public function actionViewTicket() {        
-        $ticketId = Yii::app()->request->getParam('ticketId', false);
+        $ticketId = $this->getParam('ticketId', false);
         
         try {
             $ticket = Ticket::model()->findByPk($ticketId);
@@ -65,8 +65,8 @@ class TicketController extends AdminController {
     }
     
     private function view($type) {
-        $userId = Yii::app()->request->getParam('userId', false);
-        $status = Yii::app()->request->getParam('status', 'waitForSupport');
+        $userId = $this->getParam('userId', false);
+        $status = $this->getParam('status', 'waitForSupport');
         
         try {
             $filters = array(
@@ -111,8 +111,8 @@ class TicketController extends AdminController {
     }
     
     public function actionAll() {
-        $userId = Yii::app()->request->getParam('userId', false);
-        $status = Yii::app()->request->getParam('status', false);
+        $userId = $this->getParam('userId', false);
+        $status = $this->getParam('status', false);
         
         try {
             $filters = array('userId' => ($userId != false) ? $userId : null);
@@ -138,8 +138,8 @@ class TicketController extends AdminController {
     
     public function actionReplyForTicket() {
         
-        $ticketId = Yii::app()->request->getParam('ticketId', false);
-        $text = Yii::app()->request->getParam('text');
+        $ticketId = $this->getParam('ticketId', false);
+        $text = $this->getParam('text');
         
         if(!$ticketId) {
             Response::ResponseError();

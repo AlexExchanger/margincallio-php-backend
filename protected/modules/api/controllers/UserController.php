@@ -82,9 +82,9 @@ class UserController extends MainController {
     }
     
     public function actionChangePassword() {
-        $cid = Yii::app()->request->getParam('cid');
-        $newPassword = Yii::app()->request->getParam('newPassword', true);
-        $newPasswordConfurm = Yii::app()->request->getParam('newPasswordConfurm', false);
+        $cid = $this->getParam('cid');
+        $newPassword = $this->getParam('newPassword', true);
+        $newPasswordConfurm = $this->getParam('newPasswordConfurm', false);
         
         if($newPassword != $newPasswordConfurm) {
             Response::ResponseError('Passwords are not equal');
@@ -101,10 +101,10 @@ class UserController extends MainController {
     
     public function actionContinueRegister() {
         //TODO: Make post
-        $cid = Yii::app()->request->getParam('cid', false);
-        $password = Yii::app()->request->getParam('password', true);
-        $passwordConfirm = Yii::app()->request->getParam('passwordConfirm', false);
-        $phoneNumber = Yii::app()->request->getParam('phone', false);
+        $cid = $this->getParam('cid', false);
+        $password = $this->getParam('password', true);
+        $passwordConfirm = $this->getParam('passwordConfirm', false);
+        $phoneNumber = $this->getParam('phone', false);
         
         if($password != $passwordConfirm) {
             Response::ResponseError('Passwords are not equal');
@@ -122,8 +122,8 @@ class UserController extends MainController {
     }
     
     public function actionLostPassword() {
-        $email = Yii::app()->request->getParam('email', false);
-        $phone = Yii::app()->request->getParam('phone', false);
+        $email = $this->getParam('email', false);
+        $phone = $this->getParam('phone', false);
         
         try {
             User::lostPassword($email, $phone);
@@ -136,8 +136,8 @@ class UserController extends MainController {
     
     public function actionLogin() {
 
-        $email = Yii::app()->request->getParam('email', false);
-        $password = Yii::app()->request->getParam('password', false);
+        $email = $this->getParam('email', false);
+        $password = $this->getParam('password', false);
 
         $auth = new UserIdentity($email, $password);
         if($auth->authenticate()) {
@@ -171,9 +171,9 @@ class UserController extends MainController {
     }
     
     public function actionRepairByAlarm() {
-        $alarmCode = Yii::app()->request->getParam('code');
-        $password = Yii::app()->request->getParam('password');
-        $passwordConfirm = Yii::app()->request->getParam('passwordConfirm', false);
+        $alarmCode = $this->getParam('code');
+        $password = $this->getParam('password');
+        $passwordConfirm = $this->getParam('passwordConfirm', false);
         
         if($password == $passwordConfirm) {
             if(AlarmCode::accessByCode($alarmCode, $password)) {

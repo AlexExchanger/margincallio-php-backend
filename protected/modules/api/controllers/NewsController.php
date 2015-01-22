@@ -9,9 +9,9 @@ class NewsController extends MainController {
             return false;
         }
 
-        $this->paginationOptions['limit'] = Yii::app()->request->getParam('limit', false);
-        $this->paginationOptions['offset'] = Yii::app()->request->getParam('offset', false);
-        $this->paginationOptions['sort'] = Yii::app()->request->getParam('sort', false);
+        $this->paginationOptions['limit'] = $this->getParam('limit', false);
+        $this->paginationOptions['offset'] = $this->getParam('offset', false);
+        $this->paginationOptions['sort'] = $this->getParam('sort', false);
         
         return true;
     }

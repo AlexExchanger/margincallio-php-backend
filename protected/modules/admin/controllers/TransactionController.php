@@ -10,9 +10,9 @@ class TransactionController extends AdminController {
             return false;
         }
 
-        $this->paginationOptions['limit'] = Yii::app()->request->getParam('limit', false);
-        $this->paginationOptions['offset'] = Yii::app()->request->getParam('offset', false);
-        $this->paginationOptions['sort'] = Yii::app()->request->getParam('sort', false);
+        $this->paginationOptions['limit'] = $this->getParam('limit', false);
+        $this->paginationOptions['offset'] = $this->getParam('offset', false);
+        $this->paginationOptions['sort'] = $this->getParam('sort', false);
 
         return true;
     }
@@ -76,10 +76,10 @@ class TransactionController extends AdminController {
     
     public function actionExternalTransactions() {
         $data = [
-            'accountId' => Yii::app()->request->getParam('userId'),
-            'dateFrom' => Yii::app()->request->getParam('dateFrom'),
-            'dateTo' => Yii::app()->request->getParam('dateTo'),
-            'status' => Yii::app()->request->getParam('status'),
+            'accountId' => $this->getParam('userId'),
+            'dateFrom' => $this->getParam('dateFrom'),
+            'dateTo' => $this->getParam('dateTo'),
+            'status' => $this->getParam('status'),
         ];
         
         try {
@@ -97,7 +97,7 @@ class TransactionController extends AdminController {
     }
     
     public function actionAproveTransaction() {
-        $id = Yii::app()->request->getParam('id');
+        $id = $this->getParam('id');
         
         try {
             TransactionExternal::aproveTransaction($id);
@@ -109,7 +109,7 @@ class TransactionController extends AdminController {
     }
     
     public function actionRejectTransaction() {
-        $id = Yii::app()->request->getParam('id');
+        $id = $this->getParam('id');
         
         try {
             TransactionExternal::rejectTransaction($id);

@@ -10,9 +10,9 @@ class VerificationController extends AdminController {
             return false;
         }
 
-        $this->paginationOptions['limit'] = Yii::app()->request->getParam('limit', false);
-        $this->paginationOptions['offset'] = Yii::app()->request->getParam('offset', false);
-        $this->paginationOptions['sort'] = Yii::app()->request->getParam('sort', false);
+        $this->paginationOptions['limit'] = $this->getParam('limit', false);
+        $this->paginationOptions['offset'] = $this->getParam('offset', false);
+        $this->paginationOptions['sort'] = $this->getParam('sort', false);
         
         return true;
     }
@@ -33,7 +33,7 @@ class VerificationController extends AdminController {
     }
     
     public function actionGetUserDoc() {
-        $userId = Yii::app()->request->getParam('userId');
+        $userId = $this->getParam('userId');
         
         try {
             $files = File::getUserDoc($userId);
@@ -45,7 +45,7 @@ class VerificationController extends AdminController {
     }
     
     public function actionVerifyUser() {
-        $userId = Yii::app()->request->getParam('userId');
+        $userId = $this->getParam('userId');
         
         try {
             $status = User::verify($userId);
@@ -61,8 +61,8 @@ class VerificationController extends AdminController {
     
     
     public function actionRefuseUser() {
-        $userId = Yii::app()->request->getParam('id');
-        $reason = Yii::app()->request->getParam('reason');
+        $userId = $this->getParam('id');
+        $reason = $this->getParam('reason');
         
         try {
             $status = User::refuse($userId, $reason);

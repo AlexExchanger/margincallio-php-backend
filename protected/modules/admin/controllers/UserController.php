@@ -10,15 +10,15 @@ class UserController extends AdminController {
             return false;
         }
         
-        $this->paginationOptions['limit'] = Yii::app()->request->getParam('limit', false);
-        $this->paginationOptions['offset'] = Yii::app()->request->getParam('offset', false);
-        $this->paginationOptions['sort'] = Yii::app()->request->getParam('sort', false);
+        $this->paginationOptions['limit'] = $this->getParam('limit', false);
+        $this->paginationOptions['offset'] = $this->getParam('offset', false);
+        $this->paginationOptions['sort'] = $this->getParam('sort', false);
         
         return true;
     }
     
     public function actionSendInviteByEmail() {
-        $email = Yii::app()->request->getParam('email');
+        $email = $this->getParam('email');
         
         try {
             UserInvite::SendInviteByEmail($email);
@@ -32,7 +32,7 @@ class UserController extends AdminController {
     }
     
     public function actionLockUser() {
-        $userId = Yii::app()->request->getParam('userId');
+        $userId = $this->getParam('userId');
         $email = $this->getParam('email');
         
         try {
@@ -47,7 +47,7 @@ class UserController extends AdminController {
     }
     
     public function actionUnlockUser() {
-        $userId = Yii::app()->request->getParam('userId');
+        $userId = $this->getParam('userId');
         
         try {
             User::UnlockUser($userId);
@@ -62,7 +62,7 @@ class UserController extends AdminController {
     }
     
     public function actionRemoveUser() {
-        $userId = Yii::app()->request->getParam('userId');
+        $userId = $this->getParam('userId');
         
         try {
             User::RemoveUser($userId);
