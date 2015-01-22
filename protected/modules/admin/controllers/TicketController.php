@@ -50,13 +50,16 @@ class TicketController extends AdminController {
         
         try {
             $ticket = Ticket::model()->findByPk($ticketId);
+            $tickets = array($ticket);
+            Ticket::getUsers($tickets);
+            
             $messages = Ticket::getMessageList($ticketId, $this->paginationOptions);
         } catch (Exception $e) {
             Response::ResponseError('Unknow error');
         }
 
         Response::ResponseSuccess(array(
-            'ticket' =>  $ticket,
+            'ticket' =>  isset($tickets[0])? $tickets[0]:'',
             'messages' => $messages
         ));
     }
