@@ -17,6 +17,7 @@ class AdminController extends MainController {
     );
     
     private static $accessControl = array(
+        'trader' => array(),
         'support' => array(
             'ticket' => array('ViewActiveTickets', 'ViewTicket', 'ReplyForTickets'),
         ),
@@ -44,7 +45,19 @@ class AdminController extends MainController {
         'admin' => array(
             'news' => array('AddNews', 'ModifyNews','GetPdf', 'GetAllNews'),
             'user' => array('SendInviteByEmail', 'LockUser', 'UnlockUser', 'RemoveUser'),
-        )
+        ),
+        'super' => array(
+            'accounts' => array('all'),
+            'admincontrol' => array('grantrole', 'revokerole'),
+            'funds' => array('addpair', 'convert', 'updatepair'),
+            'news' => array('addnews', 'all', 'getpdf', 'modifynews', 'news'),
+            'stat' => array('byfiataddress', 'byuser', 'gatewaystat'),
+            'ticket' => array('all', 'replyforticket', 'viewactivetickets', 'viewgeneral', 'viewfinance', 'viewverification', 'viewsecurity', 'viewpartners', 'viewticket'),
+            'transaction' => array('all', 'aprovetransaction', 'externalin', 'externalout', 'externaltransactions', 'rejecttransaction'),
+            'user' => array('all', 'changeemail', 'createuser', 'getbyid', 'lockuser', 'removeuser', 'resettwofa', 'resetuserpassword', 'sendinvitebyemail', 'setuserpassword', 'unlockuser'),
+            'verification' => array('getuserdoc', 'refuseuser', 'verifyuser', 'viewuserformoderation'),
+            'wallets' => array('createhotwallet', 'gethotwallet'),
+        ),
     );
     
     public static function getRules($role) {
