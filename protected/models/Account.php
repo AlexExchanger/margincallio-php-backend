@@ -92,10 +92,6 @@ class Account extends CActiveRecord {
         if (strpos($account->type, 'system.gateway.') === 0) {
             $account->userId = null;
             $account->tickerId = null;
-            $account->gatewayId = (int)$account->gatewayId;
-            if ($account->gatewayId == 0) {
-                $account->addError('gatewayId', 'Gateway not found');
-            }
             //для пополнения счета шлюза
             if ($account->type == 'system.gateway.external') {
 
@@ -103,14 +99,12 @@ class Account extends CActiveRecord {
         } //system account
         elseif (strpos($account->type, 'system.ticker.') === 0) {
             $account->userId = null;
-            $account->gatewayId = null;
             if (!is_numeric($account->tickerId)) {
                 $account->addError('tickerId', 'Ticker not found');
             }
         } // users account
         else {
             $account->tickerId = null;
-            $account->gatewayId = null;
             $user = User::get($account->userId);
             if (!$user) {
                 $account->addError('userId', 'User not found');

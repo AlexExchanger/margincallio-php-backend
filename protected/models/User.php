@@ -72,10 +72,11 @@ class User extends CActiveRecord {
             ));
         }
 
-        $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
-        $result = $connector->sendRequest(array(TcpRemoteClient::FUNC_CREATE_TRADE_ACCOUNT, $userId));
+        //$connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
+        //$result = $connector->sendRequest(array(TcpRemoteClient::FUNC_CREATE_TRADE_ACCOUNT, $userId));
         
-        return $result;
+        //return $result;
+        return true;
     }
     
     
@@ -366,7 +367,6 @@ class User extends CActiveRecord {
 
     public static function verify($userId) {
         $adminId = Yii::app()->user->id;
-        
         $user = self::get($userId);
         $user->verifiedBy = $adminId;
         $user->verifiedAt = TIME;
@@ -375,7 +375,6 @@ class User extends CActiveRecord {
         if($user->save()) {
             return self::createTradeAccountWallet($userId);
         }
-        
         return false;
     }
     
