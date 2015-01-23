@@ -2,13 +2,29 @@
 
 class GatewayFactory extends CComponent {
     
-    public static function create($type, $userId = null) {
-        if (!isset($type)) {
+    protected static function getClassById($id) {
+        
+        $gateway = Yii::app()->db->createCommand()
+                ->select('class')
+                ->from('gateway gg')
+                ->where('id=:id', array(':id'=>$id))
+                ->queryRow(true);
+        
+        if(!isset($gateway['class'])) {
+            return null;
+        }
+        
+        return $gateway['class'];
+    }
+    
+    public static function create($id) {
+        if (!isset($id)) {
             return false;
         }
-        $className = ucfirst($type).'Gateway';
+        
+        $className = self::getClassById($id);
         if (class_exists($className)) {
-            return new $className($userId);
+            return $className::getInstance();
         }
         return false;
     }

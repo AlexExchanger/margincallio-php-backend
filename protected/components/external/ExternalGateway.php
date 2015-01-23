@@ -1,17 +1,16 @@
 <?php
 
-abstract class ExternalGateway extends CComponent{
+class ExternalGateway extends CActiveRecord{
     
-    protected $currencyId;
-    protected $account;
-    
-    protected $paymentType;
-    
-    public function transferTo($address, $count) {}
-    public function transferFrom($address, $count) {}
-    public function getBalance($address) {}
-    
-    public function getType() {
-        return $this->currencyId;
+    public function tableName() {
+        return 'gateway';
     }
+    
+    public static function model($className = __CLASS__) {
+        return parent::model($className);
+    }
+    
+    public function getBillingMeta() {}
+    public function transferFrom() {}
+    public function transferTo() {}
 }
