@@ -40,15 +40,29 @@ class GatewayController extends MainController {
     }
     
     public function actionPayByGateway() {
+        $accountId = $this->getParam('accountId');
+        $amount = $this->getParam('amount');
+        $currency = $this->getParam('currency');
         $gatewayId = $this->getParam('id', 3);
         $paymentInformation = $this->getParam('payment');
         
         try {
-            ExternalGateway::processPayment($gatewayId, $paymentInformation);
+            if(!isset($accountId) || !isset($amount)) {
+                throw new Exception();
+            }
+            
+            $data = array(
+                'gatewayId' => $gatewayId,
+                'accountId' => $accountId,
+                'amount' => $amount,
+                'currency' => $currency,
+            );
+            
+            ExternalGateway::processPayment($data, $paymentInformation);
         } catch (Exception $e) {
             Response::ResponseError();
         }
         
-        Response::ResponseError();
+        Response::ResponseSuccess();
     }
 }

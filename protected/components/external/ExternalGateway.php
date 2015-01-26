@@ -10,27 +10,16 @@ class ExternalGateway extends CActiveRecord{
         return parent::model($className);
     }
     
-    public static function processPayment($id, $payment) {
-        $gateway = GatewayFactory::create($id);
+    public static function processPayment($data, $payment) {
+        $gateway = GatewayFactory::create($data['gatewayId']);
         if(!$gateway) {
             return false;
         }
         
         $paymentFormJSON = $gateway->payment;
         $paymentForm = json_decode($paymentFormJSON, true);
-        //$userForm = json_decode($payment, true);
+        $userForm = json_decode($payment, true);
        
-        $userForm = array(
-            'r_name ' => 'safasdf',
-            'b_country ' => 'sdf',
-            'b_city ' => 'sdfasd',
-            'b_address' => 'wgwg',
-            'b_bankname' => 'gagag',
-            'b_bic' => '12312rt',
-            'transferring' => true,
-        );
-        
-        
         foreach($paymentForm as $group) {
             foreach($group['fields'] as $field) {
                 if($field['required'] == true) {
@@ -59,7 +48,11 @@ class ExternalGateway extends CActiveRecord{
         }
         
         $transaction = new TransactionExternal();
-        $transaction->gatewayId = $id;
+        $transaction->gatewayId = $data['gatewayId'];
+        $transaction->accountId = $data['accountId'];
+        $transaction->amount = $data['amount'];
+        $transaction->createdAt = TIME;
+        $transaction->currency = $data['currency'];
         $transaction->details = json_encode($userForm);
         
         return $transaction->save();
