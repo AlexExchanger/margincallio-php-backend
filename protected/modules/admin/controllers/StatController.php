@@ -118,7 +118,32 @@ class StatController extends AdminController {
             Response::ResponseError();
         }
         
-        Response::ResponseSuccess($orders);
+        Response::ResponseSuccess(array(
+            'count' => isset($this->paginationOptions['total'])? $this->paginationOptions['total']:0,
+            'data' => $orders
+        ));
+    }
+    
+    public function actionDealsByUser() {
+        $data = array(
+            'userBuyId' => $this->getParam('userBuyId'),
+            'userSellId' => $this->getParam('userSellId'),
+            'side' => $this->getParam('side'),
+            'pair' => $this->getParam('pair', 'USD/BTC'), //Temporary solution
+            'dateFrom' => $this->getParam('dateFrom', null),
+            'dateTo' => $this->getParam('dateTo', null),
+        );
+        
+        try {
+            $deals = Deal::getList($data, $this->paginationOptions);
+        } catch(Exception $e) {
+            Response::ResponseError();
+        }
+        
+        Response::ResponseSuccess(array(
+            'count' => isset($this->paginationOptions['total'])? $this->paginationOptions['total']:0,
+            'data' => $deals
+        ));
     }
     
 }
