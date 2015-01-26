@@ -63,6 +63,13 @@ class User extends CActiveRecord {
         $defaultCurrency = array('USD', 'BTC');
         $type = 'user.trading';
         
+        if(Account::model()->countByAttributes(array(
+            'type' => $type,
+            'userId' => $userId
+        )) > 0) {
+            return true;
+        }
+        
         foreach($defaultCurrency as $value) {
             Account::create(array(
                 'userId' => $userId,
