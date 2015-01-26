@@ -478,4 +478,32 @@ class User extends CActiveRecord {
         }
     }
     
+    public static function getUsers(&$usersExternal) {
+        
+        $users = array();
+        foreach($usersExternal as $value) {
+            if(isset($value->verifiedBy) && $value->verifiedBy != null) {
+                $users[$value->verifiedBy] = $value->verifiedBy;
+            }
+        }
+        
+        $usersObj = User::model()->findAllByAttributes(array('id'=>array_values($users)));
+        
+        foreach($usersObj as $value) {
+            $users[$value->id] = $value;
+        }
+        
+        foreach($usersExternal as $key=>$value) {
+            if(isset($value->verifiedBy) && $value->verifiedBy != null) {
+                $usersExternal[$key]->verifiedBy = array(
+                    'id' => isset($users[$value->verifiedBy])? $users[$value->verifiedBy]->id:'',
+                    'email' => isset($users[$value->verifiedBy])? $users[$value->verifiedBy]->email:'',
+                );
+            }
+        }
+        
+        return $usersObj;
+    }
+    
+    
 }

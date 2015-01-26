@@ -79,6 +79,7 @@ class UserController extends AdminController {
     public function actionAll() {
         try {
             $result = User::getList($this->paginationOptions);
+            User::getUsers($result);
         } catch(Exception $e) {
             Response::ResponseError();
         }
