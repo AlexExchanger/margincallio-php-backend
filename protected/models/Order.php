@@ -201,7 +201,6 @@ class Order extends CActiveRecord {
     
     public static function getList(array $filters, array &$pagination)
     {
-        
         $limit = ArrayHelper::getFromArray($pagination, 'limit');
         $offset = ArrayHelper::getFromArray($pagination, 'offset');
         $sort = ArrayHelper::getFromArray($pagination, 'sort');
@@ -223,7 +222,7 @@ class Order extends CActiveRecord {
         $accountId = ArrayHelper::getFromArray($filters, 'userId');
         $dateFrom = ArrayHelper::getFromArray($filters, 'dateFrom');
         $dateTo = ArrayHelper::getFromArray($filters, 'dateTo');
-        $types = ArrayHelper::getFromArray($filters, 'types');
+        $types = ArrayHelper::getFromArray($filters, 'types', array());
        
         $criteria = new CDbCriteria();
         $conditions = array();

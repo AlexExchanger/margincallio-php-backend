@@ -39,4 +39,10 @@ class GatewayController extends MainController {
         Response::ResponseSuccess($data);
     }
     
+    public function actionPayByGateway() {
+        
+        $paymentInformation = $this->getParam('payment');
+        
+        
+    }
 }

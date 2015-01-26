@@ -103,4 +103,22 @@ class StatController extends AdminController {
         Response::ResponseSuccess($logs);
     }
     
+    public function actionOrdersByUser() {
+        
+        $data = array(
+            'userId' => $this->getParam('id'),
+            'pair' => $this->getParam('pair', 'USD/BTC'), //Temporary solution
+            'dateFrom' => $this->getParam('dateFrom', null),
+            'dateTo' => $this->getParam('dateTo', null),
+        );
+        
+        try {
+            $orders = Order::getList($data, $this->paginationOptions);
+        } catch(Exception $e) {
+            Response::ResponseError();
+        }
+        
+        Response::ResponseSuccess($orders);
+    }
+    
 }
