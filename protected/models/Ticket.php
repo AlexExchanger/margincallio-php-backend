@@ -190,7 +190,7 @@ class Ticket extends CActiveRecord
         return self::model()->findAll($criteria);
     }
     
-    public static function getMessageList($ticketId, array &$pagination) {
+    public static function getMessageList($ticketId, array &$pagination, $users = array()) {
         $limit = ArrayHelper::getFromArray($pagination, 'limit');
         $offset = ArrayHelper::getFromArray($pagination, 'offset');
         $sort = ArrayHelper::getFromArray($pagination, 'sort');
@@ -210,6 +210,20 @@ class Ticket extends CActiveRecord
 
         ListCriteria::sortCriteria($criteria, $sort, ['id']);
         $messages = TicketMessage::model()->findAll($criteria);
+        
+        foreach($messages as $message_key=>$message_value) {
+            if(isset($message_value->createdBy) && $message_value->createdBy != null) {
+                if(!isset($users[$message_value->createdBy])) {
+                    $users[$message_value->createdBy] = User::get($message_value->createdBy);
+                }
+                $messages[$message_key]->createdBy = array(
+                    'id'=>isset($users[$message_value->createdBy]->id)? $users[$message_value->createdBy]->id:"",
+                    'email'=>isset($users[$message_value->createdBy]->email)? $users[$message_value->createdBy]->email:"",
+                );
+            }
+        }
+        
+        
         $allFiles = array();
         foreach($messages as $key=>$value) {
             if(!is_null($value->files)) {
@@ -290,6 +304,8 @@ class Ticket extends CActiveRecord
                 );
             }
         }
+        
+        return $usersObj;
     }
     
     
