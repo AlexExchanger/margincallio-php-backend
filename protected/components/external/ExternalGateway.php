@@ -93,6 +93,6 @@ class ExternalGateway extends CActiveRecord{
     }
     
     public function getBillingMeta() {}
-    public function transferFrom() {}
-    public function transferTo() {}
+    public function transferFrom($accountId, $amount) {}
+    public function transferTo($accountId, $amount) {}
 }

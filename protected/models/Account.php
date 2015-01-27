@@ -13,6 +13,7 @@ class Account extends CActiveRecord {
         'system.gateway.internal', // оборот по шлюзу (при внешнем поступлении минус)
         'system.gateway.cold',
         'system.gateway.hot',
+        'system.gateway.grant'
     ];
     
     public static $typeOptions = [
