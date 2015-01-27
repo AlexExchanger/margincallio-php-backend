@@ -76,7 +76,8 @@ class TransactionController extends AdminController {
     
     public function actionExternalTransactions() {
         $data = [
-            'accountId' => $this->getParam('userId'),
+            'gatewayId' => $this->getParam('gatewayId'),
+            'accountId' => $this->getParam('accountId'),
             'dateFrom' => $this->getParam('dateFrom'),
             'dateTo' => $this->getParam('dateTo'),
             'status' => $this->getParam('status'),
