@@ -49,6 +49,8 @@ class ExternalGateway extends CActiveRecord{
         
         $transaction = new TransactionExternal();
         $transaction->gatewayId = $data['gatewayId'];
+        $transaction->type = false;
+        $transaction->status = 'pending';
         $transaction->accountId = $data['accountId'];
         $transaction->amount = $data['amount'];
         $transaction->createdAt = TIME;
