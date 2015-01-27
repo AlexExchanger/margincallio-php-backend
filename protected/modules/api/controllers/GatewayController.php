@@ -21,8 +21,8 @@ class GatewayController extends MainController {
     
     public function actionall() {
         try {
-            $gateways = ExternalGateway::model()->findAll();
-            
+            $gateways = ExternalGateway::model()->findAllByAttributes(array('type'=>'user'));
+                
             $data = array();
             foreach($gateways as $value) {
                 $data[] = array(

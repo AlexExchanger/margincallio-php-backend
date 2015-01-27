@@ -60,6 +60,38 @@ class ExternalGateway extends CActiveRecord{
         return $transaction->save();
     }
     
+    public static function getList(array $filters, array &$pagination) {
+        $limit = ArrayHelper::getFromArray($pagination, 'limit');
+        $offset = ArrayHelper::getFromArray($pagination, 'offset');
+        $sort = ArrayHelper::getFromArray($pagination, 'sort');
+
+        $criteria = self::getListCriteria($filters);
+        $pagination['total'] = (int) self::model()->count($criteria);
+        if ($limit) {
+            $criteria->limit = $limit;
+            $criteria->offset = $offset;
+        }
+
+        ListCriteria::sortCriteria($criteria, $sort, ['id']);
+        return self::model()->findAll($criteria);
+    }
+
+    private static function getListCriteria(array $filters) {
+        $type = ArrayHelper::getFromArray($filters, 'type', null);
+        $currency = ArrayHelper::getFromArray($filters, 'currency', null);
+
+        $criteria = new CDbCriteria();
+        if (!is_null($type)) {
+            $criteria->addSearchCondition('type', $type);
+        }
+
+        if (!is_null($currency)) {
+            $criteria->compare('currency', $currency);
+        }
+
+        return $criteria;
+    }
+    
     public function getBillingMeta() {}
     public function transferFrom() {}
     public function transferTo() {}
