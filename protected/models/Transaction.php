@@ -70,6 +70,45 @@ class Transaction extends CActiveRecord {
         ListCriteria::sortCriteria($criteria, $sort, ['id']);
         return self::model()->findAll($criteria);
     }
+    
+    public static function getUsers(&$transaction) {
+        
+        $users = array();
+        foreach($transaction as $value) {
+            if(isset($value->user_from) && $value->user_from != null) {
+                $users[$value->user_from] = $value->user_from;
+            }
+            
+            if(isset($value->user_to) && $value->user_to != null) {
+                $users[$value->user_to] = $value->user_to;
+            }
+        }
+        
+        $usersObj = User::model()->findAllByAttributes(array('id'=>array_values($users)));
+        
+        foreach($usersObj as $value) {
+            $users[$value->id] = $value;
+        }
+        
+        foreach($transaction as $key=>$value) {
+            if(isset($value->user_from) && $value->user_from != null) {
+                $transaction[$key]->user_from = array(
+                    'id' => isset($users[$value->user_from])? $users[$value->user_from]->id:'',
+                    'email' => isset($users[$value->user_from])? $users[$value->user_from]->email:'',
+                );
+            }
+
+            if(isset($value->user_to) && $value->user_to != null) {
+                $transaction[$key]->user_to = array(
+                    'id' => isset($users[$value->user_to])? $users[$value->user_to]->id:'',
+                    'email' => isset($users[$value->user_to])? $users[$value->user_to]->email:'',
+                );
+            }
+        }
+        
+        return $usersObj;
+    }
+    
 
     public static function getStats(array $filters) {
         $result = [

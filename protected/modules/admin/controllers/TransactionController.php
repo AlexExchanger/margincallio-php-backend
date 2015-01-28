@@ -124,6 +124,7 @@ class TransactionController extends AdminController {
     public function actionAll() {
         try {
             $result = Transaction::getList([], $this->paginationOptions);
+            Transaction::getUsers($result);
         } catch(Exception $e) {
             Response::ResponseError();
         }
