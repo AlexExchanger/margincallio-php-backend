@@ -92,6 +92,39 @@ class ExternalGateway extends CActiveRecord{
         return $criteria;
     }
     
+    public static function grantFunds($data) {
+        if(!isset($data['currency']) || !isset($data['amount']) || !isset($data['userId'])) {
+            return false;
+        }
+        
+        $gatewayId = 0;
+        switch($data['currency']) {
+            case 'USD':
+                $gatewayId = 4;
+                break;
+            case 'BTC':
+                $gatewayId = 5;
+                break;
+            default:
+                return false;
+                break;
+        }
+        
+        $gateway = GatewayFactory::create($gatewayId);
+        
+        $userAccount = Account::model()->findByAttributes(array(
+            'userId' => $data['userId'],
+            'currency' => $data['currency'],
+            'type' => 'user.safeWallet'
+        ));
+        
+        if(!$userAccount) {
+            return false;
+        }
+        
+        return $gateway->transferTo($userAccount->id, $data['amount']);
+    }
+    
     public function getBillingMeta() {}
     public function transferFrom($accountId, $amount) {}
     public function transferTo($accountId, $amount) {}

@@ -45,4 +45,21 @@ class GatewayController extends AdminController {
         Response::ResponseSuccess($gateway);
     }
     
+    public function actionGrantFunds() {
+        try {
+            $data = array(
+                'currency' => $this->getParam('currency'),
+                'amount' => $this->getParam('amount'),
+                'userId' => $this->getParam('userId'),
+            );
+            
+            if(!ExternalGateway::grantFunds($data)) {
+                throw new Exception();
+            }
+        } catch(Exception $e) {
+            Response::ResponseError();
+        }
+        Response::ResponseSuccess();
+    }
+    
 }

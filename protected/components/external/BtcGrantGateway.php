@@ -20,7 +20,7 @@ class BtcGrantGateway extends ExternalGateway {
             return false;
         }
         
-        if(bccomp($account->currency, $amount) < 0) {
+        if(bccomp($account->balance, $amount) < 0) {
             return false;
         }
         
@@ -37,7 +37,7 @@ class BtcGrantGateway extends ExternalGateway {
             $transaction = new TransactionExternal();
             $transaction->gatewayId = self::$gatewayId;
             $transaction->type = true;
-            $transaction->status = 'pending';
+            $transaction->verifyStatus = 'pending';
             $transaction->accountId = $accountId;
             $transaction->amount = $amount;
             $transaction->createdAt = TIME;
@@ -48,7 +48,7 @@ class BtcGrantGateway extends ExternalGateway {
             }
             
             $gatewayAccount = Account::model()->findByAttributes(array(
-                'gateway' => self::$gatewayId,
+                'gateway' => "".self::$gatewayId,
                 'currency' => 'BTC'
             ));
             
@@ -60,7 +60,7 @@ class BtcGrantGateway extends ExternalGateway {
             if(!$gatewayAccount->save()) {
                 return new Exception();
             }
-            
+            $dbTransaction->commit();
         } catch (Exception $e) {
             $dbTransaction->rollback();
             return false;
@@ -90,7 +90,7 @@ class BtcGrantGateway extends ExternalGateway {
             $transaction = new TransactionExternal();
             $transaction->gatewayId = self::$gatewayId;
             $transaction->type = false;
-            $transaction->status = 'pending';
+            $transaction->verifyStatus = 'pending';
             $transaction->accountId = $accountId;
             $transaction->amount = $amount;
             $transaction->createdAt = TIME;
@@ -101,7 +101,7 @@ class BtcGrantGateway extends ExternalGateway {
             }
             
             $gatewayAccount = Account::model()->findByAttributes(array(
-                'gateway' => self::$gatewayId,
+                'gateway' => "".self::$gatewayId,
                 'currency' => 'BTC'
             ));
             
@@ -113,7 +113,7 @@ class BtcGrantGateway extends ExternalGateway {
             if(!$gatewayAccount->save()) {
                 return new Exception();
             }
-            
+            $dbTransaction->commit();
         } catch (Exception $e) {
             $dbTransaction->rollback();
             return false;
