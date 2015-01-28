@@ -2,62 +2,12 @@
 
 class BtcGateway extends ExternalGateway {
     
-    public function __construct($userId) {
-        $this->currencyId = 'BTC';
-        
-        $account = Account::model()->findByAttributes(array(
-            'type' => 'user.trading',
-            'currency' => 'BTC',
-            'userId' => $userId
-        ));
-        
-        if(!$account) {
-            throw new ExceptionNoAccount();
-        }
-        
-        $this->account = $account;
-    }
+    protected static $gatewayId = 2;
+
+    protected $address=null;
     
-    public function transferTo($address=null, $count=null) {
-        
-        $response = array();
-        $userId = $this->account->userId;
-        
-        $prevAddresses = CoinAddress::model()->findByAttributes(array(
-            'accountId' => $userId,
-            'used' => false
-        ));
-        
-        if($prevAddresses) {
-            return array(
-                'already' => true,
-                'object' => $prevAddresses
-            );
-        }
-        
-        $address = CoinAddress::getNewAddress();
-        
-        if(!$address) {
-            return false;
-        }
-        
-        $coinAddress = new CoinAddress();
-        $coinAddress->accountId = $userId;
-        $coinAddress->address = $address;
-        $coinAddress->createdAt = TIME;
-        if(!$coinAddress->save()) {
-            return false;
-        }
-        
-        return array(
-                'already' => false,
-                'object' => $coinAddress
-            );
-    }
-    
-    public function transferFrom($address, $count) {
-        //some transfer actions
-        return true;
+    public static function getInstance() {
+        return self::model('BtcGateway')->findByPk(self::$gatewayId);
     }
     
     public static function callBtcd($function, $params=[]) {
@@ -94,5 +44,49 @@ class BtcGateway extends ExternalGateway {
         return $data['data'];
     }
     
+    public function setAddress($address) {
+        $this->address = $address;
+    }
     
+    public function transferTo($accountId, $amount) {
+        
+        $prevAddresses = CoinAddress::model()->findByAttributes(array(
+            'accountId' => $accountId,
+            'used' => false
+        ));
+        
+        if($prevAddresses) {
+            return array(
+                'already' => true,
+                'object' => $prevAddresses
+            );
+        }
+        
+        $address = CoinAddress::getNewAddress();
+        
+        if(!$address) {
+            return false;
+        }
+        
+        $coinAddress = new CoinAddress();
+        $coinAddress->accountId = $accountId;
+        $coinAddress->address = $address;
+        $coinAddress->createdAt = TIME;
+        if(!$coinAddress->save()) {
+            return false;
+        }
+        
+        return array(
+            'already' => false,
+            'object' => $coinAddress
+        );
+    }
+    
+    public function transferFrom($accountId, $amount) {
+        
+        if(is_null($this->address)) {
+            return false;
+        }
+        
+    }
 }

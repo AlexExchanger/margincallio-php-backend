@@ -31,4 +31,18 @@ class GatewayController extends AdminController {
         Response::ResponseSuccess($gateway);
     }
     
+    public function actionGetGateway() {
+        try {
+            $id = $this->getParam('id');
+            $gateway = ExternalGateway::model()->findByPk($id);
+            
+            if(!$gateway) {
+                throw new Exception();
+            }
+        } catch(Exception $e) {
+            Response::ResponseError();
+        }
+        Response::ResponseSuccess($gateway);
+    }
+    
 }

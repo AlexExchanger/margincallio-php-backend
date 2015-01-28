@@ -1,11 +1,11 @@
 <?php
 
-class UsdBoaGateway extends ExternalGateway {
+class UsdBankGateway extends ExternalGateway {
     
-    protected static $gatewayId = 3;
+    protected static $gatewayId = 6;
 
     public static function getInstance() {
-        return self::model('UsdBoaGateway')->findByPk(self::$gatewayId);
+        return self::model('UsdBankGateway')->findByPk(self::$gatewayId);
     }
 
     public function getBillingMeta() {
