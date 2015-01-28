@@ -147,7 +147,8 @@ class TicketController extends AdminController {
         
         try {
             $ticket = Ticket::get($ticketId);
-            Ticket::modify($ticket, array(), $text, 0);
+            $userId = Yii::app()->user->id;
+            Ticket::modify($ticket, array(), $text, $userId);
             
             $logMessage = 'Reply for ticket with id "'.$ticketId.'" with message: '.$text;
             Loger::logAdmin(Yii::app()->user->id, $logMessage);
