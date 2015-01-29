@@ -1,11 +1,14 @@
 <?php
 
-class TradeController extends CController { 
+class TradeController extends MainController { 
 
     private $user = null;
     
     public function beforeAction($action) {
-    
+        if(!parent::beforeAction($action)) {
+            return false;
+        }
+        
         if(!Yii::app()->user->isGuest) {
             $this->user = Yii::app()->user;
             return true;

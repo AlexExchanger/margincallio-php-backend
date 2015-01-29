@@ -79,11 +79,10 @@ class User extends CActiveRecord {
             ));
         }
 
-        //$connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
-        //$result = $connector->sendRequest(array(TcpRemoteClient::FUNC_CREATE_TRADE_ACCOUNT, $userId));
+        $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
+        $result = $connector->sendRequest(array(TcpRemoteClient::FUNC_CREATE_TRADE_ACCOUNT, $userId));
         
-        //return $result;
-        return true;
+        return $result;
     }
     
     
@@ -417,6 +416,7 @@ class User extends CActiveRecord {
         }
         
         $user->createAccountWallet($user->id);
+        $user->createTradeAccountWallet($user->id);
     }
     
     public static function resetPassword($id) {
