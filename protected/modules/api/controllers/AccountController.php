@@ -1,6 +1,6 @@
 <?php
 
-class AccountController extends CController {
+class AccountController extends MainController {
 
     private $user = null;
     public $paginationOptions;

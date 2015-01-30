@@ -160,6 +160,35 @@ class Account extends CActiveRecord {
         }
         return $accountList;
     }
+    public static function getSystemTradeAccount($currency) {
+        if(!in_array($currency, self::$currencyOptions)) {
+            return false;
+        }
+        
+        $accounts = Account::model()->findAllByAttributes(array(
+            'type'=>array(
+                'system.gateway.external.universe',
+                'system.gateway.external.universe.unknown',
+                'system.gateway.external',
+                'system.gateway.internal'
+            ),
+            'userId'=>self::$systemUserId,
+            'currency'=>$currency,
+            
+        ));
+        
+        if(!count($accounts)) {
+            $accounts = self::createSystemAccount($currency);
+        }
+        
+        $data = array();
+        foreach($accounts as $value) {
+            $data[$value->type] = $value;
+        }
+        
+        return $data;
+    }
+    
     
     public static function getSystemAccount($currency) {
         if(!in_array($currency, self::$currencyOptions)) {
@@ -229,6 +258,7 @@ class Account extends CActiveRecord {
         $walletTo = (!$type)? 'user.trading':'user.safeWallet';
         
         $dbTransaction = new CDbTransaction(Yii::app()->db);
+        $user = Yii::app()->user;
         
         try {
             $wallets = self::getAccountPair($user->id, $currency);
@@ -241,7 +271,7 @@ class Account extends CActiveRecord {
             $wallets[$walletFrom]->balance = bcsub($wallets[$walletFrom]->balance, $amount);
             $wallets[$walletTo]->balance = bcadd($wallets[$walletTo]->balance, $amount);
 
-            $systemsAccounts = self::getSystemAccount($currency);
+            $systemsAccounts = self::getSystemTradeAccount($currency);
             if($type) {
                 $systemsAccounts['system.gateway.internal']->balance = bcsub($systemsAccounts['system.gateway.internal']->balance, $amount);
             } else {
@@ -251,13 +281,10 @@ class Account extends CActiveRecord {
             if(in_array($currency, array('USD', 'BTC'))) {
                 $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
                 $resultCore = null;
-                if($trade) {
+                if($type) {
                     $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_REPLENISH_SAFE_ACCOUNT, $user->id, ($currency == 'USD')?1:0, $amount));
                 } else {
                     $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_REPLENISH_TRADE_ACCOUNT, $user->id, ($currency == 'USD')?1:0, $amount));
-                }
-                if($resultCore != array()) {
-                    throw new Exception();
                 }
             }
 

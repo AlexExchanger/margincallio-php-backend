@@ -54,9 +54,9 @@ class UserController extends MainController {
     
     public function actionRegister() {
         
-        $email = $this->getPost('email');
-        $password = $this->getPost('password');
-        $inviteCode = $this->getPost('invite', false);
+        $email = $this->getParam('email');
+        $password = $this->getParam('password');
+        $inviteCode = $this->getParam('invite', false);
         
         $user = new User();
         try {

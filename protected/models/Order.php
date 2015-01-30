@@ -46,13 +46,6 @@ class Order extends CActiveRecord {
         $order->createdAt = TIME;
         $order->updatedAt = null;
 
-        $guid = ArrayHelper::getFromArray($data, 'guid');
-        if ($guid && Guid::validate($guid)) {
-            $order->guid = $guid;
-        } else {
-            $order->guid = Guid::generate();
-        }
-
         if (!$order->validate()) {
             throw new ModelException($order->getErrors());
         }
@@ -149,8 +142,8 @@ class Order extends CActiveRecord {
         $order->type = $type;
         $order->side = $side;
         $order->size = $amount;
-        $order->rate = $rate;
-        $order->price = isset($offset)?$offset:$rate;
+        $order->offset = $rate;
+        $order->price = !isset($offset)? $rate:$offset;
         $order->userId = $userId;
         $order->guid = Guid::generate();
         $order->createdAt = TIME;
