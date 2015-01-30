@@ -164,10 +164,16 @@ class UserController extends AdminController {
             if(!$user) {
                 throw new Exception();
             }
+            
+            $data = array(
+                'count' => 1,
+                'data' => $user 
+            );
+            
         } catch(Exception $e) {
             Response::ResponseError();
         }
         
-        Response::ResponseSuccess($user);
+        Response::ResponseSuccess($data);
     }
 }
