@@ -28,7 +28,10 @@ class GatewayController extends AdminController {
         } catch(Exception $e) {
             Response::ResponseError();
         }
-        Response::ResponseSuccess($gateway);
+        Response::ResponseSuccess(array(
+            'count' => count($gateway),
+            'data' => $gateway
+        ));
     }
     
     public function actionGetGateway() {

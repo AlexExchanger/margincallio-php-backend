@@ -36,7 +36,10 @@ class GatewayController extends MainController {
             Response::ResponseSuccess();
         }
         
-        Response::ResponseSuccess($data);
+        Response::ResponseSuccess(array(
+            'count' => count($gateway),
+            'data' => $data
+        ));
     }
     
     public function actionPayByGateway() {
