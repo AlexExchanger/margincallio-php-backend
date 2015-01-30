@@ -56,14 +56,10 @@ class AccountController extends CController {
                 throw new Exception('Wrong amount');
             }
             
-            $logMessage = '';
-            if($type) {
-                Account::transferToSafe($currency, $amount);
-                $logMessage = 'Transfer '.$currency.' funds from trade to safe. Amount: '.$amount;
-            } else {
-                Account::transferToTrade($currency, $amount);
-                $logMessage = 'Transfer '.$currency.' funds from safe to trade. Amount: '.$amount;
-            }
+            Account::transferFunds($currency, $amount, $type);
+            
+            $logMessage = 'Transfer '.$currency.' funds from ';
+            $logMessage .= ($type)? 'trade to safe. Amount: '.$amount:'safe to trade. Amount: '.$amount;
             Loger::logUser(Yii::app()->user->id, $logMessage, 'fundsTransferred');
         } catch(Exception $e) {
             Response::ResponseError($e->getMessage());

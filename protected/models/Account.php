@@ -219,76 +219,63 @@ class Account extends CActiveRecord {
         $transaction->currency = $currency;
         
         if (!$transaction->save()) {
-            throw new SystemException(_('Something wrong with transaction creating'), $transaction->getErrors());
+            throw new SystemException('Something wrong with transaction creating', $transaction->getErrors());
         }
     }
     
     //type 0 = s to t, type 1 = t to s
-    public static function transferToSafe($currency, $amount) {
-        $user = Yii::app()->user;
-        $wallets = self::getAccountPair($user->id, $currency);
+    public static function transferFunds($currency, $amount, $type) {
+        $walletFrom = ($type)? 'user.trading':'user.safeWallet';
+        $walletTo = (!$type)? 'user.trading':'user.safeWallet';
         
-        $compare = bccomp($wallets['user.trading']->balance, $amount);
-        if($compare<0) {
-            throw new ExceptionNoMoney();
-        }
+        $dbTransaction = new CDbTransaction(Yii::app()->db);
         
-        //TODO: add commision
-        $wallets['user.trading']->balance = bcsub($wallets['user.trading']->balance, $amount);
-        $wallets['user.safeWallet']->balance = bcadd($wallets['user.safeWallet']->balance, $amount);
-        
-        $systemsAccounts = self::getSystemAccount($currency);
-        $systemsAccounts['system.gateway.internal']->balance = bcsub($systemsAccounts['system.gateway.internal']->balance, $amount);
-        
-        if(in_array($currency, array('USD', 'BTC'))) {
-            $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
-            $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_REPLENISH_SAFE_ACCOUNT, $user->id, ($currency == 'USD')?1:0, $amount));
-            if($resultCore != array()) {
-                $result = false;
+        try {
+            $wallets = self::getAccountPair($user->id, $currency);
+
+            $compare = bccomp($wallets[$walletFrom]->balance, $amount);
+            if($compare < 0) {
+                throw new ExceptionNoMoney();
             }
+
+            $wallets[$walletFrom]->balance = bcsub($wallets[$walletFrom]->balance, $amount);
+            $wallets[$walletTo]->balance = bcadd($wallets[$walletTo]->balance, $amount);
+
+            $systemsAccounts = self::getSystemAccount($currency);
+            if($type) {
+                $systemsAccounts['system.gateway.internal']->balance = bcsub($systemsAccounts['system.gateway.internal']->balance, $amount);
+            } else {
+                $systemsAccounts['system.gateway.internal']->balance = bcadd($systemsAccounts['system.gateway.internal']->balance, $amount);
+            }
+
+            if(in_array($currency, array('USD', 'BTC'))) {
+                $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
+                $resultCore = null;
+                if($trade) {
+                    $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_REPLENISH_SAFE_ACCOUNT, $user->id, ($currency == 'USD')?1:0, $amount));
+                } else {
+                    $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_REPLENISH_TRADE_ACCOUNT, $user->id, ($currency == 'USD')?1:0, $amount));
+                }
+                if($resultCore != array()) {
+                    throw new Exception();
+                }
+            }
+
+            if(!$wallets[$walletFrom]->save() || !$wallets[$walletTo]->save() || !$systemsAccounts['system.gateway.internal']->save()) {
+                throw new ExceptionAccount(); 
+            }
+
+            $dbTransaction->commit();
+        } catch(Exception $e) {
+            $dbTransaction->rollback();
+            return false;
         }
         
-        self::createTransaction($wallets, $amount, 1, $currency);
-        
-        if(!$wallets['user.safeWallet']->save() || !$wallets['user.trading']->save() || !$systemsAccounts['system.gateway.internal']->save()) {
-            throw new ExceptionAccount(); 
-        }
+        self::createTransaction($wallets, $amount, $type, $currency);
         
         return true;
     }
-    
-    public static function transferToTrade($currency, $amount) {
-        $user = Yii::app()->user;
-        $wallets = self::getAccountPair($user->id, $currency);
-        
-        $compare = bccomp($wallets['user.safeWallet']->balance, $amount);
-        if($compare<0) {
-            throw new ExceptionNoMoney();
-        }
-        
-        $wallets['user.safeWallet']->balance = bcsub($wallets['user.safeWallet']->balance, $amount);
-        $wallets['user.trading']->balance = bcadd($wallets['user.trading']->balance, $amount);
-        
-        $systemsAccounts = self::getSystemAccount($currency);
-        $systemsAccounts['system.gateway.internal']->balance = bcadd($systemsAccounts['system.gateway.internal']->balance, $amount);
-        
-        if(in_array($currency, array('USD', 'BTC'))) {
-            $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
-            $result = $connector->sendRequest(array(TcpRemoteClient::FUNC_REPLENISH_TRADE_ACCOUNT, $user->id, ($currency == 'USD')?1:0, $amount));
-            if($result != array()) {
-                return false;
-            }
-        }
-        
-        self::createTransaction($wallets, $amount, 0, $currency);
-        
-        if(!$wallets['user.safeWallet']->save() || !$wallets['user.trading']->save() || !$systemsAccounts['system.gateway.internal']->save()) {
-            throw new ExceptionAccount(); 
-        }
-        
-        return false;
-    }
-    
+
     public static function getAccountInfo() {
         $user = Yii::app()->user;
         if(!$user) {
