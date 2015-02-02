@@ -5,8 +5,14 @@ class AccountController extends MainController {
     private $user = null;
     public $paginationOptions;
     
+    private $fullControl = array('alltrades');
+    
     public function beforeAction($action) {
-        if(Yii::app()->user->isGuest) {
+        if(!parent::beforeAction($action)) {
+            return false;
+        }
+        
+        if(Yii::app()->user->isGuest && !in_array(mb_strtolower($action->id), $this->fullControl)) {
             Response::ResponseError('Access denied');
             return false;
         }
@@ -18,6 +24,33 @@ class AccountController extends MainController {
         $this->paginationOptions['sort'] = $this->getParam('sort', false);
         
         return true;
+    }
+    
+    public function actionAllTrades() {
+        
+        if($this->paginationOptions['limit'] == false) {
+            //magin number
+            $this->paginationOptions['limit'] = 30;
+        }
+        
+        try {
+            $trades = Deal::getList(array(), $this->paginationOptions);
+            $data = array();
+            foreach($trades as $value) {
+                $data[] = array(
+                    'size' => $value->size,
+                    'price' => $value->size,
+                    'time' => $value->createdAt,
+                );
+            }
+        } catch(Exception $e) {
+            Response::ResponseError();
+        }
+        
+        Response::ResponseSuccess(array(
+            'count' => (isset($this->paginationOptions))?$this->paginationOptions['total']:'',
+            'data' => $data
+        ));
     }
     
     public function actionGetWalletList() {
