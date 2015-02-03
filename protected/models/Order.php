@@ -33,27 +33,43 @@ class Order extends CActiveRecord {
     public static function create(array $data, $userId) {
         $order = new Order();
 
-        //Count
-        $order->size = ArrayHelper::getFromArray($data, 'amount');
-        //Price
-        $order->price = ArrayHelper::getFromArray($data, 'rate');
-        //Buy, sell
-        $order->side = ArrayHelper::getFromArray($data, 'side');
-        //Market, limit
-        $order->type = ArrayHelper::getFromArray($data, 'type');
-        $order->status = ArrayHelper::getFromArray($data, 'status') ? : 'pendingAccepted';
-        $order->userId = $userId;
-        $order->createdAt = TIME;
-        $order->updatedAt = null;
+        $dbTransaction = new CDbTransaction(Yii::app()->db);
+        
+        try {
+            
+            $criteria = new CDbCriteria();
+            $criteria->select = 'MAX(id) as "id"';
+            $lastId = Order::model()->find($criteria)->id;
+            
+            
+            $order->id = $lastId+1;
+            //Count
+            $order->size = ArrayHelper::getFromArray($data, 'amount');
+            //Price
+            $order->price = ArrayHelper::getFromArray($data, 'rate');
+            //Buy, sell
+            $order->side = ArrayHelper::getFromArray($data, 'side');
+            //Market, limit
+            $order->type = ArrayHelper::getFromArray($data, 'type');
+            $order->status = ArrayHelper::getFromArray($data, 'status') ? : 'pendingAccepted';
+            $order->userId = $userId;
+            $order->createdAt = TIME;
+            $order->updatedAt = null;
 
-        if (!$order->validate()) {
-            throw new ModelException($order->getErrors());
+            if (!$order->validate()) {
+                throw new ModelException($order->getErrors());
+            }
+
+            if (!$order->save(false)) {
+                throw new ModelException('Order was not created');
+            }
+            
+            $dbTransaction->commit();
+        } catch (Exception $e) {
+            $dbTransaction->rollback();
+            return false;
         }
-
-        if (!$order->save(false)) {
-            throw new ModelException('Order was not created');
-        }
-
+        
         return true;
     }
 
