@@ -14,7 +14,6 @@ class Transaction extends CActiveRecord {
         return [
             ['account_from, account_to, user_from, user_to', 'numerical', 'allowEmpty' => false, 'min' => 1, 'integerOnly' => true],
             ['amount', 'numerical', 'allowEmpty' => false, 'min' => 0, 'max' => 1000000, 'integerOnly' => false],
-            ['groupId', 'checkGuid'],
         ];
     }
 

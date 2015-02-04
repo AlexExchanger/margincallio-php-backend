@@ -41,11 +41,38 @@ class TcpRemoteClient extends CComponent {
     const FUNC_GET_FIX_ACCOUNT = 1900;
     const FUNC_CANCEL_FIX_ACCOUNT = 2000;
     
+    const FUNC_GENERATE_API_KEY = 2100;
+    const FUNC_GET_API_KEY = 2200;
+    const FUNC_CANCEL_API_KEY = 2300;
     
     
     const FUNC_GET_ACCOUNT_INFO = 2400;
-    const FUNC_GET_ACTIVE_ORDERS = 2500;
-    const FUNC_GET_ACTIVE_CONDITIONAL_ORDER = 2600;
+    //const FUNC_GET_ACTIVE_ORDERS = 2500;
+    const FUNC_GET_ORDER_INFO = 2500;
+    //const FUNC_GET_ACTIVE_CONDITIONAL_ORDER = 2600;
+    const FUNC_GET_ACTIVE_SL_ORDER = 2600;
+    const FUNC_GET_ACTIVE_TP_ORDER = 2700;
+    const FUNC_GET_ACTIVE_TS_ORDER = 2800;
+    
+    const FUNC_GET_ACTIVE_ORDERS = 2900;
+    const FUNC_GET_ACTIVE_CONDITIONAL_ORDER = 3000;
+    
+    const FUNC_SET_ACCOUNT_FEE = 3100;
+    const FUNC_GET_TICKER = 3200;
+    const FUNC_GET_DEPTH = 3300;
+    
+    const FUNC_GET_MARGIN_PARAM = 3400;
+    const FUNC_SET_MAX_LEVERAGE = 3500;
+    
+    const FUNC_SET_MC_LEVEL = 3600;
+    const FUNC_SET_FL_LEVEL = 3700;
+    
+    const FUNC_OPEN_MARKET = 79100;
+    const FUNC_CLOSE_MARKET = 79000;
+    const FUNC_RESTART_FIX = 79500;
+    const FUNC_BACKUP_MASTER_SNAPSHOT = 80000;
+    const FUNC_RESTORE_MASTER_SNAPSHOT = 80100;
+    const FUNC_RESTORE_SLAVE_SNAPSHOT = 80200;
     
     //ErrorCodes
     const ErrorAccountAlreadyExists = 1;
@@ -75,6 +102,23 @@ class TcpRemoteClient extends CComponent {
     const ErrorInvalidJsonInput = 25;
     const ErrorNegativeOrZeroLeverage = 26;
     const ErrorIncorrectPercValue = 27;
+    const ErrorFixAccountsLimitReached = 28;
+    const ErrorFixRestartFailed = 29;
+    const ErrorFixAccountAlreadyExists = 30;
+    const ErrorFixAccountNotFound = 31;
+    const ErrorFixSymbolNotFound = 32;
+    const ErrorFixFieldsNotSet = 33;
+    const ErrorFixInvalidClOrdID = 34;
+    const ErrorFixUnknownOrderType = 35;
+    const ErrorFixInvalidOrderId = 36;
+    const ErrorSnapshotBackupFailed = 37;
+    const ErrorSnapshotRestoreFailed = 38;
+    const ErrorMarketClosed = 39;
+    const ErrorMarketAlreadyClosed = 40;
+    const ErrorMarketAlreadyOpened = 41;
+    const ErrorMarketOpened = 42;
+    const ErrorBackupRestoreInProc = 43;
+    
     const ErrorUnknown = 99;
     
     public function __construct(array $input) {
@@ -153,9 +197,10 @@ class TcpRemoteClient extends CComponent {
 
         fwrite($this->_tcpResource, $request);
         
-        $result[] = fgets($this->_tcpResource, 4096);
+        $result = array();
         $result[] = fgets($this->_tcpResource, 4096);
         $status = $this->checkResponse($result[0]);
+        $result[]= fgets($this->_tcpResource, 4096);
         
         return $this->parseResponse($result[1], $status);
     }

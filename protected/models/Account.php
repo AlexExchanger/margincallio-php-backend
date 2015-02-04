@@ -235,8 +235,6 @@ class Account extends CActiveRecord {
         
     private static function createTransaction($wallets, $amount, $type, $currency) {
         
-        $groupId = Guid::generate();
-
         $accountFrom = ($type)?$wallets['user.trading']:$wallets['user.safeWallet'];
         $accountTo = ($type)?$wallets['user.safeWallet']:$wallets['user.trading'];
         
@@ -246,6 +244,8 @@ class Account extends CActiveRecord {
         $transaction->amount = $amount;
         $transaction->createdAt = TIME;
         $transaction->currency = $currency;
+        $transaction->user_from = Yii::app()->user->id;
+        $transaction->user_to = Yii::app()->user->id;
         
         if (!$transaction->save()) {
             throw new SystemException('Something wrong with transaction creating', $transaction->getErrors());
@@ -257,7 +257,7 @@ class Account extends CActiveRecord {
         $walletFrom = ($type)? 'user.trading':'user.safeWallet';
         $walletTo = (!$type)? 'user.trading':'user.safeWallet';
         
-        $dbTransaction = new CDbTransaction(Yii::app()->db);
+        $dbTransaction = Yii::app()->db->beginTransaction();
         $user = Yii::app()->user;
         
         try {

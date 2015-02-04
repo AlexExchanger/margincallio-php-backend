@@ -33,14 +33,12 @@ class Order extends CActiveRecord {
     public static function create(array $data, $userId) {
         $order = new Order();
 
-        $dbTransaction = new CDbTransaction(Yii::app()->db);
-        
+        $dbTransaction = Yii::app()->db->beginTransaction();
         try {
             
             $criteria = new CDbCriteria();
             $criteria->select = 'MAX(id) as "id"';
             $lastId = Order::model()->find($criteria)->id;
-            
             
             $order->id = $lastId+1;
             //Count
@@ -127,7 +125,6 @@ class Order extends CActiveRecord {
     }
 
     public static function getActiveOrders($userId) {
-
         $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
         return $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACTIVE_ORDERS, $userId));
     }

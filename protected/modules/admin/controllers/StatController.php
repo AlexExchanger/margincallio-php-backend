@@ -146,4 +146,84 @@ class StatController extends AdminController {
         ));
     }
     
+    public function actionGenerateStat() {
+        
+        $candlecount = 80;
+        $tradescount = 900;
+        $range = array(1000, 2000);
+        $volumeRange = array(1, 2000);
+        
+        $candlerange = array(-10, 10);
+        
+        $dataRange = array();
+        for($i=0; $i != $candlecount; $i++) {
+            $dataRange[] = rand($range[0], $range[1]);
+        }
+        
+        $allTrades = array();
+        
+        $dbTransaction = Yii::app()->db->beginTransaction();
+        try {
+            $criteria = new CDbCriteria();
+            $criteria->select = 'MAX(id) as "id"';
+            
+            $lastId = Deal::model()->find($criteria)->id;
+            $createdTime = TIME;
+            
+            foreach($dataRange as $value) {
+                $trades = array();
+                for($k = 0; $k != $tradescount; $k++) {
+                    $createdTime -= 30;
+                    $lastId++;
+                    
+                    $deal = new Deal();
+                    $deal->id = $lastId;
+                    $deal->price = $value+rand($candlerange[0], $candlerange[1]);
+                    $deal->size = rand($volumeRange[0], $volumeRange[1]);
+                    $deal->orderBuyId = 0;
+                    $deal->orderSellId = 0;
+                    $deal->createdAt = $createdTime;
+                    $deal->userBuyId = 0;
+                    $deal->userSellId = 0;
+                    $deal->buyerFee = 0;
+                    $deal->sellerFee = 0;
+                    $deal->side = rand(0, 1);
+                    
+                    if(!$deal->save()) {
+                        throw new Exception();
+                    }
+                    
+                    $trades[] = $deal->price;
+                }
+                $allTrades[] = $trades;
+            }
+            
+            $dbTransaction->commit();
+        } catch(Exception $e) {
+            $dbTransaction->rollback();
+            Response::ResponseError();
+        }
+//        
+//        $lastMonth = TIME - 2592000;
+//        
+//        $searchingCriteria = new CDbCriteria();
+//        $searchingCriteria->addCondition('"createdAt" > :lastMonth');
+//        $searchingCriteria->params = array(':lastMonth' => $lastWeek);
+//        
+//        $allTrades = Deal::model()->findAll($searchingCriteria);
+//        print_r(count($allTrades)); die();
+//        
+//        $candles = array();
+//        foreach($allTrades as $trades) {
+//            $candles[] = array(
+//                'open' => $trades[0],
+//                'close' => $trades[$tradescount-1],
+//                'max' => max($trades),
+//                'min' => min($trades),
+//            );
+//        }
+        
+//        Response::ResponseSuccess($candles);
+    }
+    
 }
