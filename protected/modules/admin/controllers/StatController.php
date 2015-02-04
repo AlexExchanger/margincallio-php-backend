@@ -202,28 +202,61 @@ class StatController extends AdminController {
         } catch(Exception $e) {
             $dbTransaction->rollback();
             Response::ResponseError();
-        }
-//        
-//        $lastMonth = TIME - 2592000;
-//        
-//        $searchingCriteria = new CDbCriteria();
-//        $searchingCriteria->addCondition('"createdAt" > :lastMonth');
-//        $searchingCriteria->params = array(':lastMonth' => $lastWeek);
-//        
-//        $allTrades = Deal::model()->findAll($searchingCriteria);
-//        print_r(count($allTrades)); die();
-//        
-//        $candles = array();
-//        foreach($allTrades as $trades) {
-//            $candles[] = array(
-//                'open' => $trades[0],
-//                'close' => $trades[$tradescount-1],
-//                'max' => max($trades),
-//                'min' => min($trades),
-//            );
-//        }
+        }        
+    }
+    
+    public function actionGraphicsStat() {
         
-//        Response::ResponseSuccess($candles);
+        $availableRange = array(
+            '1m' => 60,
+            '5m' => 300,
+            '15m' => 900,
+            '1h' => 3600,
+        );
+        
+        $timeRange = $this->getParam('range', '15m');
+        if(!isset($availableRange[$timeRange])) {
+            Response::ResponseError();
+        }
+        
+        $timestampRange = $availableRange[$timeRange];
+        
+        $lastWeek = TIME - 604800;
+
+        $searchingCriteria = new CDbCriteria();
+        $searchingCriteria->addCondition('"createdAt" > :lastMonth');
+        $searchingCriteria->order = '"createdAt" DESC';
+        $searchingCriteria->params = array(':lastMonth' => $lastWeek);
+
+        $allTrades = Deal::model()->findAll($searchingCriteria);
+        
+        $candles = array();
+        
+        $currentRange = $allTrades[0]->createdAt - $timestampRange;
+        $trades = array('price'=>array(), 'volume'=>array());
+        foreach($allTrades as $trade) {
+            if($trade->createdAt < $currentRange) {
+                $candles[] = array(
+                    'open' => $trades['price'][0],
+                    'close' => $trades['price'][count($trades)-1],
+                    'max' => max($trades['price']),
+                    'min' => min($trades['price']),
+                    'volume' => array_sum($trades['volume']),
+                    'time' => $currentRange
+                );
+                
+                $currentRange -= $timestampRange;
+                unset($trades);
+            }
+            
+            $trades['price'][] = $trade->price;
+            $trades['volume'][] = $trade->size;
+        }
+
+        Response::ResponseSuccess(array(
+            'count' => count($candles),
+            'data' => $candles
+        ));
     }
     
 }
