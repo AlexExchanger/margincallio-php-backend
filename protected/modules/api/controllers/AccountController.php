@@ -60,10 +60,10 @@ class AccountController extends MainController {
                 $candles[] = array(
                     'open' => $trades['price'][0],
                     'close' => $trades['price'][count($trades)-1],
-                    'max' => max($trades['price']),
-                    'min' => min($trades['price']),
+                    'high' => max($trades['price']),
+                    'low' => min($trades['price']),
                     'volume' => array_sum($trades['volume']),
-                    'time' => $currentRange
+                    'timestamp' => $currentRange
                 );
                 
                 $currentRange -= $timestampRange;
@@ -256,6 +256,5 @@ class AccountController extends MainController {
         
         Response::ResponseSuccess($orders);
     }
-    
     
 }
