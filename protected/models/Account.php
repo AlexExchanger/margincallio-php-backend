@@ -319,15 +319,17 @@ class Account extends CActiveRecord {
         $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_INFO, $user->id));
 
         $remoteAccountInfo = array(
-            'firstAvailable' => $resultCore[0],
-            'firstBlocked' => $resultCore[1],
-            'secondAvailable' => $resultCore[2],
-            'secondBlocked' => $resultCore[3],
-            'comission' => $resultCore[4],
-            'unknow' => $resultCore[5],
-            'marginCall' => $resultCore[6],
+            'firstAvailable' => $resultCore[1],
+            'firstBlocked' => $resultCore[2],
+            'secondAvailable' => $resultCore[3],
+            'secondBlocked' => $resultCore[4],
+            'comission' => $resultCore[5],
+            'marginLevel' => $resultCore[6],
+            'marginCall' => $resultCore[7],
+            'isSuspended' => $resultCore[8],
         );
-
+        print_r($remoteAccountInfo); die();
+        
         $data = array();
         foreach($accountList as $key=>$value) {
             $data[] = array(
@@ -349,7 +351,13 @@ class Account extends CActiveRecord {
             'balance' => (string)bcadd($remoteAccountInfo['secondAvailable'],0)
         );
 
-        return $data;
+        $response = array(
+            'marginLevel' => $remoteAccountInfo['marginLevel'],
+            'comission' => $remoteAccountInfo['comission'],
+            'wallets' => $data
+        );
+        
+        return $response;
     }
     
     //external methods
