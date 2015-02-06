@@ -318,6 +318,10 @@ class Account extends CActiveRecord {
         $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
         $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_INFO, $user->id));
 
+        if(count($resultCore) <= 0 || !isset($resultCore[0]) || ($resultCore[0] != 0)) {
+            throw new Exception();
+        }
+        
         $remoteAccountInfo = array(
             'firstAvailable' => $resultCore[1],
             'firstBlocked' => $resultCore[2],
