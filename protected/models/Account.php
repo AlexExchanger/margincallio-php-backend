@@ -332,7 +332,6 @@ class Account extends CActiveRecord {
             'marginCall' => $resultCore[7],
             'isSuspended' => $resultCore[8],
         );
-        print_r($remoteAccountInfo); die();
         
         $data = array();
         foreach($accountList as $key=>$value) {
