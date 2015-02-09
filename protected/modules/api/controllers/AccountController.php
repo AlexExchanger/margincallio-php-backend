@@ -95,6 +95,7 @@ class AccountController extends MainController {
                     'size' => $value->size,
                     'price' => $value->size,
                     'time' => $value->createdAt,
+                    'side' => $value->side,
                 );
             }
         } catch(Exception $e) {
