@@ -111,7 +111,10 @@ class Order extends CActiveRecord {
             } else {
                 throw new ExceptionUnknowOrderType();
             }
-
+            
+            if(!isset($resultCore[0]) || $resultCore[0] != 0) {
+                throw new Exception();
+            }
         } catch (Exception $e) {
             if ($e instanceof ExceptionTcpRemoteClient) {
                 print TcpErrorHandler::TcpHandle($e->errorType);
@@ -119,9 +122,8 @@ class Order extends CActiveRecord {
             }
             throw $e;
         }
-
-        Order::create($data, $userId);
-        return $resultCore;
+        
+        return Order::create($data, $userId);;
     }
 
     public static function getActiveOrders($userId) {

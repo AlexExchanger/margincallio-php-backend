@@ -37,14 +37,16 @@ class TradeController extends MainController {
         
         try {
             $result = Order::createOrder($this->user->id, $data);
-
+            if(!$result) {
+                throw new Exception('Order save error');
+            }
             $logMessage = 'Created '.$data['side'].' order. Type: '.$data['type'].'. Amount: '.$amount.'.';
             $logMessage .= ($rate)? 'Rate: '.$rate.'.':'';
             Loger::logUser(Yii::app()->user->id, $logMessage, 'makeOrder');
         } catch (Exception $e) {
             Response::ResponseError($e->getMessage());
         }
-        Response::ResponseSuccess($result);
+        Response::ResponseSuccess();
     }
     
     public function actionCancelOrder() {
