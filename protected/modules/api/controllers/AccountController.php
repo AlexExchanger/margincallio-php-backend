@@ -80,6 +80,49 @@ class AccountController extends MainController {
         ));
     }
     
+    public function actionGetOrderBook() {
+        try {
+            $connection = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
+            $response = $connection->sendRequest(array(TcpRemoteClient::FUNC_GET_DEPTH, 30));
+            
+            if(!isset($response[0]) || $response[0] != 0) {
+                throw new Exception();
+            }
+            
+            $askOrderBook = array();
+            foreach($response[5] as $value) {
+                $askOrderBook[] = array(
+                    'size' => $value[0],
+                    'price' => $value[1],
+                    'price_currency' => Response::bcScaleOut(bcmul($value[0], $value[1]))
+                );
+            }
+            
+            $bidOrderBook = array();
+            foreach($response[6] as $value) {
+                $bidOrderBook[] = array(
+                    'size' => $value[0],
+                    'price' => $value[1],
+                    'price_currency' => Response::bcScaleOut(bcmul($value[0], $value[1]))
+                );
+            }
+            
+            $result = array(
+                'bidVolume' => $response[1],
+                'askVolume' => $response[2],
+                'bidCount' => $response[3],
+                'askCount' => $response[4],
+                'bid' => $bidOrderBook,
+                'ask' => $askOrderBook,
+            );
+            
+        } catch(Exception $e) {
+            Response::ResponseError();
+        }
+        
+        Response::ResponseSuccess($result);
+    }
+    
     public function actionAllTrades() {
         
         if($this->paginationOptions['limit'] == false) {
