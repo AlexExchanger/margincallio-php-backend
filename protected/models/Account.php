@@ -354,9 +354,22 @@ class Account extends CActiveRecord {
             'balance' => (string)bcadd($remoteAccountInfo['secondAvailable'],0)
         );
 
+        $funds = array();
+        foreach($data as $value) {
+            if($value['type'] == 'trade') {
+                $funds['trade'][$value['currency']] = $value['balance'];
+            }
+            if(!isset($funds['available'][$value['currency']])) {
+                $funds['available'][$value['currency']] = $value['balance'];
+            } else {
+                $funds['available'][$value['currency']] = bcadd($funds['available'][$value['currency']], $value['balance']);
+            }
+        }
+        
         $response = array(
             'marginLevel' => $remoteAccountInfo['marginLevel'],
             'comission' => $remoteAccountInfo['comission'],
+            'funds' => $funds,
             'wallets' => $data
         );
         
