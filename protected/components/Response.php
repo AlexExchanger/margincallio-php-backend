@@ -49,4 +49,11 @@ class Response extends CComponent {
         exit();
     }
     
+    public static function bcScaleOut($value, $accuracy=6) {
+        bcscale($accuracy);
+        $result = bcmul($value, 1);
+        bcscale(15);
+        return $result;
+    }
+    
 }

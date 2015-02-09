@@ -338,31 +338,31 @@ class Account extends CActiveRecord {
             $data[] = array(
                 'type' => 'safe',
                 'currency' => $value->currency,
-                'balance' => $value->balance, 
+                'balance' => Response::bcScaleOut($value->balance), 
             );
         }
         
         $data[] = array(
             'type' => 'trade',
             'currency' => explode(',', $pair)[0],
-            'balance' => (string)bcadd($remoteAccountInfo['firstAvailable'], 0)
+            'balance' => (string)Response::bcScaleOut(bcadd($remoteAccountInfo['firstAvailable'], 0))
         );
         
         $data[] = array(
             'type' => 'trade',
             'currency' => explode(',', $pair)[1],
-            'balance' => (string)bcadd($remoteAccountInfo['secondAvailable'],0)
+            'balance' => (string)Response::bcScaleOut(bcadd($remoteAccountInfo['secondAvailable'],0))
         );
 
         $funds = array();
         foreach($data as $value) {
             if($value['type'] == 'trade') {
-                $funds['trade'][$value['currency']] = $value['balance'];
+                $funds['trade'][$value['currency']] = Response::bcScaleOut($value['balance']);
             }
             if(!isset($funds['available'][$value['currency']])) {
-                $funds['available'][$value['currency']] = $value['balance'];
+                $funds['available'][$value['currency']] = Response::bcScaleOut($value['balance']);
             } else {
-                $funds['available'][$value['currency']] = bcadd($funds['available'][$value['currency']], $value['balance']);
+                $funds['available'][$value['currency']] = Response::bcScaleOut(bcadd($funds['available'][$value['currency']], $value['balance']));
             }
         }
         
