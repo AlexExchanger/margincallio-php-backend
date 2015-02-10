@@ -189,7 +189,6 @@ class Account extends CActiveRecord {
         return $data;
     }
     
-    
     public static function getSystemAccount($currency) {
         if(!in_array($currency, self::$currencyOptions)) {
             return false;

@@ -30,7 +30,7 @@ class TradeController extends MainController {
         
         $data = array(
             'amount' => $amount,
-            'side' => ($orderSide == 'buy')? 0:1,
+            'side' => ($orderSide === 0 || $orderSide  === 'true')? 1:0,
             'rate' => $rate,
             'type' => mb_strtoupper($orderType),
         );
@@ -79,9 +79,11 @@ class TradeController extends MainController {
             Response::ResponseError('Wrong type for conditional order');
         }
         
+        $orderSide = $this->getParam('side');
+        
         $data = array(
             'type' => $type,
-            'side' => $this->getParam('side'),
+            'side' => ($orderSide === 0 || $orderSide  === 'true')? 1:0,
             'amount' => $this->getParam('amount'),
             'rate' => $this->getParam('rate'),
             'offset' => $this->getParam('offset')

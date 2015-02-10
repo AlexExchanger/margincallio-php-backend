@@ -29,20 +29,32 @@ class AccountController extends MainController {
     public function actionGraphicsStat() {
         
         $availableRange = array(
-            '1m' => 60,
-            '5m' => 300,
-            '15m' => 900,
-            '1h' => 3600,
+            '1m' => 6000000000,
+            '5m' => 3000000000,
+            '15m' => 9000000000,
+            '1h' => 36000000000,
         );
         
         $timeRange = $this->getParam('range', '15m');
+        $pair = $this->getParam('pair', 'BTCUSD');
+        
         if(!isset($availableRange[$timeRange])) {
             Response::ResponseError();
         }
         
-        $timestampRange = $availableRange[$timeRange];
+        $candlesObject = new Candles($pair, $timeRange);
+        $lastWeek = Response::timestampToTick(TIME - 804800);
         
-        $lastWeek = TIME - 604800;
+        $candles = $candlesObject->getLast($lastWeek);
+        
+        if(count($candles) != 0) {
+            Response::ResponseSuccess(array(
+                'count' => count($candles),
+                'data' => $candles
+            ));
+        }
+        
+        $timestampRange = $availableRange[$timeRange];
 
         $searchingCriteria = new CDbCriteria();
         $searchingCriteria->addCondition('"createdAt" > :lastMonth');
@@ -51,21 +63,24 @@ class AccountController extends MainController {
 
         $allTrades = Deal::model()->findAll($searchingCriteria);
         
-        $candles = array();
+        if(count($allTrades) <= 0) {
+            Response::ResponseError();
+        }
         
         $currentRange = $allTrades[0]->createdAt - $timestampRange;
         $trades = array('price'=>array(), 'volume'=>array());
         foreach($allTrades as $trade) {
             if($trade->createdAt < $currentRange) {
-                $candles[] = array(
-                    'open' => $trades['price'][0],
-                    'close' => $trades['price'][count($trades)-1],
-                    'high' => max($trades['price']),
-                    'low' => min($trades['price']),
-                    'volume' => array_sum($trades['volume']),
-                    'timestamp' => $currentRange
-                );
-                
+                if(count($trades['price']) > 0) {
+                    $candles[] = array(
+                        'open' => $trades['price'][0],
+                        'close' => $trades['price'][count($trades['price'])-1],
+                        'high' => max($trades['price']),
+                        'low' => min($trades['price']),
+                        'volume' => array_sum($trades['volume']),
+                        'timestamp' => $currentRange
+                    );
+                }                
                 $currentRange -= $timestampRange;
                 unset($trades);
             }
@@ -300,5 +315,75 @@ class AccountController extends MainController {
         
         Response::ResponseSuccess($orders);
     }
+    
+    public function actionGenerateApiKey() {
+        $rights = $this->getParam('rights', false);
+        $rightsParam = ($rights === 0 || $rights === 'true')? 1:0;
+        
+        try {
+            $connection = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
+            $response = $connection->sendRequest(array(TcpRemoteClient::FUNC_GENERATE_API_KEY, $this->user->id, $rightsParam));
+            
+            $data = array(
+                'key' => $response[1],
+                'secret' => $response[2],
+            );
+        } catch(Exception $e) {
+            Response::ResponseError();
+        }
+        
+        Response::ResponseSuccess($data);
+    }
+    
+    public function actionGetApiKeys() {
+        try {
+            $connection = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
+            $response = $connection->sendRequest(array(TcpRemoteClient::FUNC_GET_API_KEY, $this->user->id));
+            
+            $data = array();
+            foreach($response[1] as $key) {
+                $data[] = array(
+                    'rights' => $key[0],
+                    'key' => $key[1],
+                    'secret' => $key[2],
+                    'createdAt' => floor($key[4]/10000000)
+                );
+            }
+            
+        } catch(Exception $e) {
+            Response::ResponseError();
+        }
+        
+        Response::ResponseSuccess($data);
+    }
+    
+    public function actionCancelApiKey() {
+        $key = $this->getParam('key', NULL);
+        try {
+            if(is_null($key)) {
+                throw new Exception();
+            }
+            
+            $connection = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
+            $response = $connection->sendRequest(array(TcpRemoteClient::FUNC_CANCEL_API_KEY, $key));
+        } catch(Exception $e) {
+            Response::ResponseError();
+        }
+        
+        Response::ResponseSuccess($response);
+    }
+    
+    public function actionGenerateFix() {
+        
+    }
+    
+    public function actionGetFix() {
+        
+    }
+    
+    public function actionCancelFix() {
+        
+    }
+    
     
 }

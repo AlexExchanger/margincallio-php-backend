@@ -182,7 +182,7 @@ class StatController extends AdminController {
                     $deal->size = rand($volumeRange[0], $volumeRange[1]);
                     $deal->orderBuyId = 0;
                     $deal->orderSellId = 0;
-                    $deal->createdAt = $createdTime;
+                    $deal->createdAt = Response::timestampToTick($createdTime);
                     $deal->userBuyId = 0;
                     $deal->userSellId = 0;
                     $deal->buyerFee = 0;
