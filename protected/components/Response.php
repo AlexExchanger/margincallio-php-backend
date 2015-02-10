@@ -67,7 +67,7 @@ class Response extends CComponent {
     public static function timestampToTick($timestamp) {
         $diff = 62168428800;
         bcscale(0);
-        $result = ($tick+$diff)*10000000;
+        $result = ($timestamp+$diff)*10000000;
         bcscale(15);
         return $result;
     }
