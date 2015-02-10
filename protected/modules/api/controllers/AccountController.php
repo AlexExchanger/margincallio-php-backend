@@ -78,7 +78,7 @@ class AccountController extends MainController {
                         'high' => max($trades['price']),
                         'low' => min($trades['price']),
                         'volume' => array_sum($trades['volume']),
-                        'timestamp' => $currentRange
+                        'timestamp' => Response::tickToTimestamp($currentRange)
                     );
                 }                
                 $currentRange -= $timestampRange;
