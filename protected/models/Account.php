@@ -352,18 +352,22 @@ class Account extends CActiveRecord {
             'currency' => explode(',', $pair)[1],
             'balance' => (string)Response::bcScaleOut(bcadd($remoteAccountInfo['secondAvailable'],0))
         );
-
-        $funds = array();
-        foreach($data as $value) {
-            if($value['type'] == 'trade') {
-                $funds['trade'][$value['currency']] = Response::bcScaleOut($value['balance']);
-            }
-            if(!isset($funds['available'][$value['currency']])) {
-                $funds['available'][$value['currency']] = Response::bcScaleOut($value['balance']);
-            } else {
-                $funds['available'][$value['currency']] = Response::bcScaleOut(bcadd($funds['available'][$value['currency']], $value['balance']));
-            }
-        }
+        
+        $funds = array(
+            'trade' => array(
+                'first' => Response::bcScaleOut(bcadd($remoteAccountInfo['firstAvailable'], $remoteAccountInfo['firstBlocked']), 8),
+                'second' => Response::bcScaleOut(bcadd($remoteAccountInfo['secondAvailable'], $remoteAccountInfo['secondBlocked']), 8)
+            ), 
+            'trade_available' => array(
+                'first' => Response::bcScaleOut($remoteAccountInfo['firstAvailable'], 8),
+                'second' => Response::bcScaleOut($remoteAccountInfo['secondAvailable'], 8)
+            ),
+            'safe' => array(
+                'first' => Response::bcScaleOut($accountList[0]->balance, 8),
+                'second' => Response::bcScaleOut($accountList[1]->balance, 8),
+            )
+        );
+        
         
         $response = array(
             'marginLevel' => $remoteAccountInfo['marginLevel'],
