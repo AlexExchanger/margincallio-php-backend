@@ -57,17 +57,17 @@ class Response extends CComponent {
     }
     
     public static function tickToTimestamp($tick) {
-        $diff = 62168428800;
+        $diff = '62135596800';
         bcscale(0);
-        $result = $tick/10000000 - $diff;
+        $result = (int)bcsub($tick/10000000, $diff);
         bcscale(15);
         return $result;
     }
     
     public static function timestampToTick($timestamp) {
-        $diff = 62168428800;
+        $diff = 62135596800;
         bcscale(0);
-        $result = ($timestamp+$diff)*10000000;
+        $result = bcmul(bcadd($timestamp, $diff), 10000000);
         bcscale(15);
         return $result;
     }

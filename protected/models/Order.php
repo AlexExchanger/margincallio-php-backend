@@ -123,12 +123,52 @@ class Order extends CActiveRecord {
             throw $e;
         }
         
-        return Order::create($data, $userId);;
+        return true;
     }
 
     public static function getActiveOrders($userId) {
         $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
-        return $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACTIVE_ORDERS, $userId));
+        $response = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACTIVE_ORDERS, $userId));
+        
+        $data = array();
+        
+        foreach($response[1] as $value) {
+            $status = 'accepted';
+            if($value[3] == 0) {
+                $status = 'filled';
+            } elseif($value[2] != $value[3]) {
+                $status = 'partialFilled';
+            }
+            
+            $data[] = array(
+                'id' => $value[0],
+                'amount' => $value[2],
+                'rate' => $value[4],
+                'side' => false,
+                'status' => $status,
+                'timestamp' => Response::tickToTimestamp($value[6])
+            );
+        }
+        
+        foreach($response[2] as $value) {
+            $status = 'accepted';
+            if($value[3] == 0) {
+                $status = 'filled';
+            } elseif($value[2] != $value[3]) {
+                $status = 'partialFilled';
+            }
+            
+            $data[] = array(
+                'id' => $value[0],
+                'amount' => $value[2],
+                'rate' => $value[4],
+                'side' => true,
+                'status' => $status,
+                'timestamp' => Response::tickToTimestamp($value[6])
+            );
+        }
+        
+        return $data;
     }
     
     public static function createConditionalOrder($userId, $data) {
@@ -222,7 +262,23 @@ class Order extends CActiveRecord {
         }
 
         ListCriteria::sortCriteria($criteria, $sort, ['id']);
-        return self::model()->findAll($criteria);
+        $result = self::model()->findAll($criteria);
+        
+        foreach ($result as $value) {
+            $data[] = array(
+                'id' => (int)$value->id,
+                'amount' => Response::bcScaleOut($value->size),
+                'rate' => Response::bcScaleOut($value->price),
+                'offset' => !is_null($value->offset)? Response::bcScaleOut($value->offset): null,
+                'side' => $value->side,
+                'order_type' => $value->type,
+                'status' => $value->status,
+                'createdAt' => Response::tickToTimestamp($value->createdAt),
+                'updatedAt' => !is_null($value->updatedAt)? Response::tickToTimestamp($value->updatedAt):null,
+            );
+        }
+        
+        return $data;
     }
     
     private static function getListCriteria(array $filters)

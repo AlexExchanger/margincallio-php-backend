@@ -73,16 +73,17 @@ class AccountController extends MainController {
             if($trade->createdAt < $currentRange) {
                 if(count($trades['price']) > 0) {
                     $candles[] = array(
-                        'open' => $trades['price'][0],
-                        'close' => $trades['price'][count($trades['price'])-1],
-                        'high' => max($trades['price']),
-                        'low' => min($trades['price']),
-                        'volume' => array_sum($trades['volume']),
+                        'open' => ''.Response::bcScaleOut($trades['price'][0], 4),
+                        'close' => ''.Response::bcScaleOut($trades['price'][count($trades['price'])-1], 4),
+                        'high' => ''.Response::bcScaleOut(max($trades['price']), 4),
+                        'low' => ''.Response::bcScaleOut(min($trades['price']), 4),
+                        'volume' => ''.Response::bcScaleOut(array_sum($trades['volume']), 4),
                         'timestamp' => Response::tickToTimestamp($currentRange)
                     );
                 }                
                 $currentRange -= $timestampRange;
                 unset($trades);
+                $trades = array('price'=>array(), 'volume'=>array());
             }
             
             $trades['price'][] = $trade->price;
@@ -104,29 +105,25 @@ class AccountController extends MainController {
                 throw new Exception();
             }
             
-            $askOrderBook = array();
+            $bidOrderBook = array();
             foreach($response[5] as $value) {
-                $askOrderBook[] = array(
-                    'size' => $value[0],
-                    'price' => $value[1],
-                    'price_currency' => Response::bcScaleOut(bcmul($value[0], $value[1]))
+                $bidOrderBook[] = array(
+                    'amount' => Response::bcScaleOut($value[0], 4),
+                    'rate' => Response::bcScaleOut($value[1], 4),
+                    'sum' => Response::bcScaleOut(bcmul($value[0], $value[1]), 2)
                 );
             }
             
-            $bidOrderBook = array();
+            $askOrderBook = array();
             foreach($response[6] as $value) {
-                $bidOrderBook[] = array(
-                    'size' => $value[0],
-                    'price' => $value[1],
-                    'price_currency' => Response::bcScaleOut(bcmul($value[0], $value[1]))
+                $askOrderBook[] = array(
+                    'amount' => Response::bcScaleOut($value[0], 4),
+                    'rate' => Response::bcScaleOut($value[1], 4),
+                    'sum' => Response::bcScaleOut(bcmul($value[0], $value[1]), 2)
                 );
             }
             
             $result = array(
-                'bidVolume' => $response[1],
-                'askVolume' => $response[2],
-                'bidCount' => $response[3],
-                'askCount' => $response[4],
                 'bid' => $bidOrderBook,
                 'ask' => $askOrderBook,
             );
@@ -150,9 +147,10 @@ class AccountController extends MainController {
             $data = array();
             foreach($trades as $value) {
                 $data[] = array(
-                    'size' => $value->size,
-                    'price' => $value->size,
-                    'time' => $value->createdAt,
+                    'id' => $value->id,
+                    'amount' => Response::bcScaleOut($value->size),
+                    'rate' => Response::bcScaleOut($value->size),
+                    'timestamp' => Response::tickToTimestamp($value->createdAt),
                     'side' => $value->side,
                 );
             }
@@ -215,7 +213,6 @@ class AccountController extends MainController {
     }   
     
     public function actionGetActiveOrders() {
-        
         try {
             $orders = Order::getActiveOrders($this->user->id);
         } catch (Exception $e) {
@@ -303,7 +300,6 @@ class AccountController extends MainController {
     public function actionGetOrders() {
         
         $filter = array(
-            'types' => array('accepted'),
             'userId' => $this->user->id,
         );
         
