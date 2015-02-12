@@ -265,6 +265,7 @@ class Order extends CActiveRecord {
         ListCriteria::sortCriteria($criteria, $sort, ['id']);
         $result = self::model()->findAll($criteria);
         
+        $data = array();
         foreach ($result as $value) {
             $data[] = array(
                 'id' => (int)$value->id,
