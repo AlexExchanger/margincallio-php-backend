@@ -25,6 +25,7 @@ class Deal extends CActiveRecord {
         $criteria = self::getListCriteria($filters);
         
         $pagination['total'] = (int)self::model()->count($criteria);
+        $criteria->order = '"createdAt" DESC';
         if ($limit) {
             $criteria->limit = $limit;
             $criteria->offset = $offset;

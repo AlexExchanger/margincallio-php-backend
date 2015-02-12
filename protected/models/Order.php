@@ -261,6 +261,7 @@ class Order extends CActiveRecord {
             $criteria->offset = $offset;
         }
 
+        $criteria->order = '"createdAt" DESC';
         ListCriteria::sortCriteria($criteria, $sort, ['id']);
         $result = self::model()->findAll($criteria);
         
