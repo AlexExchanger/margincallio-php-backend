@@ -5,7 +5,7 @@ class AccountController extends MainController {
     private $user = null;
     public $paginationOptions;
     
-    private $fullControl = array('alltrades', 'graphicsstat');
+    private $fullControl = array('alltrades', 'graphicsstat', 'getorderbook');
     
     public function beforeAction($action) {
         if(!parent::beforeAction($action)) {
@@ -342,7 +342,7 @@ class AccountController extends MainController {
                     'rights' => $key[0],
                     'key' => $key[1],
                     'secret' => $key[2],
-                    'createdAt' => floor($key[4]/10000000)
+                    'createdAt' => Response::tickToTimestamp($key[4])
                 );
             }
             
@@ -369,17 +369,82 @@ class AccountController extends MainController {
         Response::ResponseSuccess($response);
     }
     
-    public function actionGenerateFix() {
+    public function actionCreateFix() {
+        try {
+            $connection = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
+            $response = $connection->sendRequest(array(TcpRemoteClient::FUNC_CREATE_FIX_ACCOUNT, $this->user->id));
+
+            $data = array(
+                'login' => $response[1],
+                'password' => $response[2],
+            );
+        } catch(Exception $e) {
+            Response::ResponseError();
+        }
         
+        Response::ResponseSuccess($data);
+    }
+    
+    public function actionChangeFixPassword() {
+        $login = $this->getParam('login', NULL);
+        try {
+            if(is_null($login)) {
+                throw new Exception();
+            }
+            
+            $connection = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
+            $response = $connection->sendRequest(array(TcpRemoteClient::FUNC_GENERATE_NEW_FIX_PASSWORD, $this->user->id, $login));
+
+            if($response[0] != 0 || !isset($response[1])) {
+                throw new Exception();
+            }
+        } catch(Exception $e) {
+            Response::ResponseError();
+        }
+        
+        Response::ResponseSuccess($response[1]);
     }
     
     public function actionGetFix() {
+        try {
+            $connection = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
+            $response = $connection->sendRequest(array(TcpRemoteClient::FUNC_GET_FIX_ACCOUNT, $this->user->id));
+            
+            $data = array();
+            foreach($response[1] as $key) {
+                $data[] = array(
+                    'login' => $key[0],
+                    'password' => $key[2],
+                    'is_active' => $key[3],
+                    'createdAt' => Response::tickToTimestamp($key[4])
+                );
+            }
+            
+        } catch(Exception $e) {
+            Response::ResponseError();
+        }
         
+        Response::ResponseSuccess($data);
     }
     
     public function actionCancelFix() {
+        $login = $this->getParam('login', NULL);
+        try {
+            if(is_null($login)) {
+                throw new Exception();
+            }
+            
+            $connection = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
+            $response = $connection->sendRequest(array(TcpRemoteClient::FUNC_CANCEL_FIX_ACCOUNT, $this->user->id, $login));
+            
+            if($response[0] != 0) {
+                throw new Exception();
+            }
+        } catch(Exception $e) {
+            Response::ResponseError();
+        }
         
+        Response::ResponseSuccess();
     }
-    
     
 }

@@ -368,10 +368,9 @@ class Account extends CActiveRecord {
             )
         );
         
-        
         $response = array(
-            'marginLevel' => $remoteAccountInfo['marginLevel'],
-            'comission' => $remoteAccountInfo['comission'],
+            'margin_level' => $remoteAccountInfo['marginLevel'],
+            'fee' => $remoteAccountInfo['comission'],
             'funds' => $funds,
             'wallets' => $data
         );
