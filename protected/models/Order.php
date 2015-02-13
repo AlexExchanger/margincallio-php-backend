@@ -113,7 +113,7 @@ class Order extends CActiveRecord {
             }
             
             if(!isset($resultCore[0]) || $resultCore[0] != 0) {
-                throw new Exception();
+                throw new Exception("User doesn't verified", 10012);
             }
         } catch (Exception $e) {
             if ($e instanceof ExceptionTcpRemoteClient) {
