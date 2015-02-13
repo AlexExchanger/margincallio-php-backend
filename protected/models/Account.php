@@ -327,9 +327,10 @@ class Account extends CActiveRecord {
             'secondAvailable' => $resultCore[3],
             'secondBlocked' => $resultCore[4],
             'comission' => $resultCore[5],
-            'marginLevel' => $resultCore[6],
-            'marginCall' => $resultCore[7],
-            'isSuspended' => $resultCore[8],
+            'equity' => $resultCore[6],
+            'marginLevel' => $resultCore[7],
+            'marginCall' => $resultCore[8],
+            'isSuspended' => $resultCore[9],
         );
         
         $data = array();
@@ -371,6 +372,7 @@ class Account extends CActiveRecord {
         $response = array(
             'margin_level' => $remoteAccountInfo['marginLevel'],
             'fee' => $remoteAccountInfo['comission'],
+            'equity' => $remoteAccountInfo['equity'],
             'funds' => $funds,
             'wallets' => $data
         );
