@@ -58,7 +58,7 @@ class AccountController extends MainController {
 
         $searchingCriteria = new CDbCriteria();
         $searchingCriteria->addCondition('"createdAt" > :lastMonth');
-        $searchingCriteria->order = '"createdAt" DESC';
+        $searchingCriteria->order = '"createdAt" ASC';
         $searchingCriteria->params = array(':lastMonth' => $lastWeek);
 
         $allTrades = Deal::model()->findAll($searchingCriteria);
