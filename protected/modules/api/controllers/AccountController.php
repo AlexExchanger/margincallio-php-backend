@@ -149,7 +149,7 @@ class AccountController extends MainController {
                 $data[] = array(
                     'id' => $value->id,
                     'amount' => Response::bcScaleOut($value->size),
-                    'rate' => Response::bcScaleOut($value->size),
+                    'rate' => Response::bcScaleOut($value->price),
                     'timestamp' => Response::tickToTimestamp($value->createdAt),
                     'side' => $value->side,
                 );
