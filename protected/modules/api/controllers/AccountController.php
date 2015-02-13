@@ -171,7 +171,12 @@ class AccountController extends MainController {
             $accountInfo = Account::getAccountInfo($pair);
             Loger::logUser(Yii::app()->user->id, 'Requested wallets list');
         } catch(Exception $e) {
-            Response::ResponseError();
+            $message = '';
+            if($e->getCode() == 10012) {
+                $message = $e->getMessage();
+            }
+            
+            Response::ResponseError($message);
         }
         
         Response::ResponseSuccess($accountInfo);

@@ -318,7 +318,7 @@ class Account extends CActiveRecord {
         $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_INFO, $user->id));
 
         if(count($resultCore) <= 0 || !isset($resultCore[0]) || ($resultCore[0] != 0)) {
-            throw new Exception();
+            throw new Exception("User doesn't verified", 10012);
         }
         
         $remoteAccountInfo = array(
