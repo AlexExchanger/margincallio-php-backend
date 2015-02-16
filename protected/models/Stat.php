@@ -114,4 +114,65 @@ class Stat extends CActiveRecord {
         
         return $data;
     }
+    
+    public static function mainStat() {
+        
+        $stat = array(
+            'dayVolume' => null,
+            'bid' => null,
+            'ask' => null,
+            'todayOpen' => null,
+            'dailyChangeCurr' => null,
+            'dailyChangePercent' => null,
+        );
+        
+        $todayRange = array(
+            'open' => Response::timestampToTick(TIME - 86400),
+            'close' => Response::timestampToTick(TIME)
+        );
+        
+        $defaultPair = 'deal_BTCUSD';
+        
+        //24 hour volume
+        $dayVolumeQuery = 'SELECT SUM("size") as "size" FROM "'.$defaultPair.'" ';
+        $dayVolumeQuery .= 'WHERE "createdAt" BETWEEN '.$todayRange['open'];
+        $dayVolumeQuery .= ' AND '.$todayRange['close'];
+        $dayVolumeResult = Deal::model()->findBySql($dayVolumeQuery);
+        if(isset($dayVolumeResult->size)) {
+            $stat['dayVolume'] = Response::bcScaleOut($dayVolumeResult->size, 4);
+        }
+        
+        
+        //Current bid & ask
+        $bidQuery = 'SELECT "price" FROM "deal_BTCUSD" WHERE "side"=FALSE AND "createdAt"=(SELECT MAX("createdAt") FROM "deal_BTCUSD" WHERE "side"=FALSE)';
+        $askQuery = 'SELECT "price" FROM "deal_BTCUSD" WHERE "side"=TRUE AND "createdAt"=(SELECT MAX("createdAt") FROM "deal_BTCUSD" WHERE "side"=TRUE)';
+        
+        $bidResult = Deal::model()->findBySql($bidQuery);
+        $askResult = Deal::model()->findBySql($askQuery);
+        
+        if(isset($bidResult->price)) {
+            $stat['bid'] = Response::bcScaleOut($bidResult->price, 4);
+        }
+        
+        if(isset($askResult->price)) {
+            $stat['ask'] = Response::bcScaleOut($askResult->price, 4);
+        }
+        
+        //Todays open price
+        $todayOpenQuery = 'SELECT "price" FROM "deal_BTCUSD" WHERE "createdAt" > '.$todayRange['open'].' ORDER BY "createdAt" ASC LIMIT 1';
+        $todayOpenResult = Deal::model()->findBySql($todayOpenQuery);
+        if(isset($todayOpenResult->price)) {
+            $stat['todayOpen'] = Response::bcScaleOut($todayOpenResult->price, 4);
+        }
+        
+        //daily change
+        if(isset($stat['bid']) && isset($stat['todayOpen'])) {
+            $cent = bcdiv('100', $stat['todayOpen'], 4);
+            $stat['dailyChangeCurr'] = bcsub($stat['bid'], $stat['todayOpen'], 4);
+            $stat['dailyChangePercent'] = bcmul($stat['dailyChangeCurr'], $cent, 4);
+        }
+        
+        return $stat;
+    }
+    
 }

@@ -65,7 +65,7 @@ class Response extends CComponent {
     }
     
     public static function timestampToTick($timestamp) {
-        $diff = 62135596800;
+        $diff = '62135596800';
         bcscale(0);
         $result = bcmul(bcadd($timestamp, $diff), 10000000);
         bcscale(15);

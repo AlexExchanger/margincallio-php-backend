@@ -5,7 +5,7 @@ class StatController extends MainController {
     private $user = null;
     public $paginationOptions;
     
-    private $fullControl = array();
+    private $fullControl = array('mainstat');
     
     public function beforeAction($action) {
         if(!parent::beforeAction($action)) {
@@ -26,11 +26,14 @@ class StatController extends MainController {
         return true;
     }
     
-    /*--General statistics--*/
-    public function actionAccountInfo() {
+    public function actionMainStat() {
+        try {
+            $data = Stat::mainStat();
+        } catch(Exception $e) {
+            Response::ResponseError($e->getMessage());
+        }
         
-        
-        
+        Response::ResponseSuccess($data);
     }
-    /*--Personal statistics--*/
+    
 }
