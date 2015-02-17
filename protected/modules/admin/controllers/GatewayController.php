@@ -59,6 +59,9 @@ class GatewayController extends AdminController {
             if(!ExternalGateway::grantFunds($data)) {
                 throw new Exception();
             }
+            
+            $logMessage = 'Grant '.$data['amount'].' '.$data['currency'].'to user '.$data['userId'];
+            Loger::logAdmin(Yii::app()->user->id, $logMessage, 'gatewayFundsTransfer');
         } catch(Exception $e) {
             Response::ResponseError();
         }
