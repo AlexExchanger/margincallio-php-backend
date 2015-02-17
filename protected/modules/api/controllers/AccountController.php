@@ -314,7 +314,10 @@ class AccountController extends MainController {
             Response::ResponseError();
         }
         
-        Response::ResponseSuccess($orders);
+        Response::ResponseSuccess(array(
+            'count' => count($orders),
+            'data' => $orders
+        ));
     }
     
     public function actionGenerateApiKey() {
