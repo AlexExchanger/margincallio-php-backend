@@ -315,7 +315,7 @@ class AccountController extends MainController {
         }
         
         Response::ResponseSuccess(array(
-            'count' => count($orders),
+            'count' => isset($this->paginationOptions['total']) ? $this->paginationOptions['total'] : '',
             'data' => $orders
         ));
     }
