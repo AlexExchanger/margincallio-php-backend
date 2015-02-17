@@ -15,8 +15,22 @@ class VerificationController extends CController {
         return false;
     }
     
+    public function actionPreflight() {
+        $content_type = 'application/json';
+        $status = 200;
+
+        // set the status
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
+        header("Access-Control-Allow-Headers: Authorization");
+        header('Access-Control-Allow-Credentials: true');
+        if(isset($_SERVER['HTTP_ORIGIN'])) {
+                header('Access-Control-Allow-Origin: '.$_SERVER['HTTP_ORIGIN']);
+        }
+        header('Content-type: ' . $content_type);
+    }
+
     public function actionSendDocs() {
-        $loaded = false;
         if(isset($_FILES['fileItem1']) && isset($_FILES['fileItem2'])) {
             $file_first = new File();
             $file_second = new File();
@@ -53,7 +67,7 @@ class VerificationController extends CController {
                 $path = Yii::getPathOfAlias('webroot').DIRECTORY_SEPARATOR.'files'.DIRECTORY_SEPARATOR.$file_second->uid;
                 $file_second->fileItem->saveAs($path);
             } else {
-                Response::ResponseError($file_first->getErrors());
+                Response::ResponseError($file_second->getErrors());
             }
             
             $ticket = Ticket::create(array(
@@ -62,9 +76,9 @@ class VerificationController extends CController {
             ), 'New verification documents', $this->user->id, array($file_first, $file_second));
             
             Loger::logUser(Yii::app()->user->id, 'New verification documents');
-            $loaded = true;
+            Response::ResponseSuccess();
+        } else {
+            $this->actionPreflight();
         }
-        
-        $this->render('index', array('loaded'=>$loaded));
     }
 }
