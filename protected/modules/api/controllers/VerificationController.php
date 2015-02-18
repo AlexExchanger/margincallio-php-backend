@@ -1,84 +1,66 @@
 <?php
 
-class VerificationController extends CController { 
-    
+class VerificationController extends MainController {
+
     private $user = null;
-    
+    private $fullControl = array('senddocs');
+
     public function beforeAction($action) {
-    
-        if(!Yii::app()->user->isGuest) {
-            $this->user = Yii::app()->user;
-            return true;
+
+        if (Yii::app()->user->isGuest && !in_array(mb_strtolower($action->id), $this->fullControl)) {
+            Response::ResponseError('Access denied');
+            return false;
         }
-        
-        Response::GetResponseError('Access denied');
-        return false;
+
+        $this->user = Yii::app()->user;
+        return true;
     }
-    
+
     public function actionPreflight() {
         $content_type = 'application/json';
         $status = 200;
 
-        // set the status
-        header("Access-Control-Allow-Origin: *");
         header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
-        header("Access-Control-Allow-Headers: Authorization");
         header('Access-Control-Allow-Credentials: true');
-        if(isset($_SERVER['HTTP_ORIGIN'])) {
-                header('Access-Control-Allow-Origin: '.$_SERVER['HTTP_ORIGIN']);
+        if (isset($_SERVER['HTTP_ORIGIN'])) {
+            header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
         }
         header('Content-type: ' . $content_type);
     }
 
     public function actionSendDocs() {
-        if(isset($_FILES['fileItem1']) && isset($_FILES['fileItem2'])) {
-            $file_first = new File();
-            $file_second = new File();
-            
-            $file_first->fileName = $_FILES['fileItem1']['name'];
-            $file_first->fileSize = $_FILES['fileItem1']['size'];
-            $file1 = $_FILES['fileItem1'];            
-            $file_first->fileItem = new CUploadedFile($file1['name'], $file1['tmp_name'], $file1['type'], $file1['size'], $file1['error']);
-            $file_first->uid = md5($this->user->id.$file_first->fileName.$file_first->fileSize);
-            $file_first->createdAt = TIME;
-            $file_first->createdBy = $this->user->id;
-            $file_first->entityType = 'doc';
-            
-            
-            $file_second->fileName = $_FILES['fileItem2']['name'];
-            $file_second->fileSize = $_FILES['fileItem2']['size'];
-            $file2 = $_FILES['fileItem2'];
-            $file_second->fileItem = new CUploadedFile($file2['name'], $file2['tmp_name'], $file2['type'], $file2['size'], $file2['error']);
-            $file_second->uid = md5($this->user->id.$file_second->fileName.$file_second->fileSize);
-            $file_second->createdAt = TIME;
-            $file_second->createdBy = $this->user->id;
-            $file_second->entityType = 'doc';
-            
-            $file_first->save();
-            if($file_first->save()) { 
-                $path = Yii::getPathOfAlias('webroot').DIRECTORY_SEPARATOR.'files'.DIRECTORY_SEPARATOR.$file_first->uid;
-                $file_first->fileItem->saveAs($path);
-            } else {
-                Response::ResponseError($file_first->getErrors());
+        
+        if (isset($_FILES) && count($_FILES) > 0) {
+            $docs = array();
+            foreach ($_FILES as $key => $value) {
+                $file = new File();
+                $file->fileName = $value['name'];
+                $file->fileSize = $value['size'];
+                $file->fileItem = new CUploadedFile($value['name'], $value['tmp_name'], $value['type'], $value['size'], $value['error']);
+                $file->uid = md5($this->user->id.$file->fileName.$file->fileSize.TIME);
+                $file->createdAt = TIME;
+                $file->createdBy = $this->user->id;
+                $file->entityType = 'doc';
+
+                if ($file->save()) {
+                    $path = Yii::getPathOfAlias('webroot') . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . $file->uid;
+                    $file->fileItem->saveAs($path);
+                    $docs[] = $file;
+                } else {
+                    Response::ResponseError($file->getErrors());
+                }
             }
-            
-            $file_second->save();
-            if($file_second->save()) { 
-                $path = Yii::getPathOfAlias('webroot').DIRECTORY_SEPARATOR.'files'.DIRECTORY_SEPARATOR.$file_second->uid;
-                $file_second->fileItem->saveAs($path);
-            } else {
-                Response::ResponseError($file_second->getErrors());
-            }
-            
+
             $ticket = Ticket::create(array(
                 'title' => 'Verification',
                 'department' => 'verification',
-            ), 'New verification documents', $this->user->id, array($file_first, $file_second));
-            
+                    ), 'New verification documents', $this->user->id, $docs);
+
             Loger::logUser(Yii::app()->user->id, 'New verification documents');
             Response::ResponseSuccess();
         } else {
             $this->actionPreflight();
         }
     }
+
 }
