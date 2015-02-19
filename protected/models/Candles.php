@@ -23,11 +23,10 @@ class Candles extends CActiveRecord {
         $this->range = $range;
     }
     
-    public function getLast($timestamp) {
+    public function getLast($begin, $end) {
         $criteria = new CDbCriteria();
-        $criteria->addCondition('"timestamp" > :range');
+        $criteria->addBetweenCondition('"timestamp"', $begin, $end);
         $criteria->order = '"timestamp" DESC';
-        $criteria->params = array(':range'=>$timestamp);
         
         return $this->findAll($criteria);
     }

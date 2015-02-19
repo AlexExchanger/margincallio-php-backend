@@ -28,8 +28,11 @@ class AccountController extends MainController {
     
     public function actionGraphicsStat() {
         
-        $availableRange = array(
-            '1m' => 6000000000,
+        $beginTime = Response::timestampToTick($this->getParam('begin', TIME - 804800));
+        $endTime = Response::timestampToTick($this->getParam('end', TIME));
+        
+        $availableRange = array(            
+            '1m' => 600000000,
             '5m' => 3000000000,
             '15m' => 9000000000,
             '1h' => 36000000000,
@@ -43,9 +46,8 @@ class AccountController extends MainController {
         }
         
         $candlesObject = new Candles($pair, $timeRange);
-        $lastWeek = Response::timestampToTick(TIME - 804800);
         
-        $candles = $candlesObject->getLast($lastWeek);
+        $candles = $candlesObject->getLast($beginTime, $endTime);
         
         if(count($candles) != 0) {
             Response::ResponseSuccess(array(
@@ -57,10 +59,9 @@ class AccountController extends MainController {
         $timestampRange = $availableRange[$timeRange];
 
         $searchingCriteria = new CDbCriteria();
-        $searchingCriteria->addCondition('"createdAt" > :lastMonth');
+        $searchingCriteria->addBetweenCondition('"createdAt"', $beginTime, $endTime);
         $searchingCriteria->order = '"createdAt" DESC';
-        $searchingCriteria->params = array(':lastMonth' => $lastWeek);
-
+        
         $allTrades = Deal::model()->findAll($searchingCriteria);
         
         if(count($allTrades) <= 0) {
