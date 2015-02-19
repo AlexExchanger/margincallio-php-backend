@@ -132,6 +132,7 @@ class Transaction extends CActiveRecord {
 
         $userFrom = ArrayHelper::getFromArray($filters, 'user_from');
         $userTo = ArrayHelper::getFromArray($filters, 'user_to');
+        $userOr = ArrayHelper::getFromArray($filters, 'user_or');
         
         $currency = ArrayHelper::getFromArray($filters, 'currency');
         $dateFrom = ArrayHelper::getFromArray($filters, 'dateFrom');
@@ -145,11 +146,16 @@ class Transaction extends CActiveRecord {
         if (!empty($accountTo)) {
             $criteria->compare('account_to', $accountTo);
         }
-        if (!empty($userFrom)) {
-            $criteria->compare('user_from', $accountFrom);
-        }
-        if (!empty($userTo)) {
-            $criteria->compare('user_to', $userTo);
+        
+        if(!empty($userOr) && $userOr == true) {
+            $criteria->addCondition('"user_from"='.$userFrom.' OR "user_to"='.$userTo);
+        } else {
+            if (!empty($userFrom)) {
+                $criteria->compare('user_from', $accountFrom);
+            }
+            if (!empty($userTo)) {
+                $criteria->compare('user_to', $userTo);
+            }
         }
         
         if (!empty($currency) && in_array($currency, Yii::app()->params['supportedCurrency'])) {

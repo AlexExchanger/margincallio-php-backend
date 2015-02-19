@@ -427,6 +427,18 @@ class Account extends CActiveRecord {
         return $internalResult;
     }
     
+    public static function getUserWallets($userId) {
+        
+        $accounts = Account::model()->findAllByAttributes(array('userId'=>$userId));
+        
+        $data = array();
+        foreach($accounts as $value) {
+            $data[$value->id] = $value;
+        }
+        
+        return $data;
+    }
+    
     public static function checkHot($hotId) {   
         $hotWallet = self::model()->findByPk($hotId);
         $coldWallet = self::model()->findByAttributes(array(

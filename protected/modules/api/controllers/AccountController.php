@@ -183,6 +183,57 @@ class AccountController extends MainController {
         Response::ResponseSuccess($accountInfo);
     }
     
+    public function actionGetTransactions() {
+        
+        try {
+            $filter = array(
+                'user_from' => $this->user->id,
+                'user_to' => $this->user->id,
+                'user_or' => true,
+            );
+            
+            $userAccounts = Account::getUserWallets($this->user->id);
+            
+            $transactions = Transaction::getList($filter, $this->paginationOptions); 
+            
+            $accountScope = array();
+            foreach($userAccounts as $key=>$value) {
+                $accountScope[] = $key;
+            }
+            
+            $externalTransactions = TransactionExternal::model()->findAllByAttributes(array('accountId'=>$accountScope));
+            
+            $data = array();
+            foreach($transactions as $value) {
+                $data[$value->createdAt] = array(
+                    'date' => Response::tickToTimestamp($value->createdAt),
+                    'currency' => $value->currency,
+                    'amount' => Response::bcScaleOut($value->amount),
+                    'type' => ($userAccounts[$value->account_to]->type == 'user.safeWallet')? 'Internal in':'Internal out',
+                    'status' => 'accepted',
+                    'info' => '',
+                );
+            }
+            
+            foreach($externalTransactions as $value) {
+                $data[$value->createdAt] = array(
+                    'date' => Response::tickToTimestamp($value->createdAt),
+                    'currency' => $value->currency,
+                    'amount' => Response::bcScaleOut($value->amount),
+                    'type' => ($value->type)? 'External In':'External Out',
+                    'status' => $value->verifyStatus,
+                    'info' => $value->details,
+                );
+            }
+            
+        } catch(Exception $e) {
+            Response::ResponseError();
+        }
+        
+        Response::ResponseSuccess($data);
+    }
+    
+    
     //type 0 = s to t, type 1 = t to s 
     public function actionTransferFunds() {
         $type = Yii::app()->request->getParam('type');
