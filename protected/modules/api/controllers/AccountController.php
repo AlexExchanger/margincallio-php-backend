@@ -74,11 +74,11 @@ class AccountController extends MainController {
             if($trade->createdAt < $currentRange) {
                 if(count($trades['price']) > 0) {
                     $candles[] = array(
-                        'open' => ''.Response::bcScaleOut($trades['price'][0], 4),
-                        'close' => ''.Response::bcScaleOut($trades['price'][count($trades['price'])-1], 4),
-                        'high' => ''.Response::bcScaleOut(max($trades['price']), 4),
-                        'low' => ''.Response::bcScaleOut(min($trades['price']), 4),
-                        'volume' => ''.Response::bcScaleOut(array_sum($trades['volume']), 4),
+                        'open' => floatval(Response::bcScaleOut($trades['price'][0], 4)),
+                        'close' => floatval(Response::bcScaleOut($trades['price'][count($trades['price'])-1], 4)),
+                        'high' => floatval(Response::bcScaleOut(max($trades['price']), 4)),
+                        'low' => floatval(Response::bcScaleOut(min($trades['price']), 4)),
+                        'volume' => floatval(Response::bcScaleOut(array_sum($trades['volume']), 4)),
                         'timestamp' => Response::tickToTimestamp($currentRange)
                     );
                 }                
