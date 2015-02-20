@@ -189,7 +189,7 @@ class AccountController extends MainController {
         
         $inputData = array(
             'filterType' => $this->getParam('filterType', 'external'),
-            'criteria' => $this->getParam('criteria', ''),
+            'criteria' => $this->getParam('filterCriteria', ''),
         );
         
         try {

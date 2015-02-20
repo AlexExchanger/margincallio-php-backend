@@ -313,7 +313,17 @@ class Account extends CActiveRecord {
         $accountList = Account::model()->findAllByAttributes(array(
             'userId'=>$user->id,
             'type'=> array('user.safeWallet'),
-            ));
+        ));
+        
+        $tradeAccountList = Account::model()->findAllByAttributes(array(
+            'userId'=>$user->id,
+            'type'=> array('user.trading'),
+        ));
+        
+        $tradeAccount = array();
+        foreach($tradeAccountList as $value) {
+            $tradeAccount[$value->currency] = $value; 
+        }
         
         $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
         $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_INFO, $user->id));
@@ -337,6 +347,7 @@ class Account extends CActiveRecord {
         $data = array();
         foreach($accountList as $key=>$value) {
             $data[] = array(
+                'id' => $value->id,
                 'type' => 'safe',
                 'currency' => $value->currency,
                 'balance' => Response::bcScaleOut($value->balance), 
@@ -344,12 +355,14 @@ class Account extends CActiveRecord {
         }
         
         $data[] = array(
+            'id' => $tradeAccount[explode(',', $pair)[0]]->id,
             'type' => 'trade',
             'currency' => explode(',', $pair)[0],
             'balance' => (string)Response::bcScaleOut(bcadd($remoteAccountInfo['firstAvailable'], 0))
         );
         
         $data[] = array(
+            'id' => $tradeAccount[explode(',', $pair)[1]]->id,
             'type' => 'trade',
             'currency' => explode(',', $pair)[1],
             'balance' => (string)Response::bcScaleOut(bcadd($remoteAccountInfo['secondAvailable'],0))
