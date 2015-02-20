@@ -20,16 +20,24 @@ class GatewayController extends MainController {
     }
     
     public function actionall() {
+        
+        $currency = $this->getParam('currency', null);
+
         try {
-            $gateways = ExternalGateway::model()->findAllByAttributes(array('type'=>'user'));
-                
+            $filter = array('type'=>'user');
+            if(!is_null($currency)) {
+                $filter['currency'] = $currency; 
+            }
+            
+            $gateways = ExternalGateway::model()->findAllByAttributes($filter);
+            
             $data = array();
             foreach($gateways as $value) {
                 $data[] = array(
                     'id' => $value->id,
                     'name' => $value->name,
                     'currency' => $value->currency,
-                    'payment' => $value->payment,
+                    'payment' => json_decode($value->payment, true),
                 );
             }
         } catch(Exception $e) {
@@ -37,7 +45,7 @@ class GatewayController extends MainController {
         }
         
         Response::ResponseSuccess(array(
-            'count' => count($gateway),
+            'count' => count($data),
             'data' => $data
         ));
     }
