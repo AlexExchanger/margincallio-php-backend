@@ -226,11 +226,16 @@ class AccountController extends MainController {
                 );
             }
             
+            $result = array();
+            foreach($data as $value) {
+                array_push($result, $value);
+            }
+            
         } catch(Exception $e) {
             Response::ResponseError();
         }
         
-        Response::ResponseSuccess($data);
+        Response::ResponseSuccess($result);
     }
     
     
