@@ -31,6 +31,15 @@ class VerificationController extends MainController {
     public function actionSendDocs() {
         try {
             if (isset($_FILES) && count($_FILES) > 0) {
+                $user = User::model()->findByPk($this->user->id);
+                if(!$user) {
+                    throw new Exception();
+                }
+                
+                if($user->verifiedStatus != 'waitingForDocuments') {
+                    throw new Exception('User already verified');
+                }
+                
                 $docs = array();
                 foreach ($_FILES as $key => $value) {
                     $file = new File();
@@ -49,11 +58,6 @@ class VerificationController extends MainController {
                     } else {
                         Response::ResponseError($file->getErrors());
                     }
-                }
-
-                $user = User::model()->findByPk($this->user->id);
-                if(!$user) {
-                    throw new Exception();
                 }
 
                 $user->verifiedStatus = 'waitingForModeration';
