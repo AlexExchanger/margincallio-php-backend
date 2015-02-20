@@ -129,10 +129,10 @@ class Transaction extends CActiveRecord {
     private static function getListCriteria(array $filters) {
         $accountFrom = ArrayHelper::getFromArray($filters, 'account_from');
         $accountTo = ArrayHelper::getFromArray($filters, 'account_to');
-
+        $accountOr = ArrayHelper::getFromArray($filters, 'account_or');
+        
         $userFrom = ArrayHelper::getFromArray($filters, 'user_from');
         $userTo = ArrayHelper::getFromArray($filters, 'user_to');
-        $userOr = ArrayHelper::getFromArray($filters, 'user_or');
         
         $currency = ArrayHelper::getFromArray($filters, 'currency');
         $dateFrom = ArrayHelper::getFromArray($filters, 'dateFrom');
@@ -140,22 +140,22 @@ class Transaction extends CActiveRecord {
 
         $criteria = new CDbCriteria();
         
-        if (!empty($accountFrom)) {
-            $criteria->compare('account_from', $accountFrom);
-        }
-        if (!empty($accountTo)) {
-            $criteria->compare('account_to', $accountTo);
+        if(!empty($accountOr) && $accountOr == true) {
+            $criteria->addCondition('"account_from"='.$accountFrom.' OR "account_to"='.$accountTo);
+        } else {
+            if (!empty($accountFrom)) {
+                $criteria->compare('account_from', $accountFrom);
+            }
+            if (!empty($accountTo)) {
+                $criteria->compare('account_to', $accountTo);
+            }
         }
         
-        if(!empty($userOr) && $userOr == true) {
-            $criteria->addCondition('"user_from"='.$userFrom.' OR "user_to"='.$userTo);
-        } else {
-            if (!empty($userFrom)) {
-                $criteria->compare('user_from', $accountFrom);
-            }
-            if (!empty($userTo)) {
-                $criteria->compare('user_to', $userTo);
-            }
+        if (!empty($userFrom)) {
+            $criteria->compare('user_from', $accountFrom);
+        }
+        if (!empty($userTo)) {
+            $criteria->compare('user_to', $userTo);
         }
         
         if (!empty($currency) && in_array($currency, Yii::app()->params['supportedCurrency'])) {
