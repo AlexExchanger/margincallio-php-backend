@@ -165,6 +165,23 @@ class AccountController extends MainController {
         ));
     }
     
+    public function actionGetWallet() {
+        
+        $id = $this->getParam('id', null);
+        
+        try {
+            if(is_null($id)) {
+                throw new Exception('id - parameter invalid');
+            }
+            
+            $data = Account::getAccountInfoOne($id);
+        } catch(Exception $e) {
+            Response::ResponseError($e->getMessage());
+        }
+        
+        Response::ResponseSuccess($data);
+    }
+    
     public function actionGetWalletList() {
         $pair = Yii::app()->request->getParam('pair', 'BTC,USD');
         
@@ -195,6 +212,12 @@ class AccountController extends MainController {
         try {
             if(is_null($accountId)) {
                 throw new Exception();
+            }
+            
+            $account = Account::get($accountId);
+            
+            if(!$account || $account->userId != $this->user->id) {
+                throw new Exception('Account for given user doesn\'t exist');
             }
             
             $filter = array(

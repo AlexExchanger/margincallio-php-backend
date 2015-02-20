@@ -394,6 +394,60 @@ class Account extends CActiveRecord {
         return $response;
     }
     
+    public static function getAccountInfoOne($id) {
+        $user = Yii::app()->user;
+        if(!$user) {
+            return false;
+        }
+        
+        $pair = Yii::app()->request->getParam('pair', 'BTC,USD');
+        $pairArray = explode(',', $pair);
+        $account = Account::model()->findByAttributes(array(
+            'userId'=>$user->id,
+            'id'=> $id,
+        ));
+        
+        if(!$account) {
+            throw new Exception('Account doesn\'t exist');
+        }
+        
+        $wallet = array();
+        
+        if($account->type == 'user.trading') {
+            $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
+            $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_INFO, $user->id));
+
+            if(count($resultCore) <= 0 || !isset($resultCore[0]) || ($resultCore[0] != 0)) {
+                throw new Exception("User doesn't verified", 10012);
+            }
+
+            $remoteAccountInfo = array(
+                'firstAvailable' => $resultCore[1],
+                'firstBlocked' => $resultCore[2],
+                'secondAvailable' => $resultCore[3],
+                'secondBlocked' => $resultCore[4],
+            );
+            
+            $wallet = array(
+                'id' => $account->id,
+                'type' => 'trade',
+                'currency' => $account->currency,
+                'balance' => (string)bcadd((($account->currency == $pairArray[0])?  $remoteAccountInfo['firstAvailable']:$remoteAccountInfo['secondAvailable']), 0, 6), 
+            );
+            
+        } else {
+            $wallet = array(
+                'id' => $account->id,
+                'type' => 'safe',
+                'currency' => $account->currency,
+                'balance' => Response::bcScaleOut($account->balance), 
+            );
+        }
+        
+        return $wallet;
+    }
+    
+    
     //external methods
     public static function transferToExternal($currency, $userId, $amount) {
         $currencyName = mb_strtolower($currency);
