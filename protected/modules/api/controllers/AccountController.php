@@ -185,45 +185,51 @@ class AccountController extends MainController {
     
     public function actionGetTransactions() {
         
+        $accountId = $this->getParam('accountId', null);
+        
+        $inputData = array(
+            'filterType' => $this->getParam('filterType', 'external'),
+            'criteria' => $this->getParam('criteria', ''),
+        );
+        
         try {
+            if(is_null($accountId)) {
+                throw new Exception();
+            }
+            
             $filter = array(
-                'user_from' => $this->user->id,
-                'user_to' => $this->user->id,
-                'user_or' => true,
+                'accountId' => $accountId,
+                'account_from' => $accountId,
+                'account_to' => $accountId,
+                'account_or' => true,
+                'balance_criteria' => $inputData['criteria'],
             );
             
-            $userAccounts = Account::getUserWallets($this->user->id);
-            
-            $transactions = Transaction::getList($filter, $this->paginationOptions); 
-            
-            $accountScope = array();
-            foreach($userAccounts as $key=>$value) {
-                $accountScope[] = $key;
-            }
-            
-            $externalTransactions = TransactionExternal::model()->findAllByAttributes(array('accountId'=>$accountScope));
-            
             $data = array();
-            foreach($transactions as $value) {
-                $data[$value->createdAt] = array(
-                    'date' => Response::tickToTimestamp($value->createdAt),
-                    'currency' => $value->currency,
-                    'amount' => Response::bcScaleOut($value->amount),
-                    'type' => ($userAccounts[$value->account_to]->type == 'user.safeWallet')? 'Internal in':'Internal out',
-                    'status' => 'accepted',
-                    'info' => '',
-                );
-            }
-            
-            foreach($externalTransactions as $value) {
-                $data[$value->createdAt] = array(
-                    'date' => Response::tickToTimestamp($value->createdAt),
-                    'currency' => $value->currency,
-                    'amount' => Response::bcScaleOut($value->amount),
-                    'type' => ($value->type)? 'External In':'External Out',
-                    'status' => $value->verifyStatus,
-                    'info' => $value->details,
-                );
+            if($inputData['filterType'] == 'internal') {
+                $transactions = Transaction::getList($filter, $this->paginationOptions);
+                foreach($transactions as $value) {
+                    $data[$value->createdAt] = array(
+                        'date' => Response::tickToTimestamp($value->createdAt),
+                        'currency' => $value->currency,
+                        'amount' => Response::bcScaleOut($value->amount),
+                        'type' => ($value->side == false)? 'Internal in':'Internal out',
+                        'status' => 'accepted',
+                        'info' => '',
+                    );
+                }
+            } else {
+                $externalTransactions = TransactionExternal::getList($filter, $this->paginationOptions);
+                foreach($externalTransactions as $value) {
+                    $data[$value->createdAt] = array(
+                        'date' => Response::tickToTimestamp($value->createdAt),
+                        'currency' => $value->currency,
+                        'amount' => Response::bcScaleOut($value->amount),
+                        'type' => ($value->type)? 'External In':'External Out',
+                        'status' => $value->verifyStatus,
+                        'info' => $value->details,
+                    );
+                }
             }
             
             $result = array();

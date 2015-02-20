@@ -42,6 +42,7 @@ class Transaction extends CActiveRecord {
         $model->user_to = (!$user_to)?Account::getUserByAccount($model->account_to):$user_to;
         
         $model->createdAt = TIME;
+        $model->side = ArrayHelper::getFromArray($data, 'side');
 
         try {
             if ($model->save()) {
@@ -137,8 +138,18 @@ class Transaction extends CActiveRecord {
         $currency = ArrayHelper::getFromArray($filters, 'currency');
         $dateFrom = ArrayHelper::getFromArray($filters, 'dateFrom');
         $dateTo = ArrayHelper::getFromArray($filters, 'dateTo');
+        
+        $balanceCriteria = ArrayHelper::getFromArray($filters, 'balance_criteria');
 
         $criteria = new CDbCriteria();
+        
+        if(!empty($balanceCriteria) && $balanceCriteria != '') {
+            if($balanceCriteria == 'debet') {
+                $criteria->compare('side', 't');
+            } else {
+                $criteria->compare('side', 'f');
+            }
+        }
         
         if(!empty($accountOr) && $accountOr == true) {
             $criteria->addCondition('"account_from"='.$accountFrom.' OR "account_to"='.$accountTo);

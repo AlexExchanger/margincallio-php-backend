@@ -90,9 +90,17 @@ class TransactionExternal extends CActiveRecord {
         $type = ArrayHelper::getFromArray($filters, 'type', null);
         $gatewayId = ArrayHelper::getFromArray($filters, 'gatewayId');
         $currency = ArrayHelper::getFromArray($filters, 'currency');
+        $balanceCriteria = ArrayHelper::getFromArray($filters, 'balance_criteria');
         
-
         $criteria = new CDbCriteria();
+        if(!empty($balanceCriteria) && $balanceCriteria != '') {
+            if($balanceCriteria == 'debet') {
+                $criteria->compare('type', 't');
+            } else {
+                $criteria->compare('type', 'f');
+            }
+        }
+
         if (!empty($accountId)) {
             $criteria->compare('accountId', $accountId);
         }

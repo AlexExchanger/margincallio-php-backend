@@ -245,6 +245,7 @@ class Account extends CActiveRecord {
         $transaction->currency = $currency;
         $transaction->user_from = Yii::app()->user->id;
         $transaction->user_to = Yii::app()->user->id;
+        $transaction->side = $type;
         
         if (!$transaction->save()) {
             throw new SystemException('Something wrong with transaction creating', $transaction->getErrors());
