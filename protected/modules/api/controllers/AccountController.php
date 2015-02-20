@@ -308,10 +308,32 @@ class AccountController extends MainController {
         $text = Yii::app()->request->getParam('text');
         
         try {
+            $files = array();
+            if (isset($_FILES) && count($_FILES) > 0) {
+                foreach ($_FILES as $key => $value) {
+                    $file = new File();
+                    $file->fileName = $value['name'];
+                    $file->fileSize = $value['size'];
+                    $file->fileItem = new CUploadedFile($value['name'], $value['tmp_name'], $value['type'], $value['size'], $value['error']);
+                    $file->uid = md5($this->user->id.$file->fileName.$file->fileSize.TIME);
+                    $file->createdAt = TIME;
+                    $file->createdBy = $this->user->id;
+                    $file->entityType = 'ticket';
+
+                    if ($file->save()) {
+                        $path = Yii::getPathOfAlias('webroot') . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . $file->uid;
+                        $file->fileItem->saveAs($path);
+                        $files[] = $file;
+                    } else {
+                        Response::ResponseError($file->getErrors());
+                    }
+                }
+            }
+            
             $ticket = Ticket::create(array(
                 'title' => Yii::app()->request->getParam('title'),
                 'department' => Yii::app()->request->getParam('department', 'general'),
-            ), $text, $this->user->id);
+            ), $text, $this->user->id, (count($files)>0)? $files:null);
             $logMessage = 'Create ticket with id: '.$ticket->id.', for '.$ticket->department.' department.';
             Loger::logUser(Yii::app()->user->id, $logMessage);
         } catch (Exception $e) {
@@ -347,8 +369,30 @@ class AccountController extends MainController {
         $text = Yii::app()->request->getParam('text');
         
         try {
+            $files = array();
+            if (isset($_FILES) && count($_FILES) > 0) {
+                foreach ($_FILES as $key => $value) {
+                    $file = new File();
+                    $file->fileName = $value['name'];
+                    $file->fileSize = $value['size'];
+                    $file->fileItem = new CUploadedFile($value['name'], $value['tmp_name'], $value['type'], $value['size'], $value['error']);
+                    $file->uid = md5($this->user->id.$file->fileName.$file->fileSize.TIME);
+                    $file->createdAt = TIME;
+                    $file->createdBy = $this->user->id;
+                    $file->entityType = 'ticket';
+
+                    if ($file->save()) {
+                        $path = Yii::getPathOfAlias('webroot') . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . $file->uid;
+                        $file->fileItem->saveAs($path);
+                        $files[] = $file;
+                    } else {
+                        Response::ResponseError($file->getErrors());
+                    }
+                }
+            }
+            
             $ticket = Ticket::getByUser($ticketId, $this->user->id);
-            Ticket::modify($ticket, array(), $text, $this->user->id);
+            Ticket::modify($ticket, array(), $text, $this->user->id, (count($files)>0)? $files:null);
             
             $logMessage = 'Replying for ticket with id: '.$ticket->id.'.';
             Loger::logUser(Yii::app()->user->id, $logMessage);
