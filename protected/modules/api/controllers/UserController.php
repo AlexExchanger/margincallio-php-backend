@@ -2,7 +2,7 @@
 
 class UserController extends MainController {
 
-    private $guestControl = array('login', 'register', 'activate', 'continueregister', 'lostpassword', 'changepassword', 'changepasswordrequest', 'repairbyalarm');
+    private $guestControl = array('login', 'register', 'activate', 'continueregister', 'lostpassword', 'changepasswordrequest', 'repairbyalarm');
     private $fullControl = array('islogged');
     
     public function beforeAction($action) {
@@ -76,22 +76,27 @@ class UserController extends MainController {
         }
     }
     
-    public function actionChangePasswordRequest($id) {
-        //TODO: action for front-end
+    public function actionChangePasswordRequest() {
+        $password = $this->getParam('password', null);
+        
+        try {
+            User::changePassword($password);
+            User::lostPassword($password);
+        } catch(ExceptionUserVerification $e) {
+            Response::ResponseError($e->getMessage());
+        }
+        
+        Response::ResponseSuccess();
         return true;
     }
     
     public function actionChangePassword() {
-        $cid = $this->getParam('cid');
-        $newPassword = $this->getParam('newPassword', true);
-        $newPasswordConfurm = $this->getParam('newPasswordConfurm', false);
         
-        if($newPassword != $newPasswordConfurm) {
-            Response::ResponseError('Passwords are not equal');
-        }
+        $password = $this->getParam('password', true);
+        $newPassword = $this->getParam('newPassword', true);
         
         try {
-            User::changeLostPassword($cid, $newPassword);
+            User::changePassword($password, $newPassword);
         } catch(ExceptionWrongInputData $e) {
             Response::ResponseError('Wrong data');
         }
@@ -123,10 +128,9 @@ class UserController extends MainController {
     
     public function actionLostPassword() {
         $email = $this->getParam('email', false);
-        $phone = $this->getParam('phone', false);
         
         try {
-            User::lostPassword($email, $phone);
+            User::lostPassword($email);
         } catch(ExceptionUserVerification $e) {
             Response::ResponseError($e->getMessage());
         }

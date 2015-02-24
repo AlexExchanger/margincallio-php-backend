@@ -116,7 +116,7 @@ class User extends CActiveRecord {
         return true;
     }
     
-    public static function lostPassword($email, $phone) {
+    public static function lostPassword($email) {
         
         $user = User::model()->findByAttributes(array('email'=>$email));
         if(!$user) {
@@ -135,6 +135,26 @@ class User extends CActiveRecord {
         $user->password = null;
         
         MailSender::sendEmail('lostPassword', $email, array('confirmCode'=>$newVerifyCode));
+        
+        if(!$user->save()) {
+            throw new ExceptionUserSave();
+        }
+        
+        return true;
+    }
+    
+    public static function changePassword($password, $newPassword) {
+        
+        $user = User::model()->findByPk(Yii::app()->user->id);
+        if(!$user) {
+            throw new ExceptionUserVerification();
+        }
+        
+        if($user->password != UserIdentity::trickyPasswordEncoding($user->email, $password)) {
+            throw new ExceptionWrongInputData();
+        }
+        
+        $user->password = UserIdentity::trickyPasswordEncoding($user->email, $newPassword);
         
         if(!$user->save()) {
             throw new ExceptionUserSave();
