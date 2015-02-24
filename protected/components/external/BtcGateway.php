@@ -50,14 +50,14 @@ class BtcGateway extends ExternalGateway {
     
     public function transferTo($accountId, $transactionId = null, $amount=null) {
         
-        $prevAddresses = CoinAddress::model()->findByAttributes(array(
+        $coinAddress = CoinAddress::model()->findByAttributes(array(
             'accountId' => $accountId,
             'used' => false
         ));
         
         $already = false;
         
-        if($prevAddresses) {
+        if($coinAddress) {
             $already = true;
         } else {
             //$address = CoinAddress::getNewAddress();
@@ -81,13 +81,13 @@ class BtcGateway extends ExternalGateway {
                     throw new SystemException('Unable to save transaction');
                 }
 
-                $address = new CoinAddress();
-                $address->accountId = $accountId;
-                $address->address = $address;
-                $address->createdAt = TIME;
-                $address->transactionId = $externalTransaction->id;
+                $coinAddress = new CoinAddress();
+                $coinAddress->accountId = $accountId;
+                $coinAddress->address = $address;
+                $coinAddress->createdAt = TIME;
+                $coinAddress->transactionId = $externalTransaction->id;
 
-                if(!$address->save()) {
+                if(!$coinAddress->save()) {
                     throw new SystemException('Unable to save coin address');
                 }
             } catch (Exception $e) {
@@ -97,7 +97,7 @@ class BtcGateway extends ExternalGateway {
         
         return array(
             'already' => $already,
-            'object' => $address
+            'object' => $coinAddress
         );
     }
     
