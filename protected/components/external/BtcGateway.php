@@ -81,13 +81,13 @@ class BtcGateway extends ExternalGateway {
                     throw new SystemException('Unable to save transaction');
                 }
 
-                $coinAddress = new CoinAddress();
-                $coinAddress->accountId = $accountId;
-                $coinAddress->address = $address;
-                $coinAddress->createdAt = TIME;
-                $coinAddress->transactionId = $externalTransaction->id;
+                $address = new CoinAddress();
+                $address->accountId = $accountId;
+                $address->address = $address;
+                $address->createdAt = TIME;
+                $address->transactionId = $externalTransaction->id;
 
-                if(!$coinAddress->save()) {
+                if(!$address->save()) {
                     throw new SystemException('Unable to save coin address');
                 }
             } catch (Exception $e) {
@@ -97,7 +97,7 @@ class BtcGateway extends ExternalGateway {
         
         return array(
             'already' => $already,
-            'object' => $coinAddress
+            'object' => $address
         );
     }
     
