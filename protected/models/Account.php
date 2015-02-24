@@ -320,9 +320,19 @@ class Account extends CActiveRecord {
             'type'=> array('user.trading'),
         ));
         
+        $withdrawalAccountList = Account::model()->findAllByAttributes(array(
+            'userId' => $user->id,
+            'type' => array('user.withdrawWallet')
+        ));
+        
         $tradeAccount = array();
         foreach($tradeAccountList as $value) {
             $tradeAccount[$value->currency] = $value; 
+        }
+        
+        $withdrawalAccount = array();
+        foreach($withdrawalAccountList as $value) {
+            $withdrawalAccount[$value->currency] = $value; 
         }
         
         $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
@@ -345,12 +355,13 @@ class Account extends CActiveRecord {
         );
         
         $data = array();
-        foreach($accountList as $key=>$value) {
+        foreach($accountList as $value) {
             $data[] = array(
                 'id' => $value->id,
                 'type' => 'safe',
                 'currency' => $value->currency,
-                'balance' => Response::bcScaleOut($value->balance), 
+                'balance' => Response::bcScaleOut($value->balance),
+                'hold' => isset($withdrawalAccount[$value->currency])? ''.Response::bcScaleOut($withdrawalAccount[$value->currency]->balance):'0',
             );
         }
         
@@ -358,14 +369,16 @@ class Account extends CActiveRecord {
             'id' => $tradeAccount[explode(',', $pair)[0]]->id,
             'type' => 'trade',
             'currency' => explode(',', $pair)[0],
-            'balance' => (string)Response::bcScaleOut(bcadd($remoteAccountInfo['firstAvailable'], 0))
+            'balance' => (string)Response::bcScaleOut(bcadd($remoteAccountInfo['firstAvailable'], 0)),
+            'hold' => (string)Response::bcScaleOut(bcadd($remoteAccountInfo['firstBlocked'], 0))
         );
         
         $data[] = array(
             'id' => $tradeAccount[explode(',', $pair)[1]]->id,
             'type' => 'trade',
             'currency' => explode(',', $pair)[1],
-            'balance' => (string)Response::bcScaleOut(bcadd($remoteAccountInfo['secondAvailable'],0))
+            'balance' => (string)Response::bcScaleOut(bcadd($remoteAccountInfo['secondAvailable'],0)),
+            'hold' => (string)Response::bcScaleOut(bcadd($remoteAccountInfo['secondBlocked'], 0))
         );
         
         $funds = array(
@@ -433,14 +446,27 @@ class Account extends CActiveRecord {
                 'type' => 'trade',
                 'currency' => $account->currency,
                 'balance' => (string)bcadd((($account->currency == $pairArray[0])?  $remoteAccountInfo['firstAvailable']:$remoteAccountInfo['secondAvailable']), 0, 6), 
+                'hold' => (string)bcadd((($account->currency == $pairArray[0])?  $remoteAccountInfo['firstBlocked']:$remoteAccountInfo['secondBlocked']), 0, 6), 
             );
             
         } else {
+            $withdrawal = Account::model()->findByAttributes(array(
+                'userId'=>$user->id,
+                'currency'=>$account->currency,
+                'type' => array('user.withdrawWallet'),
+            ));
+            
+            $holdValue = '0';
+            if($withdrawal) {
+                $holdValue = (string)Response::bcScaleOut($withdrawal->balance);
+            }
+            
             $wallet = array(
                 'id' => $account->id,
                 'type' => 'safe',
                 'currency' => $account->currency,
-                'balance' => Response::bcScaleOut($account->balance), 
+                'balance' => (string)Response::bcScaleOut($account->balance), 
+                'hold' => $holdValue
             );
         }
         
