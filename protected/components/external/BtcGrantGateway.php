@@ -69,7 +69,7 @@ class BtcGrantGateway extends ExternalGateway {
         return true;
     }
 
-    public function transferTo($accountId, $amount) {
+    public function transferTo($accountId, $transactionId, $amount) {
         parent::transferFrom($accountId, $amount);
         
         $account = Account::get($accountId);
@@ -81,22 +81,9 @@ class BtcGrantGateway extends ExternalGateway {
         
         try {
             
-            $account->balance = bcadd($account->balance, $amount); 
+            $account->balance = bcadd($account->balance, $amount);
             
             if(!$account->save()) {
-                throw new Exception();
-            }
-            
-            $transaction = new TransactionExternal();
-            $transaction->gatewayId = self::$gatewayId;
-            $transaction->type = false;
-            $transaction->verifyStatus = 'pending';
-            $transaction->accountId = $accountId;
-            $transaction->amount = $amount;
-            $transaction->createdAt = TIME;
-            $transaction->currency = 'BTC';
-            
-            if(!$transaction->save()) {
                 throw new Exception();
             }
             

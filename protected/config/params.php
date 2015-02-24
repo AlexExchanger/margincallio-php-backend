@@ -14,6 +14,6 @@ return array(
     'supportedCurrency' => array('BTC', 'USD', 'EUR'),
     'supportedPair' => array('BTC/USD'),
     'bitcoinService' => array(
-        'url'=>'http://bitconidservice/'
+        'url'=>'http://188.166.23.76'
     ),
 );

@@ -23,10 +23,6 @@ class Service
             return false;
         }
 
-        if (empty($_POST['time']) || $_POST['time'] > TIME + 10 || $_POST['time'] < TIME - 60) {
-            self::log('warn', 'Request with wrong time', $_POST);
-            return false;
-        }
         if (empty($_POST['sign'])) {
             self::log('warn', 'Request without sign', $_POST);
             return false;
@@ -34,23 +30,23 @@ class Service
         if (empty($_POST['request'])) {
             self::log('warn', 'Empty request', $_POST);
             return false;
+        } else {
+            $_POST['request'] = urldecode($_POST['request']);
         }
-
-        if ($_POST['sign'] != md5($_POST['request'] . $_POST['time'] . $requestSalt)) {
+        
+        if ($_POST['sign'] != md5($_POST['request'] . $requestSalt)) {
             self::log('warn', 'Request with wrong sign', $_POST);
             return false;
         }
 
         $_POST['request'] = json_decode($_POST['request'], true);
-
         return true;
     }
 
     public static function sendRequest($url, array $request, $requestSalt)
     {
         $request = json_encode($request, JSON_UNESCAPED_UNICODE);
-        $time = TIME;
-        $sign = md5($request . $time . $requestSalt);
+        $sign = md5($request . $requestSalt);
 
         $curl = curl_init();
         curl_setopt_array($curl, [
@@ -61,7 +57,6 @@ class Service
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => [
                 'request' => $request,
-                'time' => $time,
                 'sign' => $sign
             ]
         ]);

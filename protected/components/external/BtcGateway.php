@@ -48,45 +48,61 @@ class BtcGateway extends ExternalGateway {
         $this->address = $address;
     }
     
-    public function transferTo($accountId, $amount) {
+    public function transferTo($accountId, $transactionId = null, $amount=null) {
         
         $prevAddresses = CoinAddress::model()->findByAttributes(array(
             'accountId' => $accountId,
             'used' => false
         ));
         
+        $already = false;
+        
         if($prevAddresses) {
-            return array(
-                'already' => true,
-                'object' => $prevAddresses
-            );
-        }
-        
-        $address = CoinAddress::getNewAddress();
-        
-        if(!$address) {
-            return false;
-        }
-        
-        $coinAddress = new CoinAddress();
-        $coinAddress->accountId = $accountId;
-        $coinAddress->address = $address;
-        $coinAddress->createdAt = TIME;
-        if(!$coinAddress->save()) {
-            return false;
+            $already = true;
+        } else {
+            //$address = CoinAddress::getNewAddress();
+            $address = CoinAddress::generateNewAwating($amount);
+            
+            if(!$address) {
+                return false;
+            }
+
+            try {
+            
+                $externalTransaction = new TransactionExternal();
+                $externalTransaction->createdAt = TIME;
+                $externalTransaction->currency = 'BTC';
+                $externalTransaction->gatewayId = BtcGateway::$gatewayId;
+                $externalTransaction->type = false;
+                $externalTransaction->verifyStatus = 'pending';
+                $externalTransaction->accountId = $accountId;
+
+                if(!$externalTransaction->save()) {
+                    throw new SystemException('Unable to save transaction');
+                }
+
+                $coinAddress = new CoinAddress();
+                $coinAddress->accountId = $accountId;
+                $coinAddress->address = $address;
+                $coinAddress->createdAt = TIME;
+                $coinAddress->transactionId = $externalTransaction->id;
+
+                if(!$coinAddress->save()) {
+                    throw new SystemException('Unable to save coin address');
+                }
+            } catch (Exception $e) {
+                return false;
+            }
         }
         
         return array(
-            'already' => false,
+            'already' => $already,
             'object' => $coinAddress
         );
     }
     
-    public function transferFrom($accountId, $amount) {
-        
-        if(is_null($this->address)) {
-            return false;
-        }
+    public function transferFrom($accountId, $transactionId, $amount) {
+        return false;
         
     }
 }

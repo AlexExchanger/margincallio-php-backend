@@ -122,10 +122,23 @@ class ExternalGateway extends CActiveRecord{
             return false;
         }
         
-        return $gateway->transferTo($userAccount->id, $data['amount']);
+        $transaction = new TransactionExternal();
+        $transaction->gatewayId = $gatewayId;
+        $transaction->type = false;
+        $transaction->verifyStatus = 'pending';
+        $transaction->accountId = $userAccount->id;
+        $transaction->amount = $data['amount'];
+        $transaction->createdAt = TIME;
+        $transaction->currency = $data['currency'];
+
+        if(!$transaction->save()) {
+            throw new Exception();
+        }
+        
+        return $gateway->transferTo($userAccount->id, $transaction->id, $data['amount']);
     }
     
     public function getBillingMeta() {}
-    public function transferFrom($accountId, $amount) {}
-    public function transferTo($accountId, $amount) {}
+    public function transferFrom($accountId, $transactionId, $amount) {}
+    public function transferTo($accountId, $transactionId, $amount) {}
 }

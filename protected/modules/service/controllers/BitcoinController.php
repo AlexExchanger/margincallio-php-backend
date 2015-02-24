@@ -2,156 +2,98 @@
 
 class BitcoinController extends CController
 {
-
-    public function filters()
-    {
-        return ['postOnly'];
+    
+    public function filters() {
+        //return ['postOnly'];
     }
-
 
     public function actionReceived()
     {
-        $request = json_decode($_POST['request'], true);
-        $address = ArrayHelper::getFromArray($request, 'address');
-        $amount = ArrayHelper::getFromArray($request, 'amount');
-        $txid = ArrayHelper::getFromArray($request, 'txid');
+        $salt = 'salt';
+        
+//        $r = array(
+//            'address' => 'asdfasdg323rhgeefhewh',
+//            'amount' => 43,
+//            'txid' => 'g29hg23u8g9h23gu2hg982h892g'
+//        );
+//        
+//        $t = array(
+//            'request' => json_encode($r),
+//        );
+//        
+//        $t['sign'] = md5($t['request'].$salt);
+        
+        try {
+            if (!Service::checkRequest($salt)) {
+                throw new BitcoinDaemonException('Wrong request sign. Request: '.json_encode($_POST));
+            }
 
+            $request = $_POST['request'];
+            
+            $address = ArrayHelper::getFromArray($request, 'address');
+            $amount = ArrayHelper::getFromArray($request, 'amount');
+            $txid = ArrayHelper::getFromArray($request, 'txid');
 
-        $coinAddress = CoinAddress::getByAddress($address);
-        if (!$coinAddress) {
-            throw new MemcachedException('CoinAddress not found', array('request' => $_POST));
-        }
-
-        $gateway = Gateway::get($coinAddress->gatewayId);
-        if (!Service::checkRequest($gateway->secureData['salt'])) {
-            throw new SystemException('Wrong request sign', array('request' => $_POST));
-        }
-
-        $blockChain = @file_get_contents("https://blockchain.info/rawtx/$txid");
-        if (empty($blockChain)) {
-            throw new SystemException('Got empty data from blockchain.com', array('request' => $_POST));
+            $coinAddress = CoinAddress::getByAddress($address);
+            if (!$coinAddress) {
+                throw new BitcoinDaemonException('CoinAddress not found. Request: '.json_encode($_POST));
+            }
+            
+            $coinAddress->used = true;
+            $coinAddress->update();
+            
+        } catch(Exception $e) {
+            Response::ResponseError($e->getMessage());
         }
         
-        $blockChain = json_decode($blockChain, true);
-        if (!is_array($blockChain) || empty($blockChain['out'])) {
-            throw new SystemException('Got empty data from blockchain.com (empty [out])', array('request' => $_POST, 'blockchain' => $blockChain));
-        }
-
-        $isFound = false;
-        foreach ($blockChain['out'] as $tr) {
-            if ($tr['addr'] == $address && bccomp(bcmul($amount, '100000000'), $tr['value']) == 0) {
-                $isFound = true;
-                break;
+        //transaction update
+        $dbTransaction = Yii::app()->db->beginTransaction();
+        try {
+            $transactionQuery = 'SELECT * FROM "transaction_external" WHERE "id"='.$coinAddress->transactionId." FOR UPDATE";
+            $transaction = TransactionExternal::model()->findBySql($transactionQuery);
+            if(!$transaction) {
+                throw new SystemException('Transaction with id '.$coinAddress->transactionId.' doesn\'t exist!');
             }
-        }
 
-        if (!$isFound) {
-            throw new SystemException('Order not found', array('request' => $_POST, 'blockchain' => $blockChain));
-        }
-
-
-        $account = Account::get($coinAddress->accountId);
-        // todo type check
-        if (!$account || $account->currency != 'BTC') {
-            throw new SystemException('Account is not correct', array('request' => $_POST));
-        }
-
-        $gatewaySearchHash = md5("$txid:$address:$amount");
-
-        $transactionOrder = TransactionOrder::getByGatewaySearchHashForUpdate($gateway, $gatewaySearchHash);
-        if ($transactionOrder) {
-            $this->json();
-        }
-
-        $accountUniverse = Account::getOrCreateForSystem('system.gateway.external.universe', $gateway);
-        $accountExternal = Account::getOrCreateForSystem('system.gateway.external', $gateway);
-        $accountInternal = Account::getOrCreateForSystem('system.gateway.internal', $gateway);
-        $accountCommission = Account::getOrCreateForSystem('system.gateway.internal.commission', $gateway);
-
-        $transactionGroup = Guid::generate();
-
-        // создаем завершенный transactionOrder чтобы не зачислить деньги дважды
-        $transactionOrder = new TransactionOrder();
-        $transactionOrder->status = 'completed';
-        $transactionOrder->gatewayId = $gateway->id;
-        $transactionOrder->accountFromId = $accountUniverse->id;
-        $transactionOrder->accountFromType = $accountUniverse->type;
-        $transactionOrder->accountToId = $accountExternal->id;
-        $transactionOrder->accountToType = $accountExternal->type;
-        $transactionOrder->createdAt = TIME;
-        $transactionOrder->createdBy = $account->userId;
-        $transactionOrder->currency = $gateway->currency;
-        $transactionOrder->amount = $amount;
-        $transactionOrder->gatewaySearchHash = $gatewaySearchHash;
-        $transactionOrder->comment = '';
-        $transactionOrder->transactionGroupId = $transactionGroup;
-        $transactionOrder->details = [
-            'details' => [
+            if($transaction->verifyStatus != 'pending') {
+                throw new SystemException('Request already done!');
+            }
+            
+            $transaction->amount = $amount;
+            $transaction->verifyStatus = 'done';
+            $transaction->details = json_encode(array(
                 'txid' => $txid,
                 'address' => $address
-            ]
-        ];
-
-        $transaction1 = new Transaction();
-        $transaction1->accountId = $accountUniverse->id;
-        $transaction1->debit = 0;
-        $transaction1->credit = $amount;
-        $transaction1->createdAt = TIME;
-        $transaction1->groupId = $transactionGroup;
-        $transaction1->transactionOrderId = $transactionOrder->id;
-        if (!$transaction1->save()) {
-            throw new SystemException('Transaction was not saved', $transaction1->getErrors());
+            ));
+            
+            $transaction->update();
+            
+            $dbTransaction->commit();
+        } catch(Exception $e) {
+            $dbTransaction->rollback();
+            Response::ResponseError();
         }
-
-        $transaction2 = new Transaction();
-        $transaction2->accountId = $accountExternal->id;
-        $transaction2->debit = $amount;
-        $transaction2->credit = 0;
-        $transaction2->createdAt = TIME;
-        $transaction2->groupId = $transactionGroup;
-        $transaction2->transactionOrderId = $transactionOrder->id;
-        if (!$transaction2->save()) {
-            throw new SystemException(_('Transaction was not saved'), $transaction2->getErrors());
+        
+        //account update
+        $dbTransaction = Yii::app()->db->beginTransaction();
+        try {   
+            $query = 'SELECT * FROM "account" WHERE "id"='.$coinAddress->accountId." FOR UPDATE";
+            $account = Account::model()->findBySql($query);
+            if (!$account || $account->currency != 'BTC') {
+                throw new SystemException('Account is not correct', array('request' => $_POST));
+            }
+            $account->balance = bcadd($account->balance, $amount);
+            $account->update();
+            
+            /*push for daemon*/
+            $dbTransaction->commit();
+        } catch(Exception $e) {
+            $dbTransaction->rollback();
+            Response::ResponseError();
         }
-
-        $accountUniverse->saveCounters(['balance' => "-$amount"]);
-        $accountExternal->saveCounters(['balance' => $amount]);
-
-        $commission = Commission::get('gateway.addFunds', $gateway);
-
-        $newTransactionOrder = new TransactionOrder();
-        $newTransactionOrder->status = 'waitForAccountant';
-        $newTransactionOrder->gatewayId = $gateway->id;
-        $newTransactionOrder->accountFromId = $accountInternal->id;
-        $newTransactionOrder->accountFromType = $accountInternal->type;
-        $newTransactionOrder->accountToId = $account->id;
-        $newTransactionOrder->accountToType = $account->type;
-        $newTransactionOrder->createdAt = TIME;
-        $newTransactionOrder->createdBy = $account->userId;
-        $newTransactionOrder->currency = $gateway->currency;
-        $newTransactionOrder->amount = $amount;
-        $newTransactionOrder->gatewaySearchHash = null;
-        $newTransactionOrder->comment = '';
-        $newTransactionOrder->parentId = $transactionOrder->id;
-        $newTransactionOrder->transactionGroupId = $transactionGroup;
-        $newTransactionOrder->details = [
-            'accountantConfirmed' => [],
-            'commission' => [
-                'accountId' => $accountCommission->id,
-                'multiplier' => $commission ? $commission->rules['multiplier'] : '0',
-                'max' => $commission ? $commission->rules['max'] : '0',
-            ],
-            'details' => [
-                'txid' => $txid,
-                'address' => $address
-            ]
-        ];
-        if (!$newTransactionOrder->save()) {
-            throw new SystemException('TransactionOrder was not created', $transactionOrder->getErrors());
-        }
-        $this->json();
+        
+        Response::ResponseSuccess();
     }
-
 
     public function actionSent()
     {

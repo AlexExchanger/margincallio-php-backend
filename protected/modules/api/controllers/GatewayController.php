@@ -76,4 +76,13 @@ class GatewayController extends MainController {
         
         Response::ResponseSuccess();
     }
+    
+    public function actionMake() {
+        
+        //BTC
+        $gateway = GatewayFactory::create(2);
+        $address = $gateway->transferTo(219);
+        
+        Response::ResponseSuccess($address);
+    }
 }

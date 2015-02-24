@@ -17,6 +17,7 @@ class ModelException extends CommonException {
             $message = '';
         }
         $this->errors = $errors;
+        Loger::errorLog($message);
         parent::__construct($message);
     }
 
@@ -28,13 +29,13 @@ class SystemException extends CommonException {
     private $errors = array();
     protected $code = 1003;
     
-    function __construct($message, $errors = [])
-    {
+    function __construct($message, $errors = []) {
         if (is_array($message) && $errors === []) {
             $errors = $message;
             $message = '';
         }
         $this->errors = $errors;
+        Loger::errorLog($message);
         parent::__construct($message);
     }
 
@@ -45,6 +46,20 @@ class SystemException extends CommonException {
 }
 class NoDataException extends CommonException {
     protected $code = 1004;
+}
+class BitcoinDaemonException extends CommonException {
+    protected $code = 1005;
+    
+    function __construct($message, $errors = []) {
+        if (is_array($message) && $errors === []) {
+            $errors = $message;
+            $message = '';
+        }
+        
+        $this->errors = $errors;
+        Logger::errorLog($message);
+        parent::__construct($message);
+    }
 }
 
 //TcpRemoteClient

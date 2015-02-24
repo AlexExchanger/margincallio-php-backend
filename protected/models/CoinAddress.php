@@ -19,6 +19,41 @@ class CoinAddress extends CActiveRecord
         ];
     }
     
+    public static function getByAddress($address) {
+        return self::model()->findByAttributes(array('address'=>$address));
+    }
+    
+    public static function generateNewAwating() {
+        $request = array(
+            'request' => json_encode(array('action' => 'addToWaitingTransactions')),
+        );
+        
+        $request['sign'] = md5($request['request'].'salt');
+        $bitcoinService = curl_init();
+        curl_setopt_array($bitcoinService, array(
+            CURLOPT_URL => Yii::app()->params->bitcoinService['url'],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $request,
+        ));
+        
+        $response = curl_exec($bitcoinService);
+        curl_close($bitcoinService);
+        
+        if(!$response) {
+            return false;
+        }
+        
+        $data = json_decode($response, true);
+        
+        if(!$data['success']) {
+            return false;
+        }
+        
+        return $data['data'][0];
+    }
+    
     public static function getNewAddress() {
         
         $request = array(
