@@ -5,6 +5,10 @@ class NewsController extends AdminController {
     public $paginationOptions;
     
     public function beforeAction($action) {
+        if(mb_strtolower($action->id) == 'addnews' || mb_strtolower($action->id) == 'modifynews') {
+            $this->preflight();
+            return false;
+        }
         if(!parent::beforeAction($action)) {
             Response::ResponseAccessDenied();
             return false;
@@ -17,16 +21,28 @@ class NewsController extends AdminController {
         return true;
     }
     
+    private function preflight() {
+        $content_type = 'application/json';
+        $status = 200;
+
+        header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
+        header('Access-Control-Allow-Credentials: true');
+        if (isset($_SERVER['HTTP_ORIGIN'])) {
+            header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
+        }
+        header('Content-type: ' . $content_type);
+    }
+    
     public function actionAddNews() {
         
         $data = array(
-            'title' => $this->getParam('title'),
-            'content' => $this->getParam('content'),
-            'preview' => $this->getParam('preview'),
-            'category' => $this->getParam('category'),
-            'releaseData' => $this->getParam('releaseData', false),
-            'isActive' => $this->getParam('isActive', 0),
-            'number' => $this->getParam('number', 1),
+            'title' => $this->getPost('title'),
+            'content' => $this->getPost('content'),
+            'preview' => $this->getPost('preview'),
+            'category' => $this->getPost('category'),
+            'releaseData' => $this->getPost('releaseData', false),
+            'isActive' => $this->getPost('isActive', 0),
+            'number' => $this->getPost('number', 1),
         );
         
        try {
@@ -42,16 +58,15 @@ class NewsController extends AdminController {
     
     public function actionModifyNews() {
         $data = array(
-            'id' => $this->getParam('id', null),
-            'title' => $this->getParam('title', null),
-            'content' => $this->getParam('content', null),
-            'preview' => $this->getParam('preview', null),
-            'category' => $this->getParam('category', null),
-            'releaseData' => $this->getParam('releaseData', false),
-            'isActive' => $this->getParam('isActive', null),
-            'number' => $this->getParam('number', null),
+            'id' => $this->getPost('id', null),
+            'title' => $this->getPost('title', null),
+            'content' => $this->getPost('content', null),
+            'preview' => $this->getPost('preview', null),
+            'category' => $this->getPost('category', null),
+            'releaseData' => $this->getPost('releaseData', false),
+            'isActive' => $this->getPost('isActive', null),
+            'number' => $this->getPost('number', null),
         );
-
 
         try {
             $news = News::model()->findByPk($data['id']);
