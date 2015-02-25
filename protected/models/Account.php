@@ -303,6 +303,20 @@ class Account extends CActiveRecord {
         return true;
     }
 
+    public static function getSafeByCurrency($currency) {
+        $userId = Yii::app()->user->id;
+        if(!$userId) {
+            return false;
+        }
+        
+        return self::model()->findByAttributes(array(
+            'userId' => $userId,
+            'type'=> array('user.safeWallet'),
+            'currency'=>$currency,
+        ));
+    }
+    
+    
     public static function getAccountInfo() {
         $user = Yii::app()->user;
         if(!$user) {

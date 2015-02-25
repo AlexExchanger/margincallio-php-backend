@@ -8,8 +8,8 @@ class BtcGrantGateway extends ExternalGateway {
         return self::model('BtcGrantGateway')->findByPk(self::$gatewayId);
     }
 
-    public function getBillingMeta() {
-        
+    public static function getBillingMeta($payment, $data) {
+        return $payment;
     }
     
     public function transferFrom($accountId, $amount) {

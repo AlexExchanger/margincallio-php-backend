@@ -47,17 +47,7 @@ class ExternalGateway extends CActiveRecord{
             }
         }
         
-        $transaction = new TransactionExternal();
-        $transaction->gatewayId = $data['gatewayId'];
-        $transaction->type = false;
-        $transaction->status = 'pending';
-        $transaction->accountId = $data['accountId'];
-        $transaction->amount = $data['amount'];
-        $transaction->createdAt = TIME;
-        $transaction->currency = $data['currency'];
-        $transaction->details = json_encode($userForm);
-        
-        return $transaction->save();
+        return $gateway->transferTo($data['accountId'], null, $data['amount']);
     }
     
     public static function getList(array $filters, array &$pagination) {
@@ -138,7 +128,7 @@ class ExternalGateway extends CActiveRecord{
         return $gateway->transferTo($userAccount->id, $transaction->id, $data['amount']);
     }
     
-    public function getBillingMeta() {}
+    public static function getBillingMeta($payment, $data) {}
     public function transferFrom($accountId, $transactionId, $amount) {}
     public function transferTo($accountId, $transactionId, $amount) {}
 }

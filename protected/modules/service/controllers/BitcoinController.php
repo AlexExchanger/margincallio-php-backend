@@ -10,19 +10,6 @@ class BitcoinController extends CController
     public function actionReceived()
     {
         $salt = 'salt';
-        
-//        $r = array(
-//            'address' => 'asdfasdg323rhgeefhewh',
-//            'amount' => 43,
-//            'txid' => 'g29hg23u8g9h23gu2hg982h892g'
-//        );
-//        
-//        $t = array(
-//            'request' => json_encode($r),
-//        );
-//        
-//        $t['sign'] = md5($t['request'].$salt);
-        
         try {
             if (!Service::checkRequest($salt)) {
                 throw new BitcoinDaemonException('Wrong request sign. Request: '.json_encode($_POST));

@@ -8,6 +8,10 @@ class UsdGrantGateway extends ExternalGateway {
         return self::model('UsdGrantGateway')->findByPk(self::$gatewayId);
     }
 
+    public static function getBillingMeta($payment, $data) {
+        return $payment;
+    }
+    
     public function transferFrom($accountId, $amount) {
         parent::transferFrom($accountId, $amount);
         

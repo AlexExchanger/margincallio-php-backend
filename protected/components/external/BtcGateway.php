@@ -48,7 +48,10 @@ class BtcGateway extends ExternalGateway {
         $this->address = $address;
     }
     
-    public function transferTo($accountId, $transactionId = null, $amount=null) {
+    
+    /*Data: accountId*/
+    public static function getBillingMeta($payment, $data) {
+        $accountId = $data['accountId'];
         
         $coinAddress = CoinAddress::model()->findByAttributes(array(
             'accountId' => $accountId,
@@ -61,7 +64,7 @@ class BtcGateway extends ExternalGateway {
             $already = true;
         } else {
             //$address = CoinAddress::getNewAddress();
-            $address = CoinAddress::generateNewAwating($amount);
+            $address = CoinAddress::generateNewAwating();
             
             if(!$address) {
                 return false;
@@ -95,10 +98,14 @@ class BtcGateway extends ExternalGateway {
             }
         }
         
-        return array(
-            'already' => $already,
-            'object' => $coinAddress
-        );
+        return preg_replace_callback('/ADDRESS_PLACEHOLDER/', function($matches) use ($coinAddress){
+            return $coinAddress->address;
+        }, $payment);
+
+    }
+    
+    public function transferTo($accountId, $transactionId = null, $amount=null) {
+        return true;
     }
     
     public function transferFrom($accountId, $transactionId, $amount) {

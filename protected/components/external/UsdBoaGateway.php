@@ -8,8 +8,8 @@ class UsdBoaGateway extends ExternalGateway {
         return self::model('UsdBoaGateway')->findByPk(self::$gatewayId);
     }
 
-    public function getBillingMeta() {
-        
+    public static function getBillingMeta($payment, $data) {
+        return $payment;
     }
     
 }

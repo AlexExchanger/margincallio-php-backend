@@ -31,13 +31,21 @@ class GatewayController extends MainController {
             
             $gateways = ExternalGateway::model()->findAllByAttributes($filter);
             
+            $accounts = array();
             $data = array();
             foreach($gateways as $value) {
+                $instance = GatewayFactory::create($value->id);
+                if(!isset($accounts[$value->currency])) {
+                    $accounts[$value->currency] = Account::getSafeByCurrency($value->currency);
+                }
+                $account = $accounts[$value->currency];
+                $payment = $instance::getBillingMeta($value->payment, array('accountId'=>$account->id));
+                
                 $data[] = array(
                     'id' => $value->id,
                     'name' => $value->name,
                     'currency' => $value->currency,
-                    'payment' => json_decode($value->payment, true),
+                    'payment' => json_decode($payment, true),
                 );
             }
         } catch(Exception $e) {
