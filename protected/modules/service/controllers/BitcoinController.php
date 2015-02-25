@@ -26,8 +26,9 @@ class BitcoinController extends CController
                 throw new BitcoinDaemonException('CoinAddress not found. Request: '.json_encode($_POST));
             }
             
-            $coinAddress->used = true;
-            $coinAddress->update();
+            if(isset($coinAddress->lastTx) && $coinAddress->lastTx == $txid) {
+                throw new BitcoinDaemonException('Transaction already done!. Request: '.json_encode($_POST));
+            }
             
         } catch(Exception $e) {
             Response::ResponseError($e->getMessage());
@@ -43,18 +44,35 @@ class BitcoinController extends CController
             }
 
             if($transaction->verifyStatus != 'pending') {
-                throw new SystemException('Request already done!');
+                
+                $newTransaction = new TransactionExternal();
+                $newTransaction->createdAt = TIME;
+                $newTransaction->currency = 'BTC';
+                $newTransaction->gatewayId = BtcGateway::$gatewayId;
+                $newTransaction->type = false;
+                $newTransaction->verifyStatus = 'done';
+                $newTransaction->accountId = $coinAddress->accountId;
+                $transaction->amount = $amount;
+                $transaction->details = json_encode(array(
+                    'txid' => $txid,
+                    'address' => $address
+                ));
+                
+                if(!$newTransaction->save()) {
+                    throw new SystemException('Error with additional transaction created!');
+                }
+                
+            } else {
+                $transaction->amount = $amount;
+                $transaction->verifyStatus = 'done';
+                $transaction->details = json_encode(array(
+                    'txid' => $txid,
+                    'address' => $address
+                ));
+                
             }
             
-            $transaction->amount = $amount;
-            $transaction->verifyStatus = 'done';
-            $transaction->details = json_encode(array(
-                'txid' => $txid,
-                'address' => $address
-            ));
-            
-            $transaction->update();
-            
+            $transaction->update();   
             $dbTransaction->commit();
         } catch(Exception $e) {
             $dbTransaction->rollback();
@@ -73,6 +91,11 @@ class BitcoinController extends CController
             $account->update();
             
             /*push for daemon*/
+            
+            $coinAddress->lastTx = $txid;
+            $coinAddress->used = true;
+            $coinAddress->update();
+            
             $dbTransaction->commit();
         } catch(Exception $e) {
             $dbTransaction->rollback();
