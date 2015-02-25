@@ -478,13 +478,39 @@ class AccountController extends MainController {
 
         try {
             $ticket = Ticket::getByUser($ticketId, $this->user->id);
+            if($ticket->createdBy != Yii::app()->user->id) {
+                $ticket->createdBy = null;
+            }
+            if($ticket->updatedBy != Yii::app()->user->id) {
+                $ticket->updatedBy = null;
+            }
+            
             $messages = array();
             foreach ($ticket->messages as $value) {
+                $currentFilesObjects = array();
+                if(!is_null($value->files)) {
+                    $currentFiles = explode(',', $value->files);
+                    foreach($currentFiles as $oneFile) {
+                        if(!isset($allFiles[$oneFile])) {
+                            $file = File::model()->findByPk($oneFile);
+                            if(!$file) {continue;}
+                            $allFiles[$oneFile] = array(
+                                'url' => '/files/'.$file->uid,
+                                'uid' => $file->uid,
+                                'type' => $file->entityType
+                            );
+                        }
+                        $currentFilesObjects[] = $allFiles[$oneFile];
+                    }
+                }
+
                 $messages[] = array(
                     'id' => $value->id,
                     'createdBy' => $value->createdBy,
                     'createdAt' => $value->createdAt,
-                    'text' => $value->text);
+                    'text' => $value->text,
+                    'files' => $currentFilesObjects
+                );
             }
         } catch (Exception $e) {
             Response::ResponseError($e->getMessage());
