@@ -331,14 +331,27 @@ class AccountController extends MainController {
         
     }
     
+    private function preflight() {
+        $content_type = 'application/json';
+        $status = 200;
+
+        header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
+        header('Access-Control-Allow-Credentials: true');
+        if (isset($_SERVER['HTTP_ORIGIN'])) {
+            header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
+        }
+        header('Content-type: ' . $content_type);
+    }
+    
     /* Ticket system */
     public function actionCreateTicket() {
         
-        $text = Yii::app()->request->getParam('text');
+        $text = $this->getParam('text', null);
         
-        try {
+        if (isset($_FILES) && count($_FILES) > 0) { 
+            //files
             $files = array();
-            if (isset($_FILES) && count($_FILES) > 0) {
+            try {
                 foreach ($_FILES as $key => $value) {
                     $file = new File();
                     $file->fileName = $value['name'];
@@ -352,24 +365,33 @@ class AccountController extends MainController {
                     if ($file->save()) {
                         $path = Yii::getPathOfAlias('webroot') . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . $file->uid;
                         $file->fileItem->saveAs($path);
-                        $files[] = $file;
+                        $files[] = $file->id;
                     } else {
                         Response::ResponseError($file->getErrors());
                     }
                 }
+            } catch(Exception $e) {
+                Response::ResponseError($e->getMessage());
             }
             
-            $ticket = Ticket::create(array(
-                'title' => Yii::app()->request->getParam('title'),
-                'department' => Yii::app()->request->getParam('department', 'general'),
-            ), $text, $this->user->id, (count($files)>0)? $files:null);
             $logMessage = 'Create ticket with id: '.$ticket->id.', for '.$ticket->department.' department.';
             Loger::logUser(Yii::app()->user->id, $logMessage);
-        } catch (Exception $e) {
-            Response::ResponseError();
+            Response::ResponseSuccess($files);
+        } elseif(!is_null($text)) {
+            //ticket
+            $ticket = Ticket::create(array(
+                'title' => $this->getParam('title'),
+                'department' => $this->getParam('department', 'general'),
+                'files' => $this->getParam('files', null)
+            ), $text, $this->user->id, null);
+            $logMessage = 'Create ticket with id: '.$ticket->id.', for '.$ticket->department.' department.';
+            Loger::logUser(Yii::app()->user->id, $logMessage);
+            
+            Response::ResponseSuccess();
+        } else {
+            //headers
+            $this->preflight();
         }
-        
-        Response::ResponseSuccess();
     }
     
     public function actionGetTicket() {

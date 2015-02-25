@@ -33,6 +33,8 @@ class TicketMessage extends CActiveRecord {
         $ticketMessage->createdAt = TIME;
         $ticketMessage->text = $text;
         $ticketMessage->ticketId = $ticket->id;
+        $ticketMessage->files = ArrayHelper::getFromArray($data, 'files');
+        
         try {
             if ($ticketMessage->save()) {
                 if ($file) {

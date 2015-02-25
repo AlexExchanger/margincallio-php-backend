@@ -57,13 +57,16 @@ class Ticket extends CActiveRecord
         $ticket->updatedBy = $userId;
         $ticket->messageCount = 1;
         $ticket->status = 'waitForSupport';
-
+        
         if (!$ticket->validate()) {
             throw new ModelException('Ticket not save', $ticket->getErrors());
         }
         try {
             if ($ticket->save()) {
-                TicketMessage::create($ticket, array('text' => $text), $userId, $file);
+                TicketMessage::create($ticket, array(
+                    'text' => $text,
+                    'files' => ArrayHelper::getFromArray($data, 'files')
+                ), $userId, $file);
                 return $ticket;
             } else {
                 throw new ModelException('Ticket not save', $ticket->getErrors());
