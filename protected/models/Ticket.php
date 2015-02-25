@@ -89,7 +89,7 @@ class Ticket extends CActiveRecord
 
         try {
             //обновляем статус
-            if (!empty($status) && $ticket->status !== $status) {
+            if (!is_null($status) && $ticket->status !== $status) {
                 //статус тикета изменен
                 $update['status'] = $status;
                 $ticket->status = $status;
@@ -97,7 +97,10 @@ class Ticket extends CActiveRecord
 
             //сохраняем сообщение
             if (!empty($text)) {
-                $ticketMessage = TicketMessage::create($ticket, ['text' => $text], $userId, $file);
+                $ticketMessage = TicketMessage::create($ticket, [
+                    'text' => $text,
+                    'files' => ArrayHelper::getFromArray($data, 'files')
+                ], $userId, $file);
                 $ticket->messageCount = TicketMessage::getCountByTicket($ticket);
                 $update['messageCount'] = $ticket->messageCount;
 

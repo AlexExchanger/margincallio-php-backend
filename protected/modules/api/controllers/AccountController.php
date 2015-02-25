@@ -417,11 +417,12 @@ class AccountController extends MainController {
     public function actionReplyForTicket() {
         
         $ticketId = Yii::app()->request->getParam('ticketId');
-        $text = Yii::app()->request->getParam('text');
+        $text = $this->getParam('text', null);
         
-        try {
+        if (isset($_FILES) && count($_FILES) > 0) { 
+            //files
             $files = array();
-            if (isset($_FILES) && count($_FILES) > 0) {
+            try {
                 foreach ($_FILES as $key => $value) {
                     $file = new File();
                     $file->fileName = $value['name'];
@@ -435,23 +436,34 @@ class AccountController extends MainController {
                     if ($file->save()) {
                         $path = Yii::getPathOfAlias('webroot') . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . $file->uid;
                         $file->fileItem->saveAs($path);
-                        $files[] = $file;
+                        $files[] = $file->id;
                     } else {
                         Response::ResponseError($file->getErrors());
                     }
                 }
+            } catch(Exception $e) {
+                Response::ResponseError($e->getMessage());
             }
             
-            $ticket = Ticket::getByUser($ticketId, $this->user->id);
-            Ticket::modify($ticket, array(), $text, $this->user->id, (count($files)>0)? $files:null);
-            
-            $logMessage = 'Replying for ticket with id: '.$ticket->id.'.';
+            $logMessage = 'Upload files with id: '.implode(',', $files);
             Loger::logUser(Yii::app()->user->id, $logMessage);
-        } catch (Exception $e) {
-            Response::ResponseError();
+            Response::ResponseSuccess($files);
+        } elseif(!is_null($text)) {
+            //ticket
+            $ticket = Ticket::getByUser($ticketId, $this->user->id);
+            Ticket::modify($ticket, array(
+                'status' => $this->getParam('status', null),
+                'files' => $this->getParam('files', null),
+            ), $text, $this->user->id, null);
+
+            $logMessage = 'Replying for ticket with id: ' . $ticket->id . '.';
+            Loger::logUser(Yii::app()->user->id, $logMessage);
+            
+            Response::ResponseSuccess();
+        } else {
+            //headers
+            $this->preflight();
         }
-        
-        Response::ResponseSuccess();   
     }
     
     public function actionGetOrders() {
