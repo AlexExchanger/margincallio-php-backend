@@ -48,12 +48,12 @@ class BitcoinController extends CController
                 $newTransaction = new TransactionExternal();
                 $newTransaction->createdAt = TIME;
                 $newTransaction->currency = 'BTC';
-                $newTransaction->gatewayId = BtcGateway::$gatewayId;
+                $newTransaction->gatewayId = 2;
                 $newTransaction->type = false;
                 $newTransaction->verifyStatus = 'done';
                 $newTransaction->accountId = $coinAddress->accountId;
-                $transaction->amount = $amount;
-                $transaction->details = json_encode(array(
+                $newTransaction->amount = $amount;
+                $newTransaction->details = json_encode(array(
                     'txid' => $txid,
                     'address' => $address
                 ));

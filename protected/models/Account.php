@@ -580,6 +580,11 @@ class Account extends CActiveRecord {
         return Account::model()->findAllByAttributes($conditions);
     }
 
+    public static function getBestHotWallet($currency) {
+        $sql = 'SELECT * FROM "account" where "balance"=(SELECT MIN("balance") FROM "account" WHERE "type"=\'system.gateway.hot\') AND "type"=\'system.gateway.hot\'';
+        return Account::model()->findBySql($sql);
+    }
+    
     public static function createHot($currency) {
         
         $count = self::model()->countByAttributes(array(

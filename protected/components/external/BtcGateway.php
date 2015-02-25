@@ -13,12 +13,13 @@ class BtcGateway extends ExternalGateway {
     public static function callBtcd($function, $params=[]) {
         
         $request = array(
-            'request[action]' => $function,
-            'time' => TIME,
-            'request[params]' => json_encode($params)
+            'request' => json_encode(array(
+                'action' => $function,
+                'params' => $params
+            )),
         );
         
-        $request['sign'] = md5($request['request[action]'].TIME.'salt');
+        $request['sign'] = md5($request['request'].'salt');
         $bitcoinService = curl_init();
         curl_setopt_array($bitcoinService, array(
             CURLOPT_URL => Yii::app()->params->bitcoinService['url'],

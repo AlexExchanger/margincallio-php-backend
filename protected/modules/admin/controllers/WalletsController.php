@@ -32,5 +32,16 @@ class WalletsController extends AdminController{
         
         Response::ResponseSuccess($accounts);
     }
-       
+    
+    public function actionGetBestHotWallet() {
+        $currency = $this->getParam('currency', 'BTC');
+        
+        try {
+            $accounts = Account::getBestHotWallet($currency);
+        } catch(Exception $e) {
+            Response::ResponseError($e->getMessage());
+        }
+        
+        Response::ResponseSuccess($accounts);
+    }
 }
