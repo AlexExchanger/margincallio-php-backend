@@ -394,26 +394,55 @@ class AccountController extends MainController {
         }
     }
     
-    public function actionGetTicket() {
-        $ticketId = Yii::app()->request->getParam('ticketId');
-        
+    public function actionGetAllTickets() {
+        $userId = Yii::app()->user->id;
+        $status = $this->getParam('status', null);
+        $department = $this->getParam('department', null);
         try {
-            $ticket = Ticket::getByUser($ticketId, $this->user->id);
+            if(!$userId) {
+                throw new Exception();
+            }
+            
+            $filters = array('userId' => $userId);
+            if(!is_null($status)) {
+                $filters['status'] = $status;
+            }
+            
+            if(!is_null($department)) {
+                $filters['department'] = $department;
+            }
+            
+            $tickets = Ticket::getList($filters, $this->paginationOptions);
+            
         } catch(Exception $e) {
-            Response::ResponseError($e->getMessage());
+            Response::ResponseError();
         }
-        $messages = array();
-        foreach($ticket->messages as $value) {
-            $messages[] = array(
-                'id' => $value->id,
-                'createdBy' => $value->createdBy,
-                'createdAt' => $value->createdAt,
-                'text' => $value->text);
-        }
-        
-        Response::ResponseSuccess(array('ticket'=>$ticket, 'messages'=>$messages));
+        Response::ResponseSuccess(array(
+            'count' => count($tickets),
+            'data' => $tickets
+        ));
     }
     
+    public function actionGetTicket() {
+        $ticketId = Yii::app()->request->getParam('ticketId');
+
+        try {
+            $ticket = Ticket::getByUser($ticketId, $this->user->id);
+            $messages = array();
+            foreach ($ticket->messages as $value) {
+                $messages[] = array(
+                    'id' => $value->id,
+                    'createdBy' => $value->createdBy,
+                    'createdAt' => $value->createdAt,
+                    'text' => $value->text);
+            }
+        } catch (Exception $e) {
+            Response::ResponseError($e->getMessage());
+        }
+
+        Response::ResponseSuccess(array('ticket' => $ticket, 'messages' => $messages));
+    }
+
     public function actionReplyForTicket() {
         
         $ticketId = Yii::app()->request->getParam('ticketId');
