@@ -57,7 +57,7 @@ class BitcoinDaemonException extends CommonException {
         }
         
         $this->errors = $errors;
-        Logger::errorLog($message);
+        Loger::errorLog($message);
         parent::__construct($message);
     }
 }
