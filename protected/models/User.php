@@ -346,6 +346,7 @@ class User extends CActiveRecord {
             'defaultPair' => $supportedPair[0],
             '2fa' => $user->twoFA,
             'verified' => $user->verifiedStatus,
+            'isVerified' => ($user->verifiedStatus == 'accepted')? true:false,
             'openTickets' => $openTickets
         );
     }
