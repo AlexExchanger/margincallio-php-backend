@@ -5,7 +5,7 @@ class AccountController extends MainController {
     private $user = null;
     public $paginationOptions;
     
-    private $fullControl = array('alltrades', 'graphicsstat', 'getorderbook');
+    private $fullControl = array('alltrades', 'graphicsstat', 'getorderbook', 'createticket');
     
     public function beforeAction($action) {
         if(!parent::beforeAction($action)) {
