@@ -374,7 +374,7 @@ class AccountController extends MainController {
                 Response::ResponseError($e->getMessage());
             }
             
-            $logMessage = 'Create ticket with id: '.$ticket->id.', for '.$ticket->department.' department.';
+            $logMessage = 'Upload files with id: '.implode(',', $files);
             Loger::logUser(Yii::app()->user->id, $logMessage);
             Response::ResponseSuccess($files);
         } elseif(!is_null($text)) {
