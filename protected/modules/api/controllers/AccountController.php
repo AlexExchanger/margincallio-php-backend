@@ -437,7 +437,7 @@ class AccountController extends MainController {
                     
                     $messages[] = array(
                         'id' => $value->id,
-                        'createdBy' => $value->createdBy,
+                        'createdBy' => ($value->createdBy == $userId)? $userId: null,
                         'createdAt' => $value->createdAt,
                         'text' => $value->text,
                         'files' => $currentFilesObjects
@@ -506,7 +506,7 @@ class AccountController extends MainController {
 
                 $messages[] = array(
                     'id' => $value->id,
-                    'createdBy' => $value->createdBy,
+                    'createdBy' => ($value->createdBy == Yii::app()->user->id)? $value->createdBy: null,
                     'createdAt' => $value->createdAt,
                     'text' => $value->text,
                     'files' => $currentFilesObjects
