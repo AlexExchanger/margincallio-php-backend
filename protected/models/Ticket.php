@@ -238,6 +238,7 @@ class Ticket extends CActiveRecord
                 foreach($currentFiles as $oneFile) {
                     if(!isset($allFiles[$oneFile])) {
                         $file = File::model()->findByPk($oneFile);
+                        if(!$file) {continue;}
                         $allFiles[$oneFile] = array(
                             'url' => '/files/'.$file->uid,
                             'uid' => $file->uid,
