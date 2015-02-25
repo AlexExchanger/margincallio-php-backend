@@ -414,12 +414,44 @@ class AccountController extends MainController {
             
             $tickets = Ticket::getList($filters, $this->paginationOptions);
             
+            $data = array();
+            foreach($tickets as $ticket) {
+                $messages = array();
+                foreach ($ticket->messages as $value) {
+                    $messages[] = array(
+                        'id' => $value->id,
+                        'createdBy' => $value->createdBy,
+                        'createdAt' => $value->createdAt,
+                        'text' => $value->text
+                    );
+                    
+                    if(count($messages) > 2) {
+                        break;
+                    }
+                }
+                
+                $data[] = array(
+                    'id' => $ticket->id,
+                    'title' => $ticket->title,
+                    'createdBy' => ($ticket->createdBy == $userId)? $userId: null,
+                    'createdAt' => $ticket->createdAt,
+                    'status' => $ticket->status,
+                    'department' => $ticket->department,
+                    'updatedAt' => $ticket->updatedAt,
+                    'updatedBy' => ($ticket->updatedBy == $userId)? $userId: null,
+                    'messageCount' => $ticket->messageCount,
+                    'userId' => $ticket->userId,
+                    'importance' => $ticket->importance,
+                    'messages' => $messages
+                );
+            }
+            
         } catch(Exception $e) {
             Response::ResponseError();
         }
         Response::ResponseSuccess(array(
             'count' => count($tickets),
-            'data' => $tickets
+            'data' => $data
         ));
     }
     
