@@ -27,7 +27,7 @@ class TicketMessage extends CActiveRecord {
     }
 
     public static function getLastMessages($ticketId, $count) {
-        $messages = TicketMessage::model()->findAllByAttributes(array('ticketId' => $ticketId), array('order' => 'id DESC'));
+        $messages = TicketMessage::model()->findAllByAttributes(array('ticketId' => $ticketId), array('limit'=>$count, 'order' => 'id DESC'));
         $allMessage = array();
         foreach ($messages as $value) {
             $currentFilesObjects = array();
@@ -56,6 +56,7 @@ class TicketMessage extends CActiveRecord {
             );
         }
         
+        return $allMessage;
     }
     
     

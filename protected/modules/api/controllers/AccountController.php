@@ -564,7 +564,7 @@ class AccountController extends MainController {
             $logMessage = 'Replying for ticket with id: ' . $ticket->id . '.';
             Loger::logUser(Yii::app()->user->id, $logMessage);
             
-            $msg = Ticket::getLastMessages($ticketId, 1);
+            $msg = TicketMessage::getLastMessages($ticketId, 1);
             if(isset($msg) && isset($msg[0])) {
                 Response::ResponseSuccess($msg[0]);
             }
