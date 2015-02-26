@@ -564,7 +564,9 @@ class AccountController extends MainController {
             $logMessage = 'Replying for ticket with id: ' . $ticket->id . '.';
             Loger::logUser(Yii::app()->user->id, $logMessage);
             
-            Response::ResponseSuccess();
+            
+            $this->actionGetTicket();
+            //Response::ResponseSuccess();
         } else {
             //headers
             $this->preflight();

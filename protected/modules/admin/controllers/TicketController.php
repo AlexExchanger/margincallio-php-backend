@@ -17,6 +17,18 @@ class TicketController extends AdminController {
         return true;
     }
 
+    private function preflight() {
+        $content_type = 'application/json';
+        $status = 200;
+
+        header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
+        header('Access-Control-Allow-Credentials: true');
+        if (isset($_SERVER['HTTP_ORIGIN'])) {
+            header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
+        }
+        header('Content-type: ' . $content_type);
+    }
+    
     public function actionViewActiveTickets() {        
         $userId = $this->getParam('userId', false);
         $status = $this->getParam('status', 'waitForSupport');
@@ -138,25 +150,54 @@ class TicketController extends AdminController {
     
     public function actionReplyForTicket() {
         
-        $ticketId = $this->getParam('ticketId', false);
-        $text = $this->getParam('text');
+        $ticketId = Yii::app()->request->getParam('ticketId');
+        $text = $this->getParam('text', null);
         
-        if(!$ticketId) {
-            Response::ResponseError();
-        }
-        
-        try {
-            $ticket = Ticket::get($ticketId);
-            $userId = Yii::app()->user->id;
-            Ticket::modify($ticket, array(), $text, $userId);
+        if (isset($_FILES) && count($_FILES) > 0) { 
+            //files
+            $files = array();
+            try {
+                foreach ($_FILES as $key => $value) {
+                    $file = new File();
+                    $file->fileName = $value['name'];
+                    $file->fileSize = $value['size'];
+                    $file->fileItem = new CUploadedFile($value['name'], $value['tmp_name'], $value['type'], $value['size'], $value['error']);
+                    $file->uid = md5($this->user->id.$file->fileName.$file->fileSize.TIME);
+                    $file->createdAt = TIME;
+                    $file->createdBy = $this->user->id;
+                    $file->entityType = 'ticket';
+
+                    if ($file->save()) {
+                        $path = Yii::getPathOfAlias('webroot') . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . $file->uid;
+                        $file->fileItem->saveAs($path);
+                        $files[] = $file->id;
+                    } else {
+                        Response::ResponseError($file->getErrors());
+                    }
+                }
+            } catch(Exception $e) {
+                Response::ResponseError($e->getMessage());
+            }
             
+            $logMessage = 'Upload files with id: '.implode(',', $files);
+            Loger::logUser(Yii::app()->user->id, $logMessage);
+            Response::ResponseSuccess($files);
+        } elseif(!is_null($text)) {
+            //ticket
+            $userId = Yii::app()->user->id;
+            $ticket = Ticket::get($ticketId);
+            Ticket::modify($ticket, array(
+                'status' => $this->getParam('status', null),
+                'files' => $this->getParam('files', null),
+            ), $text, $userId, null);
+
             $logMessage = 'Reply for ticket with id "'.$ticketId.'" with message: '.$text;
             Loger::logAdmin(Yii::app()->user->id, $logMessage);
-        } catch (Exception $e) {
-            Response::ResponseError();
+            
+            Response::ResponseSuccess();
+        } else {
+            //headers
+            $this->preflight();
         }
-        
-        Response::ResponseSuccess();   
     }
-    
 }
