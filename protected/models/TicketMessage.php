@@ -26,6 +26,40 @@ class TicketMessage extends CActiveRecord {
         return (int)TicketMessage::model()->countByAttributes(array('ticketId' => $ticket->id));
     }
 
+    public static function getLastMessages($ticketId, $count) {
+        $messages = TicketMessage::model()->findAllByAttributes(array('ticketId' => $ticketId), array('order' => 'id DESC'));
+        $allMessage = array();
+        foreach ($messages as $value) {
+            $currentFilesObjects = array();
+            if(!is_null($value->files)) {
+                $currentFiles = explode(',', $value->files);
+                foreach($currentFiles as $oneFile) {
+                    if(!isset($allFiles[$oneFile])) {
+                        $file = File::model()->findByPk($oneFile);
+                        if(!$file) {continue;}
+                        $allFiles[$oneFile] = array(
+                            'url' => '/files/'.$file->uid,
+                            'uid' => $file->uid,
+                            'type' => $file->entityType
+                        );
+                    }
+                    $currentFilesObjects[] = $allFiles[$oneFile];
+                }
+            }
+            
+            $allMessage[] = array(
+                'id' => $value->id,
+                'createdBy' => ($value->createdBy == Yii::app()->user->id)? $value->createdBy: null,
+                'createdAt' => $value->createdAt,
+                'text' => $value->text,
+                'files' => $currentFilesObjects
+            );
+        }
+        
+    }
+    
+    
+    
     public static function create(Ticket $ticket, array $data, $userId, $file = null) {
         $text = ArrayHelper::getFromArray($data, 'text', '');
         $ticketMessage = new TicketMessage();
