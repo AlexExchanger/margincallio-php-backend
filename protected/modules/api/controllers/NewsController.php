@@ -29,7 +29,10 @@ class NewsController extends MainController {
             Response::ResponseError();
         }
 
-        Response::ResponseSuccess($result);
+        Response::ResponseSuccess(array(
+            'count' => isset($this->paginationOptions['total']) ? $this->paginationOptions['total'] : '',
+            'data' => $result,
+        ));
     }
 
     public function actionNews() {
