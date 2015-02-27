@@ -10,7 +10,8 @@ class ExternalGateway extends CActiveRecord{
         return parent::model($className);
     }
     
-    public static function processPayment($data, $payment) {
+    //type = 0 (In) | type = 1 (Out) 
+    public static function processPayment($data, $payment, $type) {
         $gateway = GatewayFactory::create($data['gatewayId']);
         if(!$gateway) {
             return false;
@@ -20,6 +21,8 @@ class ExternalGateway extends CActiveRecord{
         $paymentForm = json_decode($paymentFormJSON, true);
         $userForm = json_decode($payment, true);
        
+        
+        $fieldsData = array();
         foreach($paymentForm as $group) {
             foreach($group['fields'] as $field) {
                 if($field['required'] == true) {
@@ -33,21 +36,33 @@ class ExternalGateway extends CActiveRecord{
                 }
                 
                 switch($field['type']) {
+                    case 'Double':
+                        if(!is_double($userForm[$field['name']])) {
+                            return false;
+                        }
+                        $fieldsData[$field['name']] = $userForm[$field['name']];
+                        break;
                     case 'String':
                         if(!is_string($userForm[$field['name']])) {
                             return false;
                         }
+                        $fieldsData[$field['name']] = $userForm[$field['name']];
                         break;
                     case 'Checkbox':
                         if(!is_bool($userForm[$field['name']])) {
                             return false;
                         }
+                        $fieldsData[$field['name']] = $userForm[$field['name']];
                         break;
                 }
             }
         }
         
-        return $gateway->transferTo($data['accountId'], null, $data['amount']);
+        if($type) {
+            return $gateway->transferFrom($data['accountId'], null, $data['amount'], $fieldsData);
+        } else {
+            return $gateway->transferTo($data['accountId'], null, $data['amount'], $fieldsData);
+        }
     }
     
     public static function getList(array $filters, array &$pagination) {
@@ -129,6 +144,6 @@ class ExternalGateway extends CActiveRecord{
     }
     
     public static function getBillingMeta($payment, $data) {}
-    public function transferFrom($accountId, $transactionId, $amount) {}
-    public function transferTo($accountId, $transactionId, $amount) {}
+    public function transferFrom($accountId, $transactionId, $amount, $data) {}
+    public function transferTo($accountId, $transactionId, $amount, $data) {}
 }

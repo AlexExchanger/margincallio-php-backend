@@ -49,6 +49,42 @@ class BtcGateway extends ExternalGateway {
         $this->address = $address;
     }
     
+    public static function callForWithdraw($address, $transactionId, $amount) {
+        $request = array(
+            'request' => json_encode(array(
+                'action' => 'requestSend',
+                'transactionOrder' => $transactionId,
+                'address' => $address,
+                'amount' => $amount
+            )),
+        );
+        
+        $request['sign'] = md5($request['request'].'salt');
+        $bitcoinService = curl_init();
+        curl_setopt_array($bitcoinService, array(
+            CURLOPT_URL => Yii::app()->params->bitcoinService['url'],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $request,
+        ));
+        
+        $response = curl_exec($bitcoinService);
+        curl_close($bitcoinService);
+        
+        if(!$response) {
+            return false;
+        }
+        
+        $data = json_decode($response, true);
+        
+        if(!$data['success']) {
+            return false;
+        }
+        
+        return $data;
+    }
+    
     
     /*Data: accountId*/
     public static function getBillingMeta($payment, $data) {
@@ -64,7 +100,6 @@ class BtcGateway extends ExternalGateway {
         if($coinAddress) {
             $already = true;
         } else {
-            //$address = CoinAddress::getNewAddress();
             $address = CoinAddress::generateNewAwating();
             
             if(!$address) {
@@ -72,25 +107,11 @@ class BtcGateway extends ExternalGateway {
             }
 
             try {
-            
-                $externalTransaction = new TransactionExternal();
-                $externalTransaction->createdAt = TIME;
-                $externalTransaction->currency = 'BTC';
-                $externalTransaction->gatewayId = BtcGateway::$gatewayId;
-                $externalTransaction->type = false;
-                $externalTransaction->verifyStatus = 'pending';
-                $externalTransaction->accountId = $accountId;
-
-                if(!$externalTransaction->save()) {
-                    throw new SystemException('Unable to save transaction');
-                }
-
                 $coinAddress = new CoinAddress();
                 $coinAddress->accountId = $accountId;
                 $coinAddress->address = $address;
                 $coinAddress->createdAt = TIME;
-                $coinAddress->transactionId = $externalTransaction->id;
-
+                
                 if(!$coinAddress->save()) {
                     throw new SystemException('Unable to save coin address');
                 }
@@ -105,12 +126,72 @@ class BtcGateway extends ExternalGateway {
 
     }
     
-    public function transferTo($accountId, $transactionId = null, $amount=null) {
+    public function transferTo($accountId, $transactionId = null, $amount=null, $data=null) {
         return true;
     }
     
-    public function transferFrom($accountId, $transactionId, $amount) {
-        return false;
+    public function transferFrom($accountId, $transactionId, $amount, $data) {
+        if(!isset($data) || !isset($data['address'])) {
+            return false;
+        }
         
+        $response = '';
+        
+        $dbTransaction = Yii::app()->db->beginTransaction();
+        try {
+            /* withdraw */
+            $accountQuery = 'SELECT * FROM "account" WHERE id=:id FOR UPDATE';
+            $account = Account::model()->findBySql($accountQuery, array(':id'=>$accountId));
+            if(!$account) {
+                throw new Exception('Account doesn\'t exist');
+            }
+            
+            $withdrawQuery = 'SElECT * FROM "account" WHERE "currency"=\'BTC\' AND "userId"=\':userid\' AND "type"=\'user.withdrawWallet\' FOR UPDATE';
+            $withdrawWallet = Account::model()->findBySql($withdrawQuery, array(':userid' => $account->userId));
+            if(!$withdrawWallet) {
+                throw new Exception('Withdrawal account doesn\'t exist');
+            }
+
+            if(bccomp($amount, $account->balance) == 1) {
+                throw new Exception('Not enough money');
+            }
+            
+            $account->balance = bcsub($account->balance, $amount); 
+            $withdrawWallet->balance = bcadd($withdrawWallet->balance, $amount);
+            
+            $transaction = new TransactionExternal();
+            $transaction->gatewayId = self::$gatewayId;
+            $transaction->type = true;
+            $transaction->verifyStatus = 'pending';
+            $transaction->accountId = $accountId;
+            $transaction->amount = $amount;
+            $transaction->createdAt = TIME;
+            $transaction->currency = 'BTC';
+            
+            if(!$transaction->save()) {
+                throw new Exception('Transaction save error');
+            }
+            
+            $withdrawLimit = Yii::app()->params['withdrawalLimit']['BTC'];
+            if(bccomp($amount, $withdrawLimit) <= 0) {
+                $result = callForWithdraw($data['address'], $transaction->id, $amount);
+                if($result == false) {
+                    throw new Exception('BTC daemon error');
+                }
+                $response = 'done';
+            } else {
+                $response = 'admin';
+            }
+            
+            $account->update();
+            $withdrawWallet->update();
+            
+            $dbTransaction->commit();
+        } catch(Exception $e) {
+            $dbTransaction->rollback();
+            return false;
+        }
+        
+        return $response;
     }
 }

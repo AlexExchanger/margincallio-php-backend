@@ -12,12 +12,11 @@ class MainController extends CController {
         
         if(!empty($_GET)) {
             $this->getResource = $_GET;
+        } else {
+            $post_request = json_decode(file_get_contents("php://input"), true);
+            $this->resource = $post_request['params'];
         }
-        
-        if(!empty($_POST)) {
-            $this->resource = $_POST;
-        }
-        
+
         return true;
     }
     

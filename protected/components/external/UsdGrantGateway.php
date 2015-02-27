@@ -12,7 +12,7 @@ class UsdGrantGateway extends ExternalGateway {
         return $payment;
     }
     
-    public function transferFrom($accountId, $amount) {
+    public function transferFrom($accountId, $transactionId = null, $amount) {
         parent::transferFrom($accountId, $amount);
         
         $account = Account::get($accountId);
@@ -69,7 +69,7 @@ class UsdGrantGateway extends ExternalGateway {
         return true;
     }
 
-    public function transferTo($accountId, $amount) {
+    public function transferTo($accountId, $transactionId = null, $amount) {
         parent::transferFrom($accountId, $amount);
         
         $account = Account::get($accountId);

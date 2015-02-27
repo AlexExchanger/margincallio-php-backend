@@ -3,10 +3,60 @@
 class BitcoinController extends CController
 {
     
-    public function filters() {
-        //return ['postOnly'];
-    }
+    public function actionTransaction() {
+    
+        $salt = 'salt';
+      
+        $dbTransaction = Yii::app()->db->beginTransaction();
+        try {
+            if (!Service::checkRequest($salt)) {
+                throw new BitcoinDaemonException('Wrong request sign. Request: '.json_encode($_POST));
+            }
 
+            $request = $_POST['request'];
+            
+            $txid = ArrayHelper::getFromArray($request, 'txid');
+            $address = ArrayHelper::getFromArray($request, 'address');
+            
+            //select for update
+            $coinAddressQuery = 'SELECT * FROM "coin_address" WHERE "address"=\':address\' FOR UPDATE';
+            $coinAddress = CoinAddress::model()->findBySql($coinAddressQuery, array(
+               ':address' => $address,
+            ));
+            
+            if (!$coinAddress) {
+                throw new BitcoinDaemonException('CoinAddress not found. Request: '.json_encode($_POST));
+            }
+            
+            if(!is_null($coinAddress->transactionId)) {
+                if(isset($coinAddress->lastTx) && $coinAddress->lastTx != $txid) {
+                    //daemon notify
+                }
+                
+                throw new SystemException('Already done');
+            }
+            
+            $externalTransaction = new TransactionExternal();
+            $externalTransaction->createdAt = TIME;
+            $externalTransaction->currency = 'BTC';
+            $externalTransaction->gatewayId = 2;
+            $externalTransaction->type = false;
+            $externalTransaction->verifyStatus = 'pending';
+            $externalTransaction->accountId = $coinAddress->accountId;
+            
+            if(!$externalTransaction->save()) {
+                throw new SystemException('Unable to save transaction');
+            }
+            
+            $dbTransaction->commit();
+        } catch(Exception $e) {
+            $dbTransaction->rollback();
+            Response::ResponseError($e->getMessage());
+        }
+        
+        Response::ResponseSuccess();
+    }
+    
     public function actionReceived()
     {
         $salt = 'salt';
@@ -107,110 +157,51 @@ class BitcoinController extends CController
 
     public function actionSent()
     {
-        $request = json_decode($_POST['request'], true);
-        $transactionOrders = \ArrayHelper::getFromArray($request, 'transactionOrders');
-        $commission = \ArrayHelper::getFromArray($request, 'commission');
-        $txid = \ArrayHelper::getFromArray($request, 'txid');
-
-        $gateway = \Gateway::getForPayment('bitcoin', 'BTC');
-        if (!Service::checkRequest($gateway->secureData['salt'])) {
-            throw new \SystemException(_('Wrong sign of request'), ['request' => $_POST]);
-        }
-
-        $accountExternal = Account::getOrCreateForSystem('system.gateway.external', $gateway);
-        $accountCommission = Account::getOrCreateForSystem('system.gateway.external.systemCommission', $gateway);
-
-        $dbTransaction = Account::model()->dbConnection->beginTransaction();
+        $salt = 'salt';
+        
         try {
-            $transactionGroup = \Guid::generate();
-            foreach ($transactionOrders as $id) {
-                $transactionOrder = \TransactionOrder::get($id);
-                $transactionOrder->status = 'completed';
-                $transactionOrder->finishedAt = TIME;
-                $details = $transactionOrder->details;
-                $details['details']['txid'] = $txid;
-                $transactionOrder->details = $details;
-                $transactionOrder->update(['status', 'finishedAt', 'details']);
-
-                if ($transactionOrder->parentId) {
-                    $firstTransactionOrder = \TransactionOrder::get($transactionOrder->parentId);
-                    $details = $firstTransactionOrder->details;
-                    $details['details']['txid'] = $txid;
-                    $firstTransactionOrder->details = $details;
-                    $firstTransactionOrder->update(['details']);
-                }
-
-                $accountFrom = Account::get($transactionOrder->accountFromId);
-                $accountTo = Account::get($transactionOrder->accountToId);
-
-                $transaction1 = new \Transaction();
-                $transaction1->accountId = $accountFrom->id;
-                $transaction1->debit = 0;
-                $transaction1->credit = $transactionOrder->amount;
-                $transaction1->createdAt = TIME;
-                $transaction1->groupId = $transactionGroup;
-                $transaction1->transactionOrderId = $transactionOrder->id;
-                if (!$transaction1->save()) {
-                    throw new \SystemException(_('Transaction was not saved'), $transaction1->getErrors());
-                }
-
-                $transaction2 = new \Transaction();
-                $transaction2->accountId = $accountTo->id;
-                $transaction2->debit = $transactionOrder->amount;
-                $transaction2->credit = 0;
-                $transaction2->createdAt = TIME;
-                $transaction2->groupId = $transactionGroup;
-                $transaction2->transactionOrderId = $transactionOrder->id;
-                if (!$transaction2->save()) {
-                    throw new \SystemException(_('Transaction was not saved'), $transaction2->getErrors());
-                }
-
-                $accountFrom->saveCounters(['balance' => "-$transactionOrder->amount"]);
-                $accountTo->saveCounters(['balance' => $transactionOrder->amount]);
-
-                $originalAccount = Account::get($transactionOrder->details['originalAccountId']);
-                if ($originalAccount) {
-                    \UserLog::addAction($originalAccount->userId, 'fundsWithdrawal', [
-                        'accountId' => $originalAccount->publicId,
-                        'currency' => $originalAccount->currency,
-                        'amount' => $transactionOrder->amount
-                    ]);
-                }
+            if (!Service::checkRequest($salt)) {
+                throw new BitcoinDaemonException('Wrong request sign. Request: '.json_encode($_POST));
             }
 
-
-            $transaction1 = new \Transaction();
-            $transaction1->accountId = $accountExternal->id;
-            $transaction1->debit = 0;
-            $transaction1->credit = $commission;
-            $transaction1->createdAt = TIME;
-            $transaction1->groupId = $transactionGroup;
-            $transaction1->transactionOrderId = null;
-            if (!$transaction1->save()) {
-                throw new \SystemException(_('Transaction was not saved'), $transaction1->getErrors());
+            $request = $_POST['request'];
+        
+            $transactionOrders = ArrayHelper::getFromArray($request, 'transactionOrders');
+            $txid = ArrayHelper::getFromArray($request, 'txid');
+            
+            
+        } catch(Exception $e) {
+            Response::ResponseError($e->getMessage());
+        }
+        
+        $dbTransaction = Yii::app()->db->beginTransaction();
+        try {
+            $transactionQuery = 'SELECT * FROM "transaction_external" WHERE id=:id FOR UPDATE';
+            $transaction = TransactionExternal::model()->findBySql($transactionQuery, array(':id'=>$transactionOrders));
+            if(!$transaction || $transaction->verifyStatus == 'done') {
+                throw new SystemException('Transactin already done');
             }
-
-            $transaction2 = new \Transaction();
-            $transaction2->accountId = $accountCommission->id;
-            $transaction2->debit = $commission;
-            $transaction2->credit = 0;
-            $transaction2->createdAt = TIME;
-            $transaction2->groupId = $transactionGroup;
-            $transaction2->transactionOrderId = null;
-            if (!$transaction2->save()) {
-                throw new \SystemException(_('Transaction was not saved'), $transaction2->getErrors());
+            
+            $withdrawQuery = 'SELECT * FROM "account" WHERE id=:withdrawid FOR UPDATE';
+            $withdraw = Account::model()->findBySql($withdrawQuery, array(':withdrawid'=>$transaction->accountId));
+            if(!$withdraw) {
+                throw new SystemException('Withdraw account doesn\'t exist');
             }
-
-            $accountExternal->saveCounters(['balance' => "-$commission"]);
-            $accountCommission->saveCounters(['balance' => $commission]);
-
+            
+            $withdraw->balance = bcsub($withdraw->balance, $transaction->amount);
+            $transaction->verifyStatus = 'done';
+            $transaction->details = json_encode(array(
+                'txid' => $txid
+            ));
+            
+            $transaction->update();
+            $withdraw->update();
             $dbTransaction->commit();
-        }
-        catch (\Exception $e) {
+        } catch (Exception $e) {
             $dbTransaction->rollback();
-            throw $e;
+            Response::ResponseError($e->getMessage());
         }
 
-        $this->json();
+        Response::ResponseSuccess();
     }
 }

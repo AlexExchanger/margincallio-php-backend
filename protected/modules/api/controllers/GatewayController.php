@@ -64,12 +64,14 @@ class GatewayController extends MainController {
         $currency = $this->getParam('currency');
         $gatewayId = $this->getParam('id', 3);
         $paymentInformation = $this->getParam('payment');
+        $type = $this->getParam('type', null);
         
         try {
-            if(!isset($accountId) || !isset($amount)) {
+            if(!isset($accountId) || !isset($amount) || is_null($type)) {
                 throw new Exception();
             }
             
+            $type = ($type === 0 || $type === 'true')? 1:0;
             $data = array(
                 'gatewayId' => $gatewayId,
                 'accountId' => $accountId,
@@ -77,12 +79,21 @@ class GatewayController extends MainController {
                 'currency' => $currency,
             );
             
-            ExternalGateway::processPayment($data, $paymentInformation);
+            $result = ExternalGateway::processPayment($data, $paymentInformation, $type);
+            if(!$result) {
+                throw new Exception();
+            }
+            
+            $message = 'Done';
+            if($result == 'admin') {
+                $message = 'Avaing for admin';
+            }
+            
         } catch (Exception $e) {
             Response::ResponseError();
         }
         
-        Response::ResponseSuccess();
+        Response::ResponseSuccess($message);
     }
     
     public function actionMake() {

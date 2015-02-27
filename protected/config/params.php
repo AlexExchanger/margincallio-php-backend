@@ -16,4 +16,7 @@ return array(
     'bitcoinService' => array(
         'url'=>'http://188.166.23.76'
     ),
+    'withdrawalLimit' => array(
+        'BTC' => '1',
+    ),
 );
