@@ -5,7 +5,7 @@ class NewsController extends AdminController {
     public $paginationOptions;
     
     public function beforeAction($action) {
-        if(mb_strtolower($action->id) == 'addnews' || mb_strtolower($action->id) == 'modifynews') {
+        if((mb_strtolower($action->id) == 'addnews' || mb_strtolower($action->id) == 'modifynews') && $_SERVER['REQUEST_METHOD'] != 'POST') {
             $this->preflight();
             return false;
         }
@@ -24,7 +24,7 @@ class NewsController extends AdminController {
     private function preflight() {
         $content_type = 'application/json';
         $status = 200;
-
+        header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
         header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
         header('Access-Control-Allow-Credentials: true');
         if (isset($_SERVER['HTTP_ORIGIN'])) {
@@ -130,7 +130,7 @@ class NewsController extends AdminController {
                 throw new Exception();
             }
 
-            include Yii::getPathOfAlias('webroot').'/protected/extensions/pdfConverter/mpdf.php';
+            include Yii::getPathOfAlias('webroot').'/../protected/extensions/pdfConverter/mpdf.php';
 
             $news = News::model()->findByPk($id);
 
@@ -139,7 +139,7 @@ class NewsController extends AdminController {
             }
 
             $html = $this->render('newsTemplate', array(
-                'imgPath' => Yii::getPathOfAlias('webroot').'/protected/extensions/pdfConverter/examples/',
+                'imgPath' => '',//Yii::getPathOfAlias('webroot').'/../protected/extensions/pdfConverter/examples/',
                 'title' => $news->title,
                 'content' => $news->content
             ), true);
@@ -148,7 +148,7 @@ class NewsController extends AdminController {
 
             $mpdf->SetDisplayMode('fullpage');
 
-            $stylesheet = file_get_contents(Yii::getPathOfAlias('webroot').'/protected/extensions/pdfConverter/examples/mpdfstyleA4.css');
+            $stylesheet = file_get_contents(Yii::getPathOfAlias('webroot').'/../protected/extensions/pdfConverter/examples/mpdfstyleA4.css');
             $mpdf->WriteHTML($stylesheet,1);
             $mpdf->WriteHTML($html);
             $mpdf->Output();

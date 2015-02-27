@@ -14,8 +14,8 @@ class MainController extends CController {
             $this->getResource = $_GET;
         }
         
-        if(!empty($_POST) && isset($_POST['request'])) {
-            $this->resource = CJSON::decode($_POST['request'], true);
+        if(!empty($_POST)) {
+            $this->resource = $_POST;
         }
         
         return true;
