@@ -163,7 +163,7 @@ class BtcGateway extends ExternalGateway {
             $transaction->gatewayId = self::$gatewayId;
             $transaction->type = true;
             $transaction->verifyStatus = 'pending';
-            $transaction->accountId = $accountId;
+            $transaction->accountId = $withdrawWallet->id;
             $transaction->amount = $amount;
             $transaction->createdAt = TIME;
             $transaction->currency = 'BTC';
