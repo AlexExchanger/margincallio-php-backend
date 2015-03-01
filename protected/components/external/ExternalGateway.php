@@ -17,11 +17,10 @@ class ExternalGateway extends CActiveRecord{
             return false;
         }
         
-        $paymentFormJSON = $gateway->payment;
-        $paymentForm = json_decode($paymentFormJSON, true);
-        $userForm = json_decode($payment, true);
-       
-        
+        $paymentFormJSON = json_decode($gateway->payment, true);
+        $paymentForm = ($type)? $paymentFormJSON['out']:$paymentFormJSON['in'];
+        $userForm = json_decode(urldecode($payment), true);
+
         $fieldsData = array();
         foreach($paymentForm as $group) {
             foreach($group['fields'] as $field) {
@@ -37,7 +36,7 @@ class ExternalGateway extends CActiveRecord{
                 
                 switch($field['type']) {
                     case 'Double':
-                        if(!is_double($userForm[$field['name']])) {
+                        if(!is_double(doubleval($userForm[$field['name']]))) {
                             return false;
                         }
                         $fieldsData[$field['name']] = $userForm[$field['name']];

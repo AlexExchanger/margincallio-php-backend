@@ -146,7 +146,7 @@ class BtcGateway extends ExternalGateway {
                 throw new Exception('Account doesn\'t exist');
             }
             
-            $withdrawQuery = 'SElECT * FROM "account" WHERE "currency"=\'BTC\' AND "userId"=\':userid\' AND "type"=\'user.withdrawWallet\' FOR UPDATE';
+            $withdrawQuery = 'SElECT * FROM "account" WHERE "currency"=\'BTC\' AND "userId"=:userid AND "type"=\'user.withdrawWallet\' FOR UPDATE';
             $withdrawWallet = Account::model()->findBySql($withdrawQuery, array(':userid' => $account->userId));
             if(!$withdrawWallet) {
                 throw new Exception('Withdrawal account doesn\'t exist');
@@ -174,7 +174,7 @@ class BtcGateway extends ExternalGateway {
             
             $withdrawLimit = Yii::app()->params['withdrawalLimit']['BTC'];
             if(bccomp($amount, $withdrawLimit) <= 0) {
-                $result = callForWithdraw($data['address'], $transaction->id, $amount);
+                $result = self::callForWithdraw($data['address'], $transaction->id, $amount);
                 if($result == false) {
                     throw new Exception('BTC daemon error');
                 }

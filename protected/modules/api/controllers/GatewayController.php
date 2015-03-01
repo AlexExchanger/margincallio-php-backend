@@ -59,12 +59,20 @@ class GatewayController extends MainController {
     }
     
     public function actionPayByGateway() {
-        $accountId = $this->getParam('accountId');
-        $amount = $this->getParam('amount');
-        $currency = $this->getParam('currency');
-        $gatewayId = $this->getParam('id', 3);
-        $paymentInformation = $this->getParam('payment');
-        $type = $this->getParam('type', null);
+//        $accountId = $this->getParam('accountId');
+//        $amount = $this->getParam('amount');
+//        $currency = $this->getParam('currency');
+//        $gatewayId = $this->getParam('id', 3);
+//        $paymentInformation = $this->getParam('payment');
+//        $type = $this->getParam('type', null);
+        
+        $accountId = Yii::app()->request->getPost('accountId');
+        $amount = Yii::app()->request->getPost('amount');
+        $currency = Yii::app()->request->getPost('currency');
+        $gatewayId = Yii::app()->request->getPost('id', 3);
+        $paymentInformation = Yii::app()->request->getPost('payment');
+        $type = Yii::app()->request->getPost('type', null);
+        
         
         try {
             if(!isset($accountId) || !isset($amount) || is_null($type)) {
