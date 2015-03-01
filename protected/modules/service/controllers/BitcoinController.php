@@ -19,7 +19,7 @@ class BitcoinController extends CController
             $address = ArrayHelper::getFromArray($request, 'address');
             
             //select for update
-            $coinAddressQuery = 'SELECT * FROM "coin_address" WHERE "address"=\':address\' FOR UPDATE';
+            $coinAddressQuery = 'SELECT * FROM "coin_address" WHERE "address"=:address FOR UPDATE';
             $coinAddress = CoinAddress::model()->findBySql($coinAddressQuery, array(
                ':address' => $address,
             ));
@@ -44,11 +44,13 @@ class BitcoinController extends CController
             $externalTransaction->verifyStatus = 'pending';
             $externalTransaction->accountId = $coinAddress->accountId;
             
-            $coinAddress->transactionId = $externalTransaction->id;
+            
             if(!$externalTransaction->save()) {
                 throw new SystemException('Unable to save transaction');
             }
             
+            $coinAddress->transactionId = $externalTransaction->id;
+            $coinAddress->update();
             $dbTransaction->commit();
         } catch(Exception $e) {
             $dbTransaction->rollback();
