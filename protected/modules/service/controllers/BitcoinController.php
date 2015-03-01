@@ -179,8 +179,16 @@ class BitcoinController extends CController
         
         $dbTransaction = Yii::app()->db->beginTransaction();
         try {
+            $transactionId = '';
+            if(is_array($transactionOrders)) {
+                $transactionId = $transactionOrders[0];
+            } else {
+                $transactionId = $transactionOrders;
+            }
+            
+            
             $transactionQuery = 'SELECT * FROM "transaction_external" WHERE id=:id FOR UPDATE';
-            $transaction = TransactionExternal::model()->findBySql($transactionQuery, array(':id'=>$transactionOrders));
+            $transaction = TransactionExternal::model()->findBySql($transactionQuery, array(':id'=>$transactionId));
             if(!$transaction || $transaction->verifyStatus == 'done') {
                 throw new SystemException('Transactin already done');
             }
