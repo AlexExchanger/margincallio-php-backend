@@ -44,6 +44,7 @@ class BitcoinController extends CController
             $externalTransaction->verifyStatus = 'pending';
             $externalTransaction->accountId = $coinAddress->accountId;
             
+            $coinAddress->transactionId = $externalTransaction->id;
             if(!$externalTransaction->save()) {
                 throw new SystemException('Unable to save transaction');
             }

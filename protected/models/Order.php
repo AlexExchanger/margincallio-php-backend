@@ -311,4 +311,38 @@ class Order extends CActiveRecord {
         return $criteria;
     }
     
+    public static function getOrdersWithDeals(array $filter, array &$paginations) {
+        $orderList = self::getList($filter, $paginations);
+        
+        foreach($orderList as $key=>$order) {
+            $dealsCriteria = array();
+            
+            if($order['side'] == false) {
+                $dealsCriteria['orderBuyId'] = $order['id'];
+            } else {
+                $dealsCriteria['orderSellId'] = $order['id'];
+            }
+            
+            $paginationOptions = array();
+            
+            $deals = Deal::getList($dealsCriteria, $paginationOptions);
+            $dataDeal = array();
+            foreach($deals as $deal) {
+                $dataDeal[] = array(
+                    'id' => $deal->id,
+                    'size' => Response::bcScaleOut($deal->size),
+                    'price' => Response::bcScaleOut($deal->price),
+                    'timestamp' => Response::tickToTimestamp($deal->createdAt)
+                );
+            }
+            
+            $orderList[$key]['deals'] = array(
+                'count' => count($dataDeal),
+                'data' => $dataDeal
+            );
+        }
+        
+        return $orderList;
+    }
+    
 }

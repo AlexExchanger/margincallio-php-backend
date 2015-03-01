@@ -728,4 +728,16 @@ class AccountController extends MainController {
         Response::ResponseSuccess();
     }
     
+    public function actionGetTrades() {
+        try {
+            $orders = Order::getOrdersWithDeals(array(
+                'userId' => Yii::app()->user->id
+            ), $this->paginationOptions);
+        } catch (Exception $e) {
+            Response::ResponseError();
+        }
+        
+        Response::ResponseSuccess($orders);
+    }
+    
 }

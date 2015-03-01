@@ -40,6 +40,9 @@ class Deal extends CActiveRecord {
         $userBuyId = ArrayHelper::getFromArray($filters, 'userBuyId', null);
         $userSellId = ArrayHelper::getFromArray($filters, 'userSellId', null);
         
+        $orderBuyId = ArrayHelper::getFromArray($filters, 'orderBuyId', null);
+        $orderSellId = ArrayHelper::getFromArray($filters, 'orderSellId', null);
+        
         $dateFrom = ArrayHelper::getFromArray($filters, 'dateFrom');
         $dateTo = ArrayHelper::getFromArray($filters, 'dateTo');
         $side = ArrayHelper::getFromArray($filters, 'side', null);
@@ -56,6 +59,14 @@ class Deal extends CActiveRecord {
         
         if(!is_null($userSellId)) {
             $criteria->compare('userSellId', $userSellId);
+        }
+
+        if(!is_null($orderBuyId)) {
+            $criteria->compare('orderBuyId', $orderBuyId);
+        }
+        
+        if(!is_null($orderSellId)) {
+            $criteria->compare('orderSellId', $orderSellId);
         }
 
         ListCriteria::timestampCriteria($criteria, $dateFrom, $dateTo);
