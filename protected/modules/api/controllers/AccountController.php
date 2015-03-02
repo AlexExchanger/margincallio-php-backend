@@ -764,7 +764,7 @@ class AccountController extends MainController {
             $types = array();
             if(is_array($this->getParam('types'))) {
                 $types = explode(',', $this->getParam('types'));
-            } else {
+            } elseif (!is_null($this->getParam('types', null))) {
                 $types = array($this->getParam('types'));
             }
             
