@@ -762,10 +762,8 @@ class AccountController extends MainController {
     public function actionGetTrades() {
         try {
             $types = array();
-            if(is_array($this->getParam('types'))) {
+            if(!is_null($this->getParam('types', null))) {
                 $types = explode(',', $this->getParam('types'));
-            } elseif (!is_null($this->getParam('types', null))) {
-                $types = array($this->getParam('types'));
             }
             
             $orders = Order::getOrdersWithDeals(array(
