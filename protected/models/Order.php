@@ -344,7 +344,7 @@ class Order extends CActiveRecord {
                     $total['get'] = bcadd($total['get'], $oneDeal['size'], 6);
                     $total['spend'] = bcadd($total['spend'], bcmul($oneDeal['size'], $oneDeal['price']), 6);
                 } else {
-                    $total['spend'] = bcadd($total['spend'], $oneDeal['size']);
+                    $total['spend'] = bcadd($total['spend'], $oneDeal['size'], 6);
                     $total['get'] = bcadd($total['get'], bcmul($oneDeal['size'], $oneDeal['price']), 6);
                 }
                 

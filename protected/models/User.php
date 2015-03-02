@@ -240,7 +240,7 @@ class User extends CActiveRecord {
         try {
             $this->save();
             $this->createAccountWallet($this->id);
-            $user->createTradeAccountWallet($user->id);
+            $this->createTradeAccountWallet($this->id);
         } catch(Exception $e) {
             if($e instanceof ExceptionTcpRemoteClient) {
                 TcpErrorHandler::TcpHandle($e->errorType);
