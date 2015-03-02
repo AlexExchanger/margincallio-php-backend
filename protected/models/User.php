@@ -228,14 +228,22 @@ class User extends CActiveRecord {
         
         if(!$this->validate()) {
             $errorList = $this->getErrors();
-            Response::ResponseError(json_encode($errorList));
+            $message = '';
+            if(isset($errorList['email'])) {
+                $message = 'Wrong email given';
+            } else {
+                $message = 'An error occurred';
+            }
+            
+            Response::ResponseError($message);
         }
         try {
             $this->save();
             $this->createAccountWallet($this->id);
+            $user->createTradeAccountWallet($user->id);
         } catch(Exception $e) {
             if($e instanceof ExceptionTcpRemoteClient) {
-               throw $e;
+                TcpErrorHandler::TcpHandle($e->errorType);
             }
             throw new ExceptionUserSave();
         }

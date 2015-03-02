@@ -40,6 +40,9 @@ class UserController extends AdminController {
             $logMessage = 'Lock user with id "'.$userId.'"';
             Loger::logAdmin(Yii::app()->user->id, $logMessage, 'accountLocked');
         } catch(Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->errorType);
+            }
             Response::ResponseError('Unknow error');
         }
         
@@ -55,6 +58,9 @@ class UserController extends AdminController {
             $logMessage = 'Unlock user with id "'.$userId.'"';
             Loger::logAdmin(Yii::app()->user->id, $logMessage, 'accountUnlocked');
         } catch(Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->errorType);
+            }
             Response::ResponseError('Unknow error');
         }
         
@@ -70,6 +76,9 @@ class UserController extends AdminController {
             $logMessage = 'Remove user with id "'.$userId.'"';
             Loger::logAdmin(Yii::app()->user->id, $logMessage, 'accountRemoved');
         } catch(Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->errorType);
+            }
             Response::ResponseError('Unknow error');
         }
         

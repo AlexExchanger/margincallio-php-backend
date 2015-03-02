@@ -44,6 +44,9 @@ class TradeController extends MainController {
             $logMessage .= ($rate)? 'Rate: '.$rate.'.':'';
             Loger::logUser(Yii::app()->user->id, $logMessage, 'makeOrder');
         } catch (Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->errorType);
+            }
             Response::ResponseError($e->getMessage());
         }
         Response::ResponseSuccess();
@@ -59,8 +62,7 @@ class TradeController extends MainController {
             Loger::logUser(Yii::app()->user->id, $logMessage, 'cancelOrder');
         } catch (Exception $e) {
             if($e instanceof ExceptionTcpRemoteClient) {
-                print TcpErrorHandler::TcpHandle($e->errorType);
-                exit();
+                TcpErrorHandler::TcpHandle($e->errorType);
             }
             Response::ResponseError();
         }
@@ -98,8 +100,7 @@ class TradeController extends MainController {
             Loger::logUser(Yii::app()->user->id, $logMessage, 'makeConditional');
         } catch (Exception $e) {
             if($e instanceof ExceptionTcpRemoteClient) {
-                print TcpErrorHandler::TcpHandle($e->errorType);
-                exit();
+                TcpErrorHandler::TcpHandle($e->errorType);
             }
             Response::ResponseError();
         }
@@ -126,8 +127,7 @@ class TradeController extends MainController {
             Loger::logUser(Yii::app()->user->id, $logMessage, 'cancelConditional');
         } catch (Exception $e) {
             if($e instanceof ExceptionTcpRemoteClient) {
-                print TcpErrorHandler::TcpHandle($e->errorType);
-                exit();
+                TcpErrorHandler::TcpHandle($e->errorType);
             }
             Response::ResponseError();
         }

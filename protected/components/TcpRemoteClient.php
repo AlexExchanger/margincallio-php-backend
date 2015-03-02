@@ -166,6 +166,7 @@ class TcpRemoteClient extends CComponent {
         $responseArray = json_decode($response, true);
         if(!isset($responseArray[0]) || $responseArray[0] != $status) {
             $e = new ExceptionTcpRemoteClient();
+            $e->errorType = $responseArray[0];
             throw $e;
         }
         array_shift($responseArray);

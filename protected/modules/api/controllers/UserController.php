@@ -54,12 +54,20 @@ class UserController extends MainController {
     
     public function actionRegister() {
         
-        $email = $this->getParam('email');
-        $password = $this->getParam('password');
+        $email = $this->getParam('email', null);
+        $password = $this->getParam('password', null);
         $inviteCode = $this->getParam('invite', false);
         
         $user = new User();
         try {
+            if(is_null($email)) {
+                throw new Exception('Wrong email parameter');
+            }
+            
+            if(is_null($password)) {
+                throw new Exception('Wrong password parameter');
+            }
+            
             if(Yii::app()->params->registerByInvite || ($inviteCode!=false)) {
                 $status = $user->registerByInvite($inviteCode);
             } else {
@@ -154,7 +162,7 @@ class UserController extends MainController {
             Loger::logUser(Yii::app()->user->id, 'User has logged in', 'login');
             Response::ResponseSuccess($data, 'User has logged');
         } else {
-            Response::ResponseError();
+            Response::ResponseError('Wrong email or password');
         }
     }
 

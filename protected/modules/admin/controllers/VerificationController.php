@@ -52,6 +52,9 @@ class VerificationController extends AdminController {
             $logMessage = 'Verifying user with "'.$userId.'"';
             Loger::logAdmin(Yii::app()->user->id, $logMessage, 'accountVerified');
         } catch(Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->errorType);
+            }
             Response::ResponseError();
         }
         

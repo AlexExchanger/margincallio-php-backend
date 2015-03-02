@@ -130,6 +130,9 @@ class AccountController extends MainController {
             );
             
         } catch(Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->errorType);
+            }
             Response::ResponseError();
         }
         
@@ -176,6 +179,9 @@ class AccountController extends MainController {
             
             $data = Account::getAccountInfoOne($id);
         } catch(Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->errorType);
+            }
             Response::ResponseError($e->getMessage());
         }
         
@@ -189,6 +195,9 @@ class AccountController extends MainController {
             $accountInfo = Account::getAccountInfo($pair);
             Loger::logUser(Yii::app()->user->id, 'Requested wallets list');
         } catch(Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->errorType);
+            }
             $message = '';
             if($e->getCode() == 10012) {
                 $message = $e->getMessage();
@@ -297,6 +306,9 @@ class AccountController extends MainController {
             $logMessage .= ($type)? 'trade to safe. Amount: '.$amount:'safe to trade. Amount: '.$amount;
             Loger::logUser(Yii::app()->user->id, $logMessage, 'fundsTransferred');
         } catch(Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->errorType);
+            }
             Response::ResponseError($e->getMessage());
         }
         
@@ -308,8 +320,7 @@ class AccountController extends MainController {
             $orders = Order::getActiveOrders($this->user->id);
         } catch (Exception $e) {
             if($e instanceof ExceptionTcpRemoteClient) {
-                print TcpErrorHandler::TcpHandle($e->errorType);
-                exit();
+                TcpErrorHandler::TcpHandle($e->errorType);
             }
         }
         
@@ -322,8 +333,7 @@ class AccountController extends MainController {
             $orders = Order::getActiveConditionalOrders($this->user->id);
         } catch (Exception $e) {
             if($e instanceof ExceptionTcpRemoteClient) {
-                print TcpErrorHandler::TcpHandle($e->errorType);
-                exit();
+                TcpErrorHandler::TcpHandle($e->errorType);
             }
         }
         
@@ -606,6 +616,9 @@ class AccountController extends MainController {
                 'secret' => $response[2],
             );
         } catch(Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->errorType);
+            }
             Response::ResponseError();
         }
         
@@ -628,6 +641,9 @@ class AccountController extends MainController {
             }
             
         } catch(Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->errorType);
+            }
             Response::ResponseError();
         }
         
@@ -644,6 +660,9 @@ class AccountController extends MainController {
             $connection = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
             $response = $connection->sendRequest(array(TcpRemoteClient::FUNC_CANCEL_API_KEY, $key));
         } catch(Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->errorType);
+            }
             Response::ResponseError();
         }
         
@@ -660,6 +679,9 @@ class AccountController extends MainController {
                 'password' => $response[2],
             );
         } catch(Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->errorType);
+            }
             Response::ResponseError();
         }
         
@@ -680,6 +702,9 @@ class AccountController extends MainController {
                 throw new Exception();
             }
         } catch(Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->errorType);
+            }
             Response::ResponseError();
         }
         
@@ -702,6 +727,9 @@ class AccountController extends MainController {
             }
             
         } catch(Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->errorType);
+            }
             Response::ResponseError();
         }
         
@@ -722,6 +750,9 @@ class AccountController extends MainController {
                 throw new Exception();
             }
         } catch(Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->errorType);
+            }
             Response::ResponseError();
         }
         

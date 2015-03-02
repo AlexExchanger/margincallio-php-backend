@@ -117,8 +117,7 @@ class Order extends CActiveRecord {
             }
         } catch (Exception $e) {
             if ($e instanceof ExceptionTcpRemoteClient) {
-                print TcpErrorHandler::TcpHandle($e->errorType);
-                exit();
+                TcpErrorHandler::TcpHandle($e->errorType);
             }
             throw $e;
         }

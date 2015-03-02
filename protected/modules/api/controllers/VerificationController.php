@@ -33,7 +33,7 @@ class VerificationController extends MainController {
             if (isset($_FILES) && count($_FILES) > 0) {
                 $user = User::model()->findByPk($this->user->id);
                 if(!$user) {
-                    throw new Exception();
+                    throw new Exception('User doesn\'t exist');
                 }
                 
                 if($user->verifiedStatus != 'waitingForDocuments') {
