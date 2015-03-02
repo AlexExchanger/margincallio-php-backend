@@ -761,14 +761,25 @@ class AccountController extends MainController {
     
     public function actionGetTrades() {
         try {
+            $types = array();
+            if(is_array($this->getParam('types'))) {
+                $types = explode(',', $this->getParam('types'));
+            } else {
+                $types = array($this->getParam('types'));
+            }
+            
             $orders = Order::getOrdersWithDeals(array(
-                'userId' => Yii::app()->user->id
+                'userId' => Yii::app()->user->id,
+                'types' => $types
             ), $this->paginationOptions);
         } catch (Exception $e) {
             Response::ResponseError();
         }
         
-        Response::ResponseSuccess($orders);
+        Response::ResponseSuccess(array(
+            'count' => count($orders),
+            'data' => $orders,
+        ));
     }
     
 }
