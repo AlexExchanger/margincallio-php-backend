@@ -770,14 +770,15 @@ class AccountController extends MainController {
             
             $orders = Order::getOrdersWithDeals(array(
                 'userId' => Yii::app()->user->id,
-                'types' => $types
+                'types' => $types,
+                'id' => $this->getParam('id')
             ), $this->paginationOptions);
         } catch (Exception $e) {
             Response::ResponseError();
         }
         
         Response::ResponseSuccess(array(
-            'count' => count($orders),
+            'count' => (isset($this->paginationOptions))?$this->paginationOptions['total']:'',
             'data' => $orders,
         ));
     }

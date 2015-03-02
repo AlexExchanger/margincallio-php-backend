@@ -284,6 +284,7 @@ class Order extends CActiveRecord {
     
     private static function getListCriteria(array $filters)
     {
+        $orderId = ArrayHelper::getFromArray($filters, 'id');
         $accountId = ArrayHelper::getFromArray($filters, 'userId');
         $dateFrom = ArrayHelper::getFromArray($filters, 'dateFrom');
         $dateTo = ArrayHelper::getFromArray($filters, 'dateTo');
@@ -300,7 +301,10 @@ class Order extends CActiveRecord {
         $criteria->condition .= implode(' OR ', $conditions);
         $criteria->params = array_merge($criteria->params, $typeParams);
        
-       
+        if(!empty($orderId) && !is_null($orderId)) {
+            $criteria->compare('id', $orderId);
+        }
+        
         if (!empty($accountId)) {
             $criteria->compare('userId', $accountId);
         }
@@ -326,14 +330,28 @@ class Order extends CActiveRecord {
             
             $deals = Deal::getList($dealsCriteria, $paginationOptions);
             $dataDeal = array();
+            
+            $total = array('spend' => '0', 'get' => '0');
             foreach($deals as $deal) {
-                $dataDeal[] = array(
+                $oneDeal = array(
                     'id' => $deal->id,
                     'size' => Response::bcScaleOut($deal->size),
                     'price' => Response::bcScaleOut($deal->price),
                     'timestamp' => Response::tickToTimestamp($deal->createdAt)
                 );
+                
+                if($order['side'] == false) {
+                    $total['get'] = bcadd($total['get'], $oneDeal['size'], 6);
+                    $total['spend'] = bcadd($total['spend'], bcmul($oneDeal['size'], $oneDeal['price']), 6);
+                } else {
+                    $total['spend'] = bcadd($total['spend'], $oneDeal['size']);
+                    $total['get'] = bcadd($total['get'], bcmul($oneDeal['size'], $oneDeal['price']), 6);
+                }
+                
+                $dataDeal[] = $oneDeal;
             }
+            
+            $orderList[$key]['total'] = $total;
             
             $orderList[$key]['deals'] = array(
                 'count' => count($dataDeal),
