@@ -3,7 +3,7 @@
 class MailSender extends CComponent {
     
     public static function sendEmail($type, $to, $data=array()) {
-        require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.'/extensions/PHPMailer/PHPMailerAutoload.php';
+        //require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.'/extensions/PHPMailer/PHPMailerAutoload.php';
         
         $viewPath = 'views'.DIRECTORY_SEPARATOR.'mail'.DIRECTORY_SEPARATOR.$type.'.php';
         $fullPath = dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.$viewPath;
@@ -14,9 +14,9 @@ class MailSender extends CComponent {
         
         $fullMessagePath = Yii::app()->controller->renderFile($fullPath, $data, true);
 
-        //$headers = 'Content-type: text/html; charset=utf-8' . "\r\n";
+        $headers = 'Content-type: text/html; charset=utf-8' . "\r\n";
         
-        $mail = new PHPMailer();
+        /*$mail = new PHPMailer();
         $mail->IsSMTP();
         $mail->CharSet    = 'UTF-8';
         $mail->Host       = 'mail.spacebtc.com'; 
@@ -38,9 +38,9 @@ class MailSender extends CComponent {
             echo 'Message could not be sent.';
             echo 'Mailer Error: ' . $mail->ErrorInfo;
             die();
-        }
+        }*/
         
-        //$status = mail($to, isset($data['subject'])?$data['subject']:'Rocket BTC', $fullMessagePath, $headers);
+        $status = mail($to, isset($data['subject'])?$data['subject']:'Rocket BTC', $fullMessagePath, $headers);
 
         return $status;
     }

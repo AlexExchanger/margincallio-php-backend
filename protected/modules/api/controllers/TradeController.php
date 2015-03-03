@@ -40,6 +40,13 @@ class TradeController extends MainController {
             if(!$result) {
                 throw new Exception('Order save error');
             }
+            
+            $message = ($data->side == 0)? 'Buy ':'Sell ';
+            $message .= $data['type'].' '.$amount.' ';
+            if($data['type'] == 'LIMIT') {
+                $message .= 'for '.$rate;
+            }
+            
             $logMessage = 'Created '.$data['side'].' order. Type: '.$data['type'].'. Amount: '.$amount.'.';
             $logMessage .= ($rate)? 'Rate: '.$rate.'.':'';
             Loger::logUser(Yii::app()->user->id, $logMessage, 'makeOrder');
@@ -47,9 +54,9 @@ class TradeController extends MainController {
             if($e instanceof ExceptionTcpRemoteClient) {
                 TcpErrorHandler::TcpHandle($e->errorType);
             }
-            Response::ResponseError($e->getMessage());
+            Response::ResponseError('Error');
         }
-        Response::ResponseSuccess();
+        Response::ResponseSuccess($message);
     }
     
     public function actionCancelOrder() {
