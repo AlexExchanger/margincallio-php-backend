@@ -6,7 +6,10 @@ class VerificationController extends MainController {
     private $fullControl = array('senddocs');
 
     public function beforeAction($action) {
-
+        if(!parent::beforeAction($action)) {
+            return false;
+        }
+        
         if (Yii::app()->user->isGuest && !in_array(mb_strtolower($action->id), $this->fullControl)) {
             Response::ResponseError('Access denied');
             return false;
