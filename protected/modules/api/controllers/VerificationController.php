@@ -67,6 +67,7 @@ class VerificationController extends MainController {
                         Response::ResponseError($file->getErrors());
                     }
                 }
+                Response::ResponseSuccess($files);
             } catch(Exception $e) {
                 Response::ResponseError($e->getMessage());
             }
