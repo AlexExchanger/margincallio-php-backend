@@ -29,22 +29,26 @@ class VerificationController extends MainController {
     }
 
     public function actionSendDocs() {
-        try {
-            if (isset($_FILES) && count($_FILES) > 0) {
-                $user = User::model()->findByPk($this->user->id);
-                if(!$user) {
-                    throw new Exception('User doesn\'t exist');
-                }
-                
-                if($user->verifiedStatus == 'accepted') {
-                    throw new Exception('User already verified');
-                }
-                
-                if($user->verifiedStatus != 'waitingForDocuments') {
-                    throw new Exception('Verification request submitted');
-                }
-                
-                $docs = array();
+        
+        $docs = $this->getParam('files', null);
+        
+        if(isset($_FILES) && count($_FILES) > 0) {
+            $user = User::model()->findByPk($this->user->id);
+            
+            if(!$user) {
+                throw new Exception('User doesn\'t exist');
+            }
+
+            if($user->verifiedStatus == 'accepted') {
+                throw new Exception('User already verified');
+            }
+
+            if($user->verifiedStatus != 'waitingForDocuments') {
+                throw new Exception('Verification request submitted');
+            }
+            
+            $files = array();
+            try {
                 foreach ($_FILES as $key => $value) {
                     $file = new File();
                     $file->fileName = $value['name'];
@@ -58,10 +62,28 @@ class VerificationController extends MainController {
                     if ($file->save()) {
                         $path = Yii::getPathOfAlias('webroot') . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . $file->uid;
                         $file->fileItem->saveAs($path);
-                        $docs[] = $file;
+                        $files[] = $file->id;
                     } else {
                         Response::ResponseError($file->getErrors());
                     }
+                }
+            } catch(Exception $e) {
+                Response::ResponseError($e->getMessage());
+            }
+        } elseif(!is_null($docs)) {
+            $user = User::model()->findByPk($this->user->id);
+            
+            try {
+                if(!$user) {
+                    throw new Exception('User doesn\'t exist');
+                }
+
+                if($user->verifiedStatus == 'accepted') {
+                    throw new Exception('User already verified');
+                }
+
+                if($user->verifiedStatus != 'waitingForDocuments') {
+                    throw new Exception('Verification request submitted');
                 }
 
                 $user->verifiedStatus = 'waitingForModeration';
@@ -72,15 +94,16 @@ class VerificationController extends MainController {
                 $ticket = Ticket::create(array(
                     'title' => 'Verification',
                     'department' => 'verification',
-                        ), 'New verification documents', $this->user->id, $docs);
-
-                Loger::logUser(Yii::app()->user->id, 'New verification documents');
-                Response::ResponseSuccess($ticket->id, 'Success');
-            } else {
-                $this->actionPreflight();
+                    'files' => $docs
+                        ), 'New verification documents', $this->user->id, null);
+            } catch(Exception $e) {
+                Response::ResponseError($e->getMessage());
             }
-        } catch(Exception $e) {
-            Response::ResponseError($e->getMessage());
+            
+            Loger::logUser(Yii::app()->user->id, 'New verification documents');
+            Response::ResponseSuccess($ticket->id, 'Success');
+        } else {
+            $this->actionPreflight();
         }
     }
 
