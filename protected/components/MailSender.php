@@ -25,7 +25,7 @@ class MailSender extends CComponent {
         $mail->Username   = 'noreply@spacebtc.com';
         $mail->Password   = '43sahTMT4b';    
         
-        $mail->SMTPDebug  = 1;
+        $mail->SMTPDebug  = 3;
         
         $mail->From = 'noreply@spacebtc.com';
         $mail->isHTML(true);
