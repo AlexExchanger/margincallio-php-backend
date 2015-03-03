@@ -41,7 +41,7 @@ class TradeController extends MainController {
                 throw new Exception('Order save error');
             }
             
-            $message = ($data->side == 0)? 'Buy ':'Sell ';
+            $message = ($data['side'] == 0)? 'Buy ':'Sell ';
             $message .= $data['type'].' '.$amount.' ';
             if($data['type'] == 'LIMIT') {
                 $message .= 'for '.$rate;
