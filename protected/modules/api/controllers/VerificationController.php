@@ -36,8 +36,12 @@ class VerificationController extends MainController {
                     throw new Exception('User doesn\'t exist');
                 }
                 
-                if($user->verifiedStatus != 'waitingForDocuments') {
+                if($user->verifiedStatus == 'accepted') {
                     throw new Exception('User already verified');
+                }
+                
+                if($user->verifiedStatus != 'waitingForDocuments') {
+                    throw new Exception('Verification request submitted');
                 }
                 
                 $docs = array();
@@ -65,13 +69,13 @@ class VerificationController extends MainController {
                     throw new Exception('Can\'t update user status');
                 }
 
-                Ticket::create(array(
+                $ticket = Ticket::create(array(
                     'title' => 'Verification',
                     'department' => 'verification',
                         ), 'New verification documents', $this->user->id, $docs);
 
                 Loger::logUser(Yii::app()->user->id, 'New verification documents');
-                Response::ResponseSuccess();
+                Response::ResponseSuccess($ticket->id, 'Success');
             } else {
                 $this->actionPreflight();
             }
