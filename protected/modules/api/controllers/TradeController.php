@@ -56,7 +56,7 @@ class TradeController extends MainController {
             }
             Response::ResponseError('Error');
         }
-        Response::ResponseSuccess($message);
+        Response::ResponseSuccess(array(), $message);
     }
     
     public function actionCancelOrder() {
