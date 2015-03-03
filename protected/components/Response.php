@@ -10,8 +10,22 @@ class Response extends CComponent {
     public static function setHeaders() {
         header('Content-Type: application/json');
         header('Access-Control-Allow-Credentials: true');
+        
+        $allowDomains = array(
+            'http://stock.bit',
+            'http://spacebtc.tk',
+            'http://dev.stock.bit',
+            'http://dev.stock.loc',
+            'http://dev.stock.loc',
+            'http://admin.stock.bit',
+            'http://dev.admin.stock.bit',
+            'http://admin.stock.loc',
+            'http://dev.admin.stock.loc');
+        
         if(isset($_SERVER['HTTP_ORIGIN'])) {
-            header('Access-Control-Allow-Origin: '.$_SERVER['HTTP_ORIGIN']);
+            if(in_array($_SERVER['HTTP_ORIGIN'], $allowDomains)) {
+                header('Access-Control-Allow-Origin: '.$_SERVER['HTTP_ORIGIN']);
+            }
         }
     }
     
