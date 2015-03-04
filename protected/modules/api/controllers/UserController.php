@@ -29,8 +29,11 @@ class UserController extends MainController {
     public function actionIsLogged() {
         $response = array('logged' => !Yii::app()->user->isGuest);
         if ($response['logged']) {
-            $data = User::getLoginData(User::getCurrent());
-            $response = array_merge($response, $data);
+            $user = User::getCurrent();
+            if($user) {
+                $data = User::getLoginData(User::getCurrent());
+                $response = array_merge($response, $data);
+            }
         }
         Response::ResponseSuccess($response);
     }
