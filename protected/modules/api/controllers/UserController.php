@@ -33,6 +33,8 @@ class UserController extends MainController {
             if($user) {
                 $data = User::getLoginData(User::getCurrent());
                 $response = array_merge($response, $data);
+            } else {
+                $response['logged'] = false;
             }
         }
         Response::ResponseSuccess($response);
