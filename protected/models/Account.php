@@ -390,7 +390,7 @@ class Account extends CActiveRecord {
             $data[] = array(
                 'id' => $value->id,
                 'type' => 'safe',
-                'currency' => $value->currency,
+                'currency' => trim($value->currency),
                 'balance' => Response::bcScaleOut($value->balance),
                 'hold' => isset($withdrawalAccount[$value->currency])? ''.Response::bcScaleOut($withdrawalAccount[$value->currency]->balance):'0',
             );
@@ -432,8 +432,6 @@ class Account extends CActiveRecord {
             return false;
         }
         
-        $pair = Yii::app()->request->getParam('pair', 'BTC,USD');
-        $pairArray = explode(',', $pair);
         $account = Account::model()->findByAttributes(array(
             'userId'=>$user->id,
             'id'=> $id,
@@ -444,9 +442,10 @@ class Account extends CActiveRecord {
         }
         
         $wallet = array();
+        $currency = $account->currency;
         
         if($account->type == 'user.trading') {
-            $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
+            $connector = new TcpRemoteClient();
             $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_INFO, $user->id));
 
             if(count($resultCore) <= 0 || !isset($resultCore[0]) || ($resultCore[0] != 0)) {
