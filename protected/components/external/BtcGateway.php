@@ -176,7 +176,7 @@ class BtcGateway extends ExternalGateway {
             if(bccomp($amount, $withdrawLimit) <= 0) {
                 $result = self::callForWithdraw($data['address'], $transaction->id, $amount);
                 if($result == false) {
-                    throw new Exception('BTC daemon error');
+                    throw new Exception('Wrong address given');
                 }
                 $response = 'done';
             } else {
@@ -189,7 +189,7 @@ class BtcGateway extends ExternalGateway {
             $dbTransaction->commit();
         } catch(Exception $e) {
             $dbTransaction->rollback();
-            return false;
+            throw $e;
         }
         
         return $response;
