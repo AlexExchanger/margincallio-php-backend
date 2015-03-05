@@ -1,11 +1,11 @@
 <?php
 
-class UsdBankGateway extends ExternalGateway {
+class EurBankGateway extends ExternalGateway {
     
     protected static $gatewayId = 6;
 
     public static function getInstance() {
-        return self::model('UsdBankGateway')->findByPk(self::$gatewayId);
+        return self::model('EurBankGateway')->findByPk(self::$gatewayId);
     }
 
     public static function getBillingMeta($payment, $data) {
@@ -50,7 +50,7 @@ class UsdBankGateway extends ExternalGateway {
             $dbTransaction->commit();
         } catch(Exception $e) {
             $dbTransaction->rollback();
-            throw $e
+            throw $e;
         }
         
         return true;
