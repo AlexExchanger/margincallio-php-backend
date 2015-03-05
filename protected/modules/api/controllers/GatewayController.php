@@ -86,7 +86,7 @@ class GatewayController extends MainController {
                 throw new Exception();
             }
             
-            $type = ($type === 0 || $type === 'true')? 1:0;
+            $type = ($type == 'in')? 0:1;
             $data = array(
                 'gatewayId' => $gatewayId,
                 'accountId' => $accountId,
