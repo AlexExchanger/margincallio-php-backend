@@ -36,6 +36,18 @@ class UserController extends MainController {
             } else {
                 $response['logged'] = false;
             }
+        } else {
+            $currency = Yii::app()->params->currency;
+            $supportedPairs = Account::getSupportedPairs();
+
+            foreach($supportedPairs as $key=>$value) {
+                $supportedPairs[$key] = explode('_', $value);
+            }
+
+            $response['logged'] = false;
+            $response['defaultPair'] = 0;
+            $response['currency'] = $currency;
+            $response['supportedPairs'] = $supportedPairs;
         }
         Response::ResponseSuccess($response);
     }

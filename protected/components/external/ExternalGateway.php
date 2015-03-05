@@ -19,8 +19,17 @@ class ExternalGateway extends CActiveRecord{
         
         $paymentFormJSON = json_decode($gateway->payment, true);
         $paymentForm = ($type)? $paymentFormJSON['out']:$paymentFormJSON['in'];
-        $userForm = json_decode(urldecode($payment), true);
-
+        $userPaymentForm = json_decode(urldecode($payment), true);
+        
+        $userForm = array();
+        foreach($userPaymentForm as $group) {
+            foreach($group['fields'] as $field) {
+                if(isset($field['name']) && isset($field['value'])) {
+                    $userForm[$field['name']] = $field['value'];
+                }
+            }
+        }
+        
         $fieldsData = array();
         foreach($paymentForm as $group) {
             foreach($group['fields'] as $field) {

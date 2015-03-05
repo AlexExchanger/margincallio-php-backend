@@ -361,6 +361,7 @@ class User extends CActiveRecord {
             'access' => AdminController::getRules($user->type),
             'currency' => $currency,
             'supportedPairs' => $supportedPairs,
+            'defaultPair' => 0,
             '2fa' => $user->twoFA,
             'verified' => $user->verifiedStatus,
             'isVerified' => ($user->verifiedStatus == 'accepted')? true:false,
