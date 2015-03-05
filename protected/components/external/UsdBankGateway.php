@@ -34,12 +34,12 @@ class UsdBankGateway extends ExternalGateway {
             $transaction->currency = 'USD';
             
             if(!$transaction->save()) {
-                throw new Exception();
+                throw new Exception('Error with transaction save');
             }
             
             $userId = Yii::app()->user->id;
             if(!isset($userId)) {
-                throw new Exception();
+                throw new Exception('User doesn\'t exist');
             }
             
             $ticket = Ticket::create(array(
@@ -50,7 +50,7 @@ class UsdBankGateway extends ExternalGateway {
             $dbTransaction->commit();
         } catch(Exception $e) {
             $dbTransaction->rollback();
-            return false;
+            throw $e
         }
         
         return true;
@@ -70,12 +70,12 @@ class UsdBankGateway extends ExternalGateway {
             $transaction->currency = 'USD';
             
             if(!$transaction->save()) {
-                throw new Exception();
+                throw new Exception('Error with transaction save');
             }
             
             $userId = Yii::app()->user->id;
             if(!isset($userId)) {
-                throw new Exception();
+                throw new Exception('User doesn\'t exist');
             }
             
             $ticket = Ticket::create(array(
@@ -86,7 +86,7 @@ class UsdBankGateway extends ExternalGateway {
             $dbTransaction->commit();
         } catch(Exception $e) {
             $dbTransaction->rollback();
-            return false;
+            throw $e;
         }
         
         return true;
