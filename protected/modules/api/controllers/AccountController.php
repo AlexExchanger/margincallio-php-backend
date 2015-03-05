@@ -26,6 +26,26 @@ class AccountController extends MainController {
         return true;
     }
     
+    public function actionTest() {
+        try {
+            $userId = Yii::app()->user->id;
+            
+            $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
+            //$resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_INFO, $userId));
+            $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_BALANCE, $userId, 'btc'));
+            
+            
+        } catch (Exception $e) {
+            if($e instanceof TcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->getType());
+            }
+            Response::ResponseError();
+        }
+        
+        Response::ResponseSuccess($resultCore);
+    }
+    
+    
     public function actionGraphicsStat() {
         
         $beginTime = Response::timestampToTick($this->getParam('begin', TIME - 804800));
@@ -97,7 +117,7 @@ class AccountController extends MainController {
         ));
     }
     
-    public function actionGetOrderBook() {
+    public function actionGetOrderBook() {       
         try {
             $connection = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
             $response = $connection->sendRequest(array(TcpRemoteClient::FUNC_GET_DEPTH, 30));
@@ -189,10 +209,8 @@ class AccountController extends MainController {
     }
     
     public function actionGetWalletList() {
-        $pair = Yii::app()->request->getParam('pair', 'BTC,USD');
-        
         try {
-            $accountInfo = Account::getAccountInfo($pair);
+            $accountInfo = Account::getAccountInfo();
             Loger::logUser(Yii::app()->user->id, 'Requested wallets list');
         } catch(Exception $e) {
             if($e instanceof ExceptionTcpRemoteClient) {

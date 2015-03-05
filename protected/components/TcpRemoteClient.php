@@ -26,8 +26,8 @@ class TcpRemoteClient extends CComponent {
     
     const FUNC_CREATE_LIMIT_ORDER = 700;
     const FUNC_CREATE_MARKET_ORDER = 800;
-    const FUNC_CREATE_INSTANT_ORDER = 900;
-    const FUNC_CANCEL_ORDER = 1000;
+    //const FUNC_CREATE_INSTANT_ORDER = 900;
+    const FUNC_CANCEL_ORDER = 900;
     
     const FUNC_CREATE_SL = 1100;
     const FUNC_CREATE_TP = 1200;
@@ -46,26 +46,33 @@ class TcpRemoteClient extends CComponent {
     const FUNC_CANCEL_API_KEY = 2300;
     
     
-    const FUNC_GET_ACCOUNT_INFO = 2400;
+    const FUNC_GET_ACCOUNT_INFO = 2500;
     //const FUNC_GET_ACTIVE_ORDERS = 2500;
-    const FUNC_GET_ORDER_INFO = 2500;
+    const FUNC_GET_ACCOUNT_BALANCE = 2400;
     //const FUNC_GET_ACTIVE_CONDITIONAL_ORDER = 2600;
-    const FUNC_GET_ACTIVE_SL_ORDER = 2600;
-    const FUNC_GET_ACTIVE_TP_ORDER = 2700;
-    const FUNC_GET_ACTIVE_TS_ORDER = 2800;
+//    const FUNC_GET_ACTIVE_SL_ORDER = 2600;
+//    const FUNC_GET_ACTIVE_TP_ORDER = 2700;
+//    const FUNC_GET_ACTIVE_TS_ORDER = 2800;
+    const FUNC_GET_WITHDRAWAL_LIMIT = 2600;
+    const FUNC_GET_ACTIVE_ORDERS = 2700;
+    const FUNC_GET_ORDER_INFO = 2800;
     
-    const FUNC_GET_ACTIVE_ORDERS = 2900;
     const FUNC_GET_ACTIVE_CONDITIONAL_ORDER = 3000;
     
     const FUNC_SET_ACCOUNT_FEE = 3100;
-    const FUNC_GET_TICKER = 3200;
-    const FUNC_GET_DEPTH = 3300;
+    const FUNC_GET_TICKER = 7000;
+    const FUNC_GET_DEPTH = 7100;
     
     const FUNC_GET_MARGIN_PARAM = 3400;
     const FUNC_SET_MAX_LEVERAGE = 3500;
     
     const FUNC_SET_MC_LEVEL = 3600;
     const FUNC_SET_FL_LEVEL = 3700;
+    
+    const FUNC_CREATE_CURRENCY_PAIR = 5000;
+    const FUNC_GET_CURRENCY_PAIRS = 5100;
+    const FUNC_GET_DERIVED_CURRENCIES = 5200;
+    const FUNC_DELETE_CURRENCY_PAIR = 5300;
     
     const FUNC_OPEN_MARKET = 79100;
     const FUNC_CLOSE_MARKET = 79000;
@@ -89,39 +96,53 @@ class TcpRemoteClient extends CComponent {
     const ErrorNegativeOrZeroSum = 12;
     const ErrorNegativeOrZeroId = 13;
     const ErrorApiKeyNotPrivileged = 14;
-    const ErrorIncorrectPositionType = 15;
-    const ErrorIncorrectRate = 16;
-    const ErrorApiKeysLimitReached = 17;
-    const ErrorApiKeyNotFound = 18;
-    const ErrorSignatureDuplicate = 19;
-    const ErrorNonceLessThanExpected = 20;
-    const ErrorIncorrectSignature = 21;
-    const ErrorNegativeOrZeroLimit = 22;
-    const ErrorInvalidFunctionArguments = 23;
-    const ErrorFunctionNotFound = 24;
-    const ErrorInvalidJsonInput = 25;
-    const ErrorNegativeOrZeroLeverage = 26;
-    const ErrorIncorrectPercValue = 27;
-    const ErrorFixAccountsLimitReached = 28;
-    const ErrorFixRestartFailed = 29;
-    const ErrorFixAccountAlreadyExists = 30;
-    const ErrorFixAccountNotFound = 31;
-    const ErrorFixSymbolNotFound = 32;
-    const ErrorFixFieldsNotSet = 33;
-    const ErrorFixInvalidClOrdID = 34;
-    const ErrorFixUnknownOrderType = 35;
-    const ErrorFixInvalidOrderId = 36;
-    const ErrorSnapshotBackupFailed = 37;
-    const ErrorSnapshotRestoreFailed = 38;
-    const ErrorMarketClosed = 39;
-    const ErrorMarketAlreadyClosed = 40;
-    const ErrorMarketAlreadyOpened = 41;
-    const ErrorMarketOpened = 42;
-    const ErrorBackupRestoreInProc = 43;
+    const ErrorIncorrectStopLossRate = 15;
+    const ErrorIncorrectTakeProfitRate = 16;
+    const ErrorIncorrectTrailingStopOffset = 17;
+    const ErrorApiKeysLimitReached = 18;
+    const ErrorApiKeyNotFound = 19;
+    const ErrorSignatureDuplicate = 20;
+    const ErrorNonceLessThanExpected = 21;
+    const ErrorIncorrectSignature = 22;
+    const ErrorNegativeOrZeroLimit = 23;
+    const ErrorInvalidFunctionArguments = 24;
+    const ErrorFunctionNotFound = 25;
+    const ErrorInvalidJsonInput = 26;
+    const ErrorNegativeOrZeroLeverage = 27;
+    const ErrorIncorrectPercValue = 28;
+    const ErrorFixAccountsLimitReached = 29;
+    const ErrorFixRestartFailed = 30;
+    const ErrorFixAccountAlreadyExists = 31;
+    const ErrorFixAccountNotFound = 32;
+    const ErrorFixSymbolNotFound = 33;
+    const ErrorFixFieldsNotSet = 34;
+    const ErrorFixInvalidClOrdID = 35;
+    const ErrorFixUnknownOrderType = 36;
+    const ErrorFixInvalidOrderId = 37;
+    const ErrorSnapshotBackupFailed = 38;
+    const ErrorSnapshotRestoreFailed = 39;
+    const ErrorMarketClosed = 40;
+    const ErrorMarketAlreadyClosed = 41;
+    const ErrorMarketAlreadyOpened = 42;
+    const ErrorMarketOpened = 43;
+    const ErrorBackupRestoreInProc = 44;
+    const ErrorIPDuplicate = 45;
+    const ErrorInvalidCurrency = 46;
+    const ErrorInvalidCurrencyPair = 47; 
+    const ErrorCurrencyNotFound = 48;
+    const ErrorCurrencyPairNotFound = 49; 
+    const ErrorCurrencyPairAlreadyExists = 50;
+    const ErrorStopLossUnavailable = 51;
+    const ErrorTakeProfitUnavailable = 52;
+    const ErrorTrailingStopUnavailable = 53;
     
     const ErrorUnknown = 99;
     
-    public function __construct(array $input) {
+    public function __construct(array $input=null) {
+        if(is_null($input)) {
+            $input = Yii::app()->params->coreUsdBtc;
+        }
+        
         if(!isset($input['url']) || !isset($input['port'])) {
             throw new ExceptionWrongInputData();
         }

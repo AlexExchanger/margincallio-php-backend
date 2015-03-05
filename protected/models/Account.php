@@ -4,7 +4,7 @@ class Account extends CActiveRecord {
 
     private static $systemUserId = 0;
     
-    public static $currencyOptions = ['BTC', 'USD', 'EUR'];
+    public static $currencyOptions = ['LTC', 'DOGE', 'BTC', 'USD', 'EUR'];
     
     public static $systemTypeOptions = [
         'system.gateway.external.universe', // отдано наружу / принято снаружи (сумма)
@@ -323,7 +323,8 @@ class Account extends CActiveRecord {
             return false;
         }
         
-        $pair = Yii::app()->request->getParam('pair', 'BTC,USD');
+        $currencies = Account::getSupportedCurrency();
+        
         $accountList = Account::model()->findAllByAttributes(array(
             'userId'=>$user->id,
             'type'=> array('user.safeWallet'),
@@ -349,24 +350,40 @@ class Account extends CActiveRecord {
             $withdrawalAccount[$value->currency] = $value; 
         }
         
-        $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
-        $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_INFO, $user->id));
-
-        if(count($resultCore) <= 0 || !isset($resultCore[0]) || ($resultCore[0] != 0)) {
-            throw new Exception("User doesn't verified", 10012);
+        $connector = new TcpRemoteClient();
+        
+        $remoteAccountInfo = array();
+        foreach($currencies['derived'] as $currency) {
+            $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_BALANCE, $user->id, mb_strtolower($currency)));
+            if(count($resultCore) <= 0 || !isset($resultCore[0]) || ($resultCore[0] != 0)) {
+                throw new Exception("User doesn't verified", 10012);
+            }
+            
+            $remoteAccountInfo[$currency] = array(
+                'Available' => $resultCore[1],
+                'Blocked' => $resultCore[2],
+            );
         }
         
-        $remoteAccountInfo = array(
-            'firstAvailable' => $resultCore[1],
-            'firstBlocked' => $resultCore[2],
-            'secondAvailable' => $resultCore[3],
-            'secondBlocked' => $resultCore[4],
-            'comission' => $resultCore[5],
-            'equity' => $resultCore[6],
-            'marginLevel' => $resultCore[7],
-            'marginCall' => $resultCore[8],
-            'isSuspended' => $resultCore[9],
-        );
+        //Query for getting account parameter
+        try {
+            $resultCore = $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_INFO, $user->id));
+            $accountInfo = array(
+                'maxLeverage' => $resultCore[1],
+                'mcLevel' => $resultCore[2],
+                'flLevel' => $resultCore[3],
+                'equity' => $resultCore[4],
+                'margin' => $resultCore[5],
+                'freeMargin' => $resultCore[6],
+                'marginLevel' => $resultCore[7],
+                'marginCall' => $resultCore[8],
+                'suspended' => $resultCore[9],
+            );
+        } catch(Exception $e) {
+            if ($e instanceof ExceptionTcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->errorType);
+            }
+        }
         
         $data = array();
         foreach($accountList as $value) {
@@ -379,23 +396,18 @@ class Account extends CActiveRecord {
             );
         }
         
-        $data[] = array(
-            'id' => $tradeAccount[explode(',', $pair)[0]]->id,
-            'type' => 'trade',
-            'currency' => explode(',', $pair)[0],
-            'balance' => (string)Response::bcScaleOut(bcadd($remoteAccountInfo['firstAvailable'], 0)),
-            'hold' => (string)Response::bcScaleOut(bcadd($remoteAccountInfo['firstBlocked'], 0))
-        );
+        foreach($remoteAccountInfo as $currency => $account) {
+            $id = isset($tradeAccount[$currency])? $tradeAccount[$currency]->id:'';
+            $data[] = array(
+                'id' => $id,
+                'type' => 'trade',
+                'currency' => $currency,
+                'balance' => (string)Response::bcScaleOut(bcadd($account['Available'], 0)),
+                'hold' => (string)Response::bcScaleOut(bcadd($account['Blocked'], 0))
+            );
+        }
         
-        $data[] = array(
-            'id' => $tradeAccount[explode(',', $pair)[1]]->id,
-            'type' => 'trade',
-            'currency' => explode(',', $pair)[1],
-            'balance' => (string)Response::bcScaleOut(bcadd($remoteAccountInfo['secondAvailable'],0)),
-            'hold' => (string)Response::bcScaleOut(bcadd($remoteAccountInfo['secondBlocked'], 0))
-        );
-        
-        $funds = array(
+        /*$funds = array(
             'trade' => array(
                 'first' => Response::bcScaleOut(bcadd($remoteAccountInfo['firstAvailable'], $remoteAccountInfo['firstBlocked']), 8),
                 'second' => Response::bcScaleOut(bcadd($remoteAccountInfo['secondAvailable'], $remoteAccountInfo['secondBlocked']), 8)
@@ -408,17 +420,10 @@ class Account extends CActiveRecord {
                 'first' => Response::bcScaleOut($accountList[0]->balance, 8),
                 'second' => Response::bcScaleOut($accountList[1]->balance, 8),
             )
-        );
-        
-        $response = array(
-            'margin_level' => $remoteAccountInfo['marginLevel'],
-            'fee' => $remoteAccountInfo['comission'],
-            'equity' => $remoteAccountInfo['equity'],
-            'funds' => $funds,
-            'wallets' => $data
-        );
-        
-        return $response;
+        );*/
+        $accountInfo['wallets'] = $data;
+   
+        return $accountInfo;
     }
     
     public static function getAccountInfoOne($id) {
@@ -615,6 +620,40 @@ class Account extends CActiveRecord {
         }
         
         return true;
+    }
+    
+    public static function getSupportedCurrency() {
+        $pairs = self::getSupportedPairs();
+        $currencies = array('main'=>array(), 'derived'=>array());
+
+        foreach($pairs as $pair) {
+            $onePair = explode('_', $pair);
+            if(!in_array($onePair[1], $currencies['main'])) {
+                $currencies['main'][] = $onePair[1];
+            }
+            $currencies['derived'][] = $onePair[0];
+        }
+        
+        return $currencies;
+    }
+    
+    
+    public static function getSupportedPairs() {
+        
+        try {
+            $connector = new TcpRemoteClient();
+            $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_CURRENCY_PAIRS));
+            $pairs = array();
+            foreach($resultCore[1] as $value) {
+                $pairs[] = mb_strtoupper($value);
+            }
+            return $pairs;
+        } catch(Exception $e) {
+            if($e instanceof TcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->getType());
+            }
+        }
+        return false;
     }
     
 }

@@ -12,7 +12,33 @@ return array(
     'registerByInvite' => false,
     'currentUrl' => 'http://site.exchange/',
     'supportedCurrency' => array('BTC', 'USD', 'EUR'),
-    'supportedPair' => array('BTC/USD'),
+    'currency' => array(
+        array(
+            'name' => 'BTC',
+            'title' => 'Bitcoin',
+            'symbol' => '฿'
+        ),
+        array(
+            'name' => 'USD',
+            'title' => 'United states dollar',
+            'symbol' => '$'
+        ),
+        array(
+            'name' => 'EUR',
+            'title' => 'Euro',
+            'symbol' => '€'
+        ),
+        array(
+            'name' => 'LTC',
+            'title' => 'Litecoin',
+            'symbol' => 'Ł',
+        ),
+        array(
+            'name' => 'DOGE',
+            'title' => 'Dogecoin',
+            'symbol' => 'Ð'
+        ),
+        ),
     'bitcoinService' => array(
         'url'=>'http://188.166.23.76'
     ),

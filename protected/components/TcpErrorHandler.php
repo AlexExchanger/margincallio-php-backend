@@ -31,7 +31,7 @@ class TcpErrorHandler extends CComponent {
             case TcpRemoteClient::ErrorIncorrectOrderKind:
                 $message = 'Incorrect order kind';
                 break;
-            case TcpErrorHandler::ErrorOrderNotFound:
+            case TcpRemoteClient::ErrorOrderNotFound:
                 $message = 'Order Not Found';
                 break;
             case TcpRemoteClient::ErrorInsufficientMarketVolume:
@@ -49,11 +49,14 @@ class TcpErrorHandler extends CComponent {
             case TcpRemoteClient::ErrorApiKeyNotPrivileged:
                 $message = 'This api key doesn\'t privileged';
                 break;
-            case TcpRemoteClient::ErrorIncorrectPositionType:
-                $message = 'Incorrect position type';
+            case TcpRemoteClient::ErrorIncorrectStopLossRate:
+                $message = 'Incorrect stop loss rate';
                 break;
-            case TcpRemoteClient::ErrorIncorrectRate:
-                $message = 'Incorrect rate paramether';
+            case TcpRemoteClient::ErrorIncorrectTakeProfitRate:
+                $message = 'Incorrect take profit rate';
+                break;
+            case TcpRemoteClient::ErrorIncorrectTrailingStopOffset:
+                $message = 'Incorrect trailing stop offset';
                 break;
             case TcpRemoteClient::ErrorApiKeysLimitReached:
                 $message = 'Api key\'s limit reached';
@@ -135,6 +138,33 @@ class TcpErrorHandler extends CComponent {
                 break;
             case TcpRemoteClient::ErrorBackupRestoreInProc:
                 $message = 'Backup restore in proccess';
+                break;
+            case TcpRemoteClient::ErrorIPDuplicate:
+                $message = 'IP Duplicate';
+                break;
+            case TcpRemoteClient::ErrorInvalidCurrency:
+                $message = 'Invalid currency';
+                break;
+            case TcpRemoteClient::ErrorInvalidCurrencyPair:
+                $message = 'Invalid currency pair';
+                break;
+            case TcpRemoteClient::ErrorCurrencyNotFound:
+                $message = 'Currency not found';
+                break;
+            case TcpRemoteClient::ErrorCurrencyPairNotFound:
+                $message = 'Currency pair not found';
+                break;
+            case TcpRemoteClient::ErrorCurrencyPairAlreadyExists:
+                $message = 'Currency pair already exist';
+                break;
+            case TcpRemoteClient::ErrorStopLossUnavailable:
+                $message = 'Stop loss unavailable';
+                break;
+            case TcpRemoteClient::ErrorTakeProfitUnavailable:
+                $message = 'Take profit unavailable';
+                break;
+            case TcpRemoteClient::ErrorTrailingStopUnavailable:
+                $message = 'Trailing stop unavailable';
                 break;
             case TcpRemoteClient::ErrorUnknown:
                 $message = 'Unknow core error';

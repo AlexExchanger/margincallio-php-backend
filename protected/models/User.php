@@ -41,7 +41,9 @@ class User extends CActiveRecord {
     
     private function createAccountWallet($userId) {
         //currency by default
-        $defaultCurrency = array('USD', 'BTC');
+        $supportedCurrency = Account::getSupportedCurrency();
+        $defaultCurrency = array_merge($supportedCurrency['main'], $supportedCurrency['derived']);
+        
         $defaultTypes = array('user.safeWallet', 'user.withdrawWallet');
         
         foreach($defaultTypes as $type) {
@@ -60,7 +62,9 @@ class User extends CActiveRecord {
     
     private static function createTradeAccountWallet($userId) {
         //currency by default
-        $defaultCurrency = array('USD', 'BTC');
+        $supportedCurrency = Account::getSupportedCurrency();
+        $defaultCurrency = array_merge($supportedCurrency['main'], $supportedCurrency['derived']);
+        
         $type = 'user.trading';
         
         if(Account::model()->countByAttributes(array(
@@ -342,16 +346,21 @@ class User extends CActiveRecord {
     }
     
     public static function getLoginData($user) {
-        $supportedPair = Yii::app()->params->supportedPair;
+        $currency = Yii::app()->params->currency;
         $openTickets = Ticket::getTicketsWithLastMessage($user->id, 'waitForUser');
+        $supportedPairs = Account::getSupportedPairs();
+        
+        foreach($supportedPairs as $key=>$value) {
+            $supportedPairs[$key] = explode('_', $value);
+        }
         
         return array(
             'id' => $user->id,
             'email' => $user->email,
             'role' => $user->type,
             'access' => AdminController::getRules($user->type),
-            'supportedPair' => $supportedPair,
-            'defaultPair' => $supportedPair[0],
+            'currency' => $currency,
+            'supportedPairs' => $supportedPairs,
             '2fa' => $user->twoFA,
             'verified' => $user->verifiedStatus,
             'isVerified' => ($user->verifiedStatus == 'accepted')? true:false,
