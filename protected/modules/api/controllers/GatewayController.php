@@ -10,13 +10,26 @@ class GatewayController extends MainController {
         }
         
         if(Yii::app()->user->isGuest) {
-            Response::GetResponseError('Access denied');
+            $this->actionPreflight();
+            //Response::GetResponseError('Access denied');
             return false;
         }
         
         $this->user = Yii::app()->user;
 
         return true;
+    }
+    
+    public function actionPreflight() {
+        $content_type = 'application/json';
+        $status = 200;
+
+        header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
+        header('Access-Control-Allow-Credentials: true');
+        if (isset($_SERVER['HTTP_ORIGIN'])) {
+            header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
+        }
+        header('Content-type: ' . $content_type);
     }
     
     public function actionall() {
@@ -60,12 +73,12 @@ class GatewayController extends MainController {
     
     public function actionPayByGateway() {
       
-        $accountId = Yii::app()->request->getPost('accountId');
-        $amount = Yii::app()->request->getPost('amount');
-        $currency = Yii::app()->request->getPost('currency');
-        $gatewayId = Yii::app()->request->getPost('id', 3);
-        $paymentInformation = Yii::app()->request->getPost('payment');
-        $type = Yii::app()->request->getPost('type', null);
+        $accountId = $this->getPost('accountId');
+        $amount = $this->getPost('amount');
+        $currency = $this->getPost('currency');
+        $gatewayId = $this->getPost('id', 3);
+        $paymentInformation = $this->getPost('payment');
+        $type = $this->getPost('type', null);
         
         
         try {
