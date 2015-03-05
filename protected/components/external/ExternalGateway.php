@@ -19,8 +19,8 @@ class ExternalGateway extends CActiveRecord{
         
         $paymentFormJSON = json_decode($gateway->payment, true);
         $paymentForm = ($type)? $paymentFormJSON['out']:$paymentFormJSON['in'];
-        $userPaymentForm = json_decode(urldecode($payment), true);
-        
+        $userPaymentForm = $payment;
+
         $userForm = array();
         foreach($userPaymentForm as $group) {
             foreach($group['fields'] as $field) {
@@ -64,6 +64,10 @@ class ExternalGateway extends CActiveRecord{
                         break;
                 }
             }
+        }
+        
+        if(!isset($fieldsData['amount'])) {
+            $fieldsData['amount'] = $data['amount'];
         }
         
         if($type) {
