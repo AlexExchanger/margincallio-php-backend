@@ -142,17 +142,14 @@ class Account extends CActiveRecord {
     
     private static function createSystemAccount($currency) {
         
-        $account = new Account();
-        $account->currency = $currency;
-        $account->status = 'opened';
-        $account->userId = self::$systemUserId;
-        $account->createdAt = TIME;
-        
         $accountList = array();
         
         foreach(self::$systemTypeOptions as $wallet) {
-            $account->setIsNewRecord(true);
-            unset($account->id);
+            $account = new Account();
+            $account->currency = $currency;
+            $account->status = 'opened';
+            $account->userId = self::$systemUserId;
+            $account->createdAt = TIME;
             $account->type = $wallet;
             $account->guid = Guid::generate();
             $account->save();
@@ -278,16 +275,20 @@ class Account extends CActiveRecord {
                 $systemsAccounts['system.gateway.internal']->balance = bcadd($systemsAccounts['system.gateway.internal']->balance, $amount);
             }
 
-            if(in_array($currency, array('USD', 'BTC'))) {
-                $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
-                $resultCore = null;
-                if($type) {
-                    $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_REPLENISH_SAFE_ACCOUNT, $user->id, ($currency == 'USD')?1:0, $amount));
-                } else {
-                    $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_REPLENISH_TRADE_ACCOUNT, $user->id, ($currency == 'USD')?1:0, $amount));
-                }
+            $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
+            $resultCore = null;
+            if($type) {
+                $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_REPLENISH_SAFE_ACCOUNT, $user->id, mb_strtolower($currency), $amount));
+            } else {
+                $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_REPLENISH_TRADE_ACCOUNT, $user->id, mb_strtolower($currency), $amount));
             }
 
+            if($resultCore[0] != 0) {
+                $e = new ExceptionTcpRemoteClient();
+                $e->errorType = $resultCore[0];
+                throw $e;
+            }
+            
             if(!$wallets[$walletFrom]->save() || !$wallets[$walletTo]->save() || !$systemsAccounts['system.gateway.internal']->save()) {
                 throw new ExceptionAccount(); 
             }
@@ -295,7 +296,7 @@ class Account extends CActiveRecord {
             $dbTransaction->commit();
         } catch(Exception $e) {
             $dbTransaction->rollback();
-            return false;
+            throw $e;
         }
         
         self::createTransaction($wallets, $amount, $type, $currency);

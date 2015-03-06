@@ -11,7 +11,7 @@ return array(
     //Back-end params
     'registerByInvite' => false,
     'currentUrl' => 'http://site.exchange/',
-    'supportedCurrency' => array('BTC', 'USD', 'EUR'),
+    'supportedCurrency' => array('BTC', 'EUR', 'LTC', 'DOGE'),
     'currency' => array(
         array(
             'name' => 'BTC',

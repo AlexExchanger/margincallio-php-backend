@@ -310,7 +310,7 @@ class AccountController extends MainController {
         }
         
         try {
-            if ($currency == 'BTC') {
+            if (($currency == 'BTC') || ($currency == 'LTC')) {
                 if (!preg_match('~^\d+(\.\d{1,8})?$~', $amount)) {
                     throw new Exception('Wrong amount');
                 }
