@@ -402,8 +402,6 @@ class Account extends CActiveRecord {
             return false;
         }
         
-        $currencies = Account::getSupportedCurrency();
-        
         $accountList = Account::model()->findAllByAttributes(array(
             'userId'=>$user->id,
             'type'=> array('user.safeWallet'),
@@ -451,7 +449,7 @@ class Account extends CActiveRecord {
         
         //Query for getting account parameter
         try {
-            $resultCore = $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_INFO, $user->id));
+            $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_INFO, $user->id));
             $accountInfo = array(
                 'maxLeverage' => $resultCore[1],
                 'mcLevel' => $resultCore[2],
