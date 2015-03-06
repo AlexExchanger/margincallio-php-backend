@@ -317,6 +317,63 @@ class Account extends CActiveRecord {
         ));
     }
     
+    public static function getAccountBalance($currency1, $currency2) {
+        $user = Yii::app()->user;
+        if(!$user) {
+            throw new Exception('User doesn\'t exist');
+        }
+        
+        if(!in_array($currency1, Yii::app()->params->supportedCurrency) || !in_array($currency2, Yii::app()->params->supportedCurrency)) {
+            throw new Exception('Currency doesn\'t support');
+        }
+        
+        $data = array();
+
+        //safe accounts
+        $safe = Account::model()->findAllByAttributes(array(
+            'userId' => $user->id,
+            'type' => array('user.safeWallet'),
+            'currency' => array($currency1, $currency2)
+        ));
+        
+        $safeAccounts = array();
+        foreach($safe as $account) {
+            $safeAccounts[$account->currency] = $account;
+        }
+        
+        $data['safe'] = array(
+            'first' => Response::bcScaleOut($safeAccounts[$currency1]->balance, 8),
+            'second' => Response::bcScaleOut($safeAccounts[$currency2]->balance, 8)
+        );
+        
+        
+        //trade accounts
+        $connector = new TcpRemoteClient();
+        $responseInfo = array();
+        foreach(array($currency1, $currency2) as $currency) {
+            $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_BALANCE, $user->id, mb_strtolower($currency)));
+            if(count($resultCore) <= 0 || !isset($resultCore[0]) || ($resultCore[0] != 0)) {
+                throw new Exception("User doesn't verified", 10012);
+            }
+            $responseInfo[$currency] = array(
+                'available' => $resultCore[1],
+                'blocked' => $resultCore[2],
+            );
+        }
+        
+        $data['trade'] = array(
+            'first' => Response::bcScaleOut(bcadd($responseInfo[$currency1]['available'], $responseInfo[$currency1]['blocked']) , 6),
+            'second' => Response::bcScaleOut(bcadd($responseInfo[$currency2]['available'], $responseInfo[$currency2]['blocked']) , 6)
+        );
+        
+        $data['trade_available'] = array(
+            'first' => Response::bcScaleOut($responseInfo[$currency1]['available'], 6),
+            'second' => Response::bcScaleOut($responseInfo[$currency2]['available'], 6),
+        );
+        
+        
+        return $data;
+    }
     
     public static function getAccountInfo() {
         $user = Yii::app()->user;

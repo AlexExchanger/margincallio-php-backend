@@ -227,6 +227,27 @@ class AccountController extends MainController {
         Response::ResponseSuccess($accountInfo);
     }
     
+    public function actionGetPairBalance() {
+        $currency1 = $this->getParam('currency1', null);
+        $currency2 = $this->getParam('currency2', null);
+        
+        try {
+            if(is_null($currency1) || is_null($currency2)) {
+                throw new Exception('Wrong currency parameters');
+            }
+            
+            $accountBalance = Account::getAccountBalance($currency1, $currency2);
+        } catch(Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->errorType);
+            }
+            
+            Response::ResponseError($e->getMessage());
+        }
+        
+        Response::ResponseSuccess($accountBalance);
+    }
+    
     public function actionGetTransactions() {
         
         $accountId = $this->getParam('accountId', null);
