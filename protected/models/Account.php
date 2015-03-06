@@ -371,8 +371,30 @@ class Account extends CActiveRecord {
             'second' => Response::bcScaleOut($responseInfo[$currency2]['available'], 6),
         );
         
+        try {
+            $resultCore = $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_INFO, $user->id));
+            $accountInfo = array(
+                'maxLeverage' => $resultCore[1],
+                'mcLevel' => $resultCore[2],
+                'flLevel' => $resultCore[3],
+                'equity' => $resultCore[4],
+                'margin' => $resultCore[5],
+                'freeMargin' => $resultCore[6],
+                'marginLevel' => $resultCore[7],
+                'marginCall' => $resultCore[8],
+                'suspended' => $resultCore[9],
+            );
+        } catch(Exception $e) {
+            if ($e instanceof ExceptionTcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->errorType);
+            }
+        }
         
-        return $data;
+        
+        return array(
+            'info' => $accountInfo,
+            'funds' => $data
+        );
     }
     
     public static function getAccountInfo() {
