@@ -53,7 +53,7 @@ class TcpRemoteClient extends CComponent {
 //    const FUNC_GET_ACTIVE_SL_ORDER = 2600;
 //    const FUNC_GET_ACTIVE_TP_ORDER = 2700;
 //    const FUNC_GET_ACTIVE_TS_ORDER = 2800;
-    const FUNC_GET_WITHDRAWAL_LIMIT = 2600;
+    const FUNC_GET_ACCOUNT_FEE = 2600;
     const FUNC_GET_ACTIVE_ORDERS = 2700;
     const FUNC_GET_ORDER_INFO = 2800;
     

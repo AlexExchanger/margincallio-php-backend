@@ -373,7 +373,7 @@ class Account extends CActiveRecord {
         );
         
         try {
-            $resultCore = $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_INFO, $user->id));
+            $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_INFO, $user->id));
             $accountInfo = array(
                 'maxLeverage' => $resultCore[1],
                 'mcLevel' => $resultCore[2],
@@ -385,6 +385,12 @@ class Account extends CActiveRecord {
                 'marginCall' => $resultCore[8],
                 'suspended' => $resultCore[9],
             );
+            
+            $resultFee = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_FEE, $user->id, $currency));
+            if(isset($resultFee) && isset($resultFee) && $resultFee[0] == 0) {
+                $accountInfo['fee'] = $resultFee[1];
+            }
+            
         } catch(Exception $e) {
             if ($e instanceof ExceptionTcpRemoteClient) {
                 TcpErrorHandler::TcpHandle($e->errorType);
