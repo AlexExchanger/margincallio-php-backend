@@ -19,11 +19,6 @@ return array(
             'symbol' => '฿'
         ),
         array(
-            'name' => 'USD',
-            'title' => 'United states dollar',
-            'symbol' => '$'
-        ),
-        array(
             'name' => 'EUR',
             'title' => 'Euro',
             'symbol' => '€'

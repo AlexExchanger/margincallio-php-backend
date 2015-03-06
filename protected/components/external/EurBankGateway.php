@@ -45,7 +45,7 @@ class EurBankGateway extends ExternalGateway {
             $ticket = Ticket::create(array(
                 'title' => 'Income',
                 'department' => 'finance',      
-            ), income('. ', $data), $userId);
+            ), 'Money income. '.implode('. ', $data), $userId);
             
             $dbTransaction->commit();
         } catch(Exception $e) {
@@ -81,7 +81,7 @@ class EurBankGateway extends ExternalGateway {
             $ticket = Ticket::create(array(
                 'title' => 'Outcome',
                 'department' => 'finance',      
-            ), income('. ', $data), $userId);
+            ), 'Money outcome. '.implode('. ', $data), $userId);
             
             $dbTransaction->commit();
         } catch(Exception $e) {
