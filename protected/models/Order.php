@@ -93,21 +93,26 @@ class Order extends CActiveRecord {
         $side = ArrayHelper::getFromArray($data, 'side');
         $type = ArrayHelper::getFromArray($data, 'type');
         $rate = ArrayHelper::getFromArray($data, 'rate');
+        $currency = ArrayHelper::getFromArray($data, 'currency');
+        
+        $base = ArrayHelper::getFromArray($data, 'base');
+        
+        $sl_rate = ArrayHelper::getFromArray($data, 'sl_rate');
+        $tp_rate = ArrayHelper::getFromArray($data, 'tp_rate');
+        $ts_offset = ArrayHelper::getFromArray($data, 'tp_offset');
 
-        //check amount
-        if (!$amount) {
+        //check amount and curency
+        if (!$amount || is_null($currency)) {
             throw new ExceptionWrongInputData();
         }
 
         //check available funds
         try {
-            $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
+            $connector = new TcpRemoteClient();
             if ($type == 'LIMIT') {
-                $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_CREATE_LIMIT_ORDER, $userId, $side, $amount, $rate));
+                $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_CREATE_LIMIT_ORDER, $userId, mb_strtolower($currency), $side, $amount, $rate, $sl_rate, $tp_rate, $ts_offset));
             } elseif ($type == 'MARKET') {
-                $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_CREATE_MARKET_ORDER, $userId, $side, $amount));
-            } elseif ($type == 'INSTANT') {
-                $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_CREATE_INSTANT_ORDER, $userId, $side, $amount));
+                $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_CREATE_MARKET_ORDER, $userId, mb_strtolower($currency), $side, $base, $amount, $sl_rate, $tp_rate, $ts_offset));
             } else {
                 throw new ExceptionUnknowOrderType();
             }

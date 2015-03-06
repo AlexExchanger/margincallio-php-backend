@@ -25,14 +25,24 @@ class TradeController extends MainController {
         $amount = $this->getParam('amount');
         $rate = $this->getParam('rate');
         $orderType = $this->getParam('type', false);
+        $currency = $this->getParam('currency1', null);
         
-        //todo: for USD/BTC only
+        $base = $this->getParam('base', null);
+        
+        $sl_rate = $this->getParam('sl_rate', 0);
+        $tp_rate = $this->getParam('tp_rate', 0);
+        $ts_offset = $this->getParam('ts_offset', 0);
         
         $data = array(
             'amount' => $amount,
             'side' => ($orderSide === 0 || $orderSide  === 'true')? 1:0,
             'rate' => $rate,
             'type' => mb_strtoupper($orderType),
+            'currency' => $currency,
+            'base' => ($base === true || $base === 1)? 1:0,
+            'sl_rate' => $sl_rate,
+            'tp_rate' => $tp_rate,
+            'ts_offset' => $ts_offset
         );
         
         try {
