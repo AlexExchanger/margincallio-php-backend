@@ -390,7 +390,6 @@ class Account extends CActiveRecord {
             }
         }
         
-        
         return array(
             'info' => $accountInfo,
             'funds' => $data
@@ -433,15 +432,20 @@ class Account extends CActiveRecord {
         $connector = new TcpRemoteClient();
         
         $remoteAccountInfo = array();
-        foreach($currencies['derived'] as $currency) {
-            $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_BALANCE, $user->id, mb_strtolower($currency)));
+        
+        try {
+            $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_BALANCE, $user->id));
             if(count($resultCore) <= 0 || !isset($resultCore[0]) || ($resultCore[0] != 0)) {
                 throw new Exception("User doesn't verified", 10012);
             }
-            
-            $remoteAccountInfo[$currency] = array(
-                'Available' => $resultCore[1],
-                'Blocked' => $resultCore[2],
+        } catch(Exception $e) {
+            throw $e;
+        }
+        
+        foreach($resultCore[1] as $pair) {            
+            $remoteAccountInfo[mb_strtoupper($pair[0])] = array(
+                'Available' => $pair[1],
+                'Blocked' => $pair[2],
             );
         }
         
@@ -487,20 +491,6 @@ class Account extends CActiveRecord {
             );
         }
         
-        /*$funds = array(
-            'trade' => array(
-                'first' => Response::bcScaleOut(bcadd($remoteAccountInfo['firstAvailable'], $remoteAccountInfo['firstBlocked']), 8),
-                'second' => Response::bcScaleOut(bcadd($remoteAccountInfo['secondAvailable'], $remoteAccountInfo['secondBlocked']), 8)
-            ), 
-            'trade_available' => array(
-                'first' => Response::bcScaleOut($remoteAccountInfo['firstAvailable'], 8),
-                'second' => Response::bcScaleOut($remoteAccountInfo['secondAvailable'], 8)
-            ),
-            'safe' => array(
-                'first' => Response::bcScaleOut($accountList[0]->balance, 8),
-                'second' => Response::bcScaleOut($accountList[1]->balance, 8),
-            )
-        );*/
         $accountInfo['wallets'] = $data;
    
         return $accountInfo;
