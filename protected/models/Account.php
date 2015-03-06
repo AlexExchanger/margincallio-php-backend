@@ -386,7 +386,7 @@ class Account extends CActiveRecord {
                 'suspended' => $resultCore[9],
             );
             
-            $resultFee = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_FEE, $user->id, $currency));
+            $resultFee = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_FEE, $user->id, mb_strtolower($currency)));
             if(isset($resultFee) && isset($resultFee) && $resultFee[0] == 0) {
                 $accountInfo['fee'] = $resultFee[1];
             }
