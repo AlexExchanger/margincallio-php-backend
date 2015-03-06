@@ -27,8 +27,10 @@ class StatController extends MainController {
     }
     
     public function actionMainStat() {
+        $currency = $this->getParam('currency', 'BTC');
+        
         try {
-            $data = Stat::mainStat();
+            $data = Stat::mainStat($currency);
         } catch(Exception $e) {
             Response::ResponseError($e->getMessage());
         }

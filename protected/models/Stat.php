@@ -115,7 +115,7 @@ class Stat extends CActiveRecord {
         return $data;
     }
     
-    public static function mainStat() {
+    public static function mainStat($currency) {
         
         $stat = array(
             'dayVolume' => null,
@@ -142,21 +142,21 @@ class Stat extends CActiveRecord {
             $stat['dayVolume'] = Response::bcScaleOut($dayVolumeResult->size, 4);
         }
         
-        
-        //Current bid & ask
-        $bidQuery = 'SELECT "price" FROM "deal_BTCUSD" WHERE "side"=FALSE AND "createdAt"=(SELECT MAX("createdAt") FROM "deal_BTCUSD" WHERE "side"=FALSE)';
-        $askQuery = 'SELECT "price" FROM "deal_BTCUSD" WHERE "side"=TRUE AND "createdAt"=(SELECT MAX("createdAt") FROM "deal_BTCUSD" WHERE "side"=TRUE)';
-        
-        $bidResult = Deal::model()->findBySql($bidQuery);
-        $askResult = Deal::model()->findBySql($askQuery);
-        
-        if(isset($bidResult->price)) {
-            $stat['bid'] = Response::bcScaleOut($bidResult->price, 4);
+        try {
+            $connection = new TcpRemoteClient();
+            $response = $connection->sendRequest(array(TcpRemoteClient::FUNC_GET_TICKER, mb_strtolower($currency)));
+            
+            if(!isset($response[0]) || $response[0] != 0) {
+                throw new ExceptionTcpRemoteClient($response[0]);
+            }
+        } catch(Exception $e) {
+            if($e instanceof TcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->getType());
+            }
         }
         
-        if(isset($askResult->price)) {
-            $stat['ask'] = Response::bcScaleOut($askResult->price, 4);
-        }
+        $stat['bid'] = Response::bcScaleOut($response[1], 4);
+        $stat['ask'] = Response::bcScaleOut($response[2], 4);
         
         //Todays open price
         $todayOpenQuery = 'SELECT "price" FROM "deal_BTCUSD" WHERE "createdAt" > '.$todayRange['open'].' ORDER BY "createdAt" ASC LIMIT 1';
