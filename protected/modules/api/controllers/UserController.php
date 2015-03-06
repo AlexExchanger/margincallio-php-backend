@@ -38,16 +38,12 @@ class UserController extends MainController {
             }
         } else {
             $currency = Yii::app()->params->currency;
-            $supportedPairs = Account::getSupportedPairs();
-
-            foreach($supportedPairs as $key=>$value) {
-                $supportedPairs[$key] = explode('_', $value);
-            }
-
+            
             $response['logged'] = false;
             $response['defaultPair'] = 0;
+            $response['baseCurrency'] = 1;
             $response['currency'] = $currency;
-            $response['supportedPairs'] = $supportedPairs;
+            $response['supportedCurrency'] = Account::getSupportedCurrency()['derived'];
         }
         Response::ResponseSuccess($response);
     }

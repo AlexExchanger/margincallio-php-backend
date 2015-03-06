@@ -348,19 +348,15 @@ class User extends CActiveRecord {
     public static function getLoginData($user) {
         $currency = Yii::app()->params->currency;
         $openTickets = Ticket::getTicketsWithLastMessage($user->id, 'waitForUser');
-        $supportedPairs = Account::getSupportedPairs();
-        
-        foreach($supportedPairs as $key=>$value) {
-            $supportedPairs[$key] = explode('_', $value);
-        }
-        
+
         return array(
             'id' => $user->id,
             'email' => $user->email,
             'role' => $user->type,
             'access' => AdminController::getRules($user->type),
             'currency' => $currency,
-            'supportedPairs' => $supportedPairs,
+            'baseCurrency' => 1,
+            'supportedCurrency' => Account::getSupportedCurrency()['derived'],
             'defaultPair' => 0,
             '2fa' => $user->twoFA,
             'verified' => $user->verifiedStatus,

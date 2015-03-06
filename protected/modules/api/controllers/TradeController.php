@@ -127,7 +127,6 @@ class TradeController extends MainController {
     
     public function actionCancelConditionalOrder() {
         
-        //TODO: обсудить с фронтенд, как будет считаться направление условного ордера
         $availableTypes = array('STOPLOSS', 'TAKEPROFIT', 'TRAILINGSTOP');
         
         $type = mb_strtoupper($this->getParam('type'));
