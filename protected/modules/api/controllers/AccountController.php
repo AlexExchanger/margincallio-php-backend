@@ -233,15 +233,14 @@ class AccountController extends MainController {
     }
     
     public function actionGetPairBalance() {
-        $currency1 = $this->getParam('currency1', null);
-        $currency2 = $this->getParam('currency2', null);
+        $currency = $this->getParam('currency', null);
         
         try {
-            if(is_null($currency1) || is_null($currency2)) {
+            if(is_null($currency)) {
                 throw new Exception('Wrong currency parameters');
             }
             
-            $accountBalance = Account::getAccountBalance($currency1, $currency2);
+            $accountBalance = Account::getAccountBalance($currency);
         } catch(Exception $e) {
             if($e instanceof ExceptionTcpRemoteClient) {
                 TcpErrorHandler::TcpHandle($e->errorType);

@@ -25,7 +25,7 @@ class TradeController extends MainController {
         $amount = $this->getParam('amount');
         $rate = $this->getParam('rate');
         $orderType = $this->getParam('type', false);
-        $currency = $this->getParam('currency1', null);
+        $currency = $this->getParam('currency', null);
         
         $base = $this->getParam('base', null);
         
