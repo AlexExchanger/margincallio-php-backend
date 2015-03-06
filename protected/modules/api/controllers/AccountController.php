@@ -85,7 +85,10 @@ class AccountController extends MainController {
         $allTrades = Deal::model()->findAll($searchingCriteria);
         
         if(count($allTrades) <= 0) {
-            Response::ResponseError();
+            Response::ResponseSuccess(array(
+                'count' => 0,
+                'data' => array()
+            ));
         }
         
         $currentRange = $allTrades[0]->createdAt - $timestampRange;
