@@ -145,9 +145,9 @@ class TransactionExternal extends CActiveRecord {
         }
         
         $transaction->verifiedBy = Yii::app()->user->id;
-        $transaction->status = 'done';
+        $transaction->verifyStatus = 'done';
         
-        return $transaction->save(true, ['verifiedBy', 'status']);
+        return $transaction->save(true, ['verifiedBy', 'verifyStatus']);
     }
     
     public static function rejectTransaction($id) {
@@ -159,9 +159,9 @@ class TransactionExternal extends CActiveRecord {
         }
         
         $transaction->verifiedBy = Yii::app()->user->id;
-        $transaction->status = 'rejected';
+        $transaction->verifyStatus = 'rejected';
         
-        return $transaction->save(true, ['verifiedBy', 'status']);
+        return $transaction->save(true, ['verifiedBy', 'verifyStatus']);
     }
     
 
