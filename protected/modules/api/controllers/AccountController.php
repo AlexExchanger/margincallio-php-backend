@@ -119,11 +119,13 @@ class AccountController extends MainController {
     
     public function actionGetOrderBook() {       
         try {
+            $currency = $this->getParam('currency', 'BTC');
+            
             $connection = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
-            $response = $connection->sendRequest(array(TcpRemoteClient::FUNC_GET_DEPTH, 30));
+            $response = $connection->sendRequest(array(TcpRemoteClient::FUNC_GET_DEPTH, mb_strtolower($currency), 30));
             
             if(!isset($response[0]) || $response[0] != 0) {
-                throw new Exception();
+                throw new ExceptionTcpRemoteClient($response[0]);
             }
             
             $bidOrderBook = array();

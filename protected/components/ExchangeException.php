@@ -67,6 +67,10 @@ class ExceptionTcpRemoteClient extends CException {
     protected $code = 2000;
     public $errorType;
     public $message = 'TCP connection error';
+    
+    public function __construct($type) {
+        $this->errorType = $type;
+    }
 }
 class ExceptionConnectionRefused extends ExceptionTcpRemoteClient {
     protected $code = 2001;
