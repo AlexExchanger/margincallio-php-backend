@@ -99,7 +99,7 @@ class Order extends CActiveRecord {
         
         $sl_rate = ArrayHelper::getFromArray($data, 'sl_rate');
         $tp_rate = ArrayHelper::getFromArray($data, 'tp_rate');
-        $ts_offset = ArrayHelper::getFromArray($data, 'tp_offset');
+        $ts_offset = ArrayHelper::getFromArray($data, 'ts_offset');
 
         //check amount and curency
         if (!$amount || is_null($currency)) {
