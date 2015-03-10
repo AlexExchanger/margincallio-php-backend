@@ -79,7 +79,7 @@ class UserController extends MainController {
                 throw new Exception('Wrong email parameter');
             }
             
-            if($agree === 0 || $agree === false) {
+            if($agree === '0' || $agree === 'false') {
                 throw new Exception('You have to accept Terms of Agreement');
             }
             
