@@ -13,7 +13,7 @@ class Order extends CActiveRecord {
     }
 
     public function tableName() {
-        return 'order_' . self::$pair;
+        return 'order';
     }
 
     public function rules() {

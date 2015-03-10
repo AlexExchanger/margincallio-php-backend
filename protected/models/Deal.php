@@ -9,7 +9,7 @@ class Deal extends CActiveRecord {
     }
 
     public function tableName() {
-        return 'deal_' . self::$pair;
+        return 'deal';
     }
 
     public function rules() {

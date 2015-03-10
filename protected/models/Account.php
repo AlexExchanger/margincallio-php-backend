@@ -696,16 +696,25 @@ class Account extends CActiveRecord {
         return true;
     }
     
-    public static function getSupportedCurrency() {
-        $pairs = self::getSupportedPairs();
-        $currencies = array('main'=>array(), 'derived'=>array());
-
-        foreach($pairs as $pair) {
-            $onePair = explode('_', $pair);
-            if(!in_array($onePair[1], $currencies['main'])) {
-                $currencies['main'][] = $onePair[1];
+    public static function getSupportedCurrencyNew() {
+        
+        $currencies = array('main'=>array('EUR'), 'derived' => array());
+        
+        try {
+            $connector = new TcpRemoteClient();
+            $response = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_DERIVED_CURRENCIES));
+            
+            if(!isset($response[1])) {
+                throw new Exception('Error with currencies info');
             }
-            $currencies['derived'][] = $onePair[0];
+            
+            $currencies['derived'] = array_map(function($element) {
+                return mb_strtoupper($element);
+            }, $response[1]);
+        } catch(Exception $e) {
+            if($e instanceof TcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->getType());
+            }
         }
         
         return $currencies;
