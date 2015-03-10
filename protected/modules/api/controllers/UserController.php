@@ -71,11 +71,16 @@ class UserController extends MainController {
         $email = $this->getParam('email', null);
         $password = $this->getParam('password', null);
         $inviteCode = $this->getParam('invite', false);
+        $agree = $this->getParam('agree', false);
         
         $user = new User();
         try {
             if(is_null($email)) {
                 throw new Exception('Wrong email parameter');
+            }
+            
+            if($agree === 0 || $agree === false) {
+                throw new Exception('You have to accept Terms of Agreement');
             }
             
             if(is_null($password)) {
