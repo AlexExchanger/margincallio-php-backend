@@ -273,8 +273,8 @@ class Order extends CActiveRecord {
         foreach ($result as $value) {
             $data[] = array(
                 'id' => (int)$value->id,
-                'amount' => Response::bcScaleOut($value->size),
-                'actualAmount' => Response::bcScaleOut($value->actualSize),
+                'original_amount' => Response::bcScaleOut($value->size),
+                'actual_amount' => Response::bcScaleOut($value->actualSize),
                 'rate' => Response::bcScaleOut($value->price),
                 'offset' => !is_null($value->offset)? Response::bcScaleOut($value->offset): null,
                 'side' => $value->side,
