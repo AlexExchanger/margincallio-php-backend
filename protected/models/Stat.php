@@ -131,7 +131,7 @@ class Stat extends CActiveRecord {
             'close' => Response::timestampToTick(TIME)
         );
         
-        $defaultPair = 'deal_BTCUSD';
+        $defaultPair = 'deal';
         
         //24 hour volume
         $dayVolumeQuery = 'SELECT SUM("size") as "size" FROM "'.$defaultPair.'" ';
@@ -159,7 +159,7 @@ class Stat extends CActiveRecord {
         $stat['ask'] = Response::bcScaleOut($response[2], 4);
         
         //Todays open price
-        $todayOpenQuery = 'SELECT "price" FROM "deal_BTCUSD" WHERE "createdAt" > '.$todayRange['open'].' ORDER BY "createdAt" ASC LIMIT 1';
+        $todayOpenQuery = 'SELECT "price" FROM "deal" WHERE "createdAt" > '.$todayRange['open'].' ORDER BY "createdAt" ASC LIMIT 1';
         $todayOpenResult = Deal::model()->findBySql($todayOpenQuery);
         if(isset($todayOpenResult->price)) {
             $stat['todayOpen'] = Response::bcScaleOut($todayOpenResult->price, 4);

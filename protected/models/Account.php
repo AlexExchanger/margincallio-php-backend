@@ -696,7 +696,7 @@ class Account extends CActiveRecord {
         return true;
     }
     
-    public static function getSupportedCurrencyNew() {
+    public static function getSupportedCurrency() {
         
         $currencies = array('main'=>array('EUR'), 'derived' => array());
         
