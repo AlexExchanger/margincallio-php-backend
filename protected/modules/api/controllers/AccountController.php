@@ -632,6 +632,7 @@ class AccountController extends MainController {
         
         $filter = array(
             'userId' => $this->user->id,
+            'currency' => $this->getParam('currency', null),
         );
         
         try {
@@ -822,6 +823,22 @@ class AccountController extends MainController {
             'count' => (isset($this->paginationOptions))?$this->paginationOptions['total']:'',
             'data' => $orders,
         ));
+    }
+    
+    
+    public function actionGetSecurityLog() {
+        
+        try {
+            $filters = array(
+                'userId' => $this->user->id,
+            );
+            
+            $log = UserLog::getList($filters, $this->paginationOptions);
+        } catch(Exception $e) {
+            Response::ResponseSuccess($e->getMessage());
+        }
+        
+        Response::ResponseSuccess($log);
     }
     
 }

@@ -73,7 +73,7 @@ class UserLog extends CActiveRecord {
             $criteria->compare('action', $filters['action']);
         }
         
-        if (!is_null($filters['ip'])) {
+        if (isset($filters['ip']) && !is_null($filters['ip'])) {
             $criteria->compare('ip', $filters['ip']);
         }
         
