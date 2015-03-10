@@ -64,7 +64,7 @@ class TradeController extends MainController {
             if($e instanceof ExceptionTcpRemoteClient) {
                 TcpErrorHandler::TcpHandle($e->errorType);
             }
-            Response::ResponseError('Error');
+            Response::ResponseError($e->getMessage());
         }
         Response::ResponseSuccess(array(), $message);
     }

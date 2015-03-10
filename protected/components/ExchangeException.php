@@ -6,6 +6,7 @@ class CommonException extends CException {
 }
 class ExceptionWrongInputData extends CommonException {
     protected $code = 1001;
+    public $message = 'Wrong input data';
 }
 class ModelException extends CommonException {
     private $errors = array();

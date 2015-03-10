@@ -102,7 +102,7 @@ class Order extends CActiveRecord {
         $ts_offset = ArrayHelper::getFromArray($data, 'ts_offset');
 
         //check amount and curency
-        if (!$amount || is_null($currency)) {
+        if (!$amount || is_null($currency) || !is_numeric($amount)) {
             throw new ExceptionWrongInputData();
         }
 
