@@ -35,6 +35,7 @@ class UserController extends MainController {
                 $response = array_merge($response, $data);
             } else {
                 $response['logged'] = false;
+                Yii::app()->session->destroy();
             }
         } else {
             $currency = Yii::app()->params->currency;

@@ -297,6 +297,8 @@ class Order extends CActiveRecord {
         $dateTo = ArrayHelper::getFromArray($filters, 'dateTo');
         $types = ArrayHelper::getFromArray($filters, 'types', array());
        
+        $currency = ArrayHelper::getFromArray($filters, 'currency', null);
+        
         $criteria = new CDbCriteria();
         $conditions = array();
         $typeParams = array();
@@ -310,6 +312,10 @@ class Order extends CActiveRecord {
        
         if(!empty($orderId) && !is_null($orderId)) {
             $criteria->compare('id', $orderId);
+        }
+        
+        if(!is_null($currency)) {
+            $criteria->compare('currency', $currency);
         }
         
         if (!empty($accountId)) {
