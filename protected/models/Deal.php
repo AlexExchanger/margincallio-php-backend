@@ -46,6 +46,8 @@ class Deal extends CActiveRecord {
         $dateFrom = ArrayHelper::getFromArray($filters, 'dateFrom');
         $dateTo = ArrayHelper::getFromArray($filters, 'dateTo');
         $side = ArrayHelper::getFromArray($filters, 'side', null);
+        
+        $currency = ArrayHelper::getFromArray($filters, 'currency', null);
        
         $criteria = new CDbCriteria();
         
@@ -67,6 +69,10 @@ class Deal extends CActiveRecord {
         
         if(!is_null($orderSellId)) {
             $criteria->compare('orderSellId', $orderSellId);
+        }
+        
+        if(!is_null($currency)) {
+            $criteria->compare('currency', $currency);
         }
 
         ListCriteria::timestampCriteria($criteria, $dateFrom, $dateTo);

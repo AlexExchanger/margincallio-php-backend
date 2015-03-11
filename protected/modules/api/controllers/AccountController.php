@@ -807,6 +807,12 @@ class AccountController extends MainController {
     
     public function actionGetTrades() {
         try {
+            $currency = $this->getParam('currency', null);
+                    
+            if(is_null($currency)) {
+                throw new Exception('Wrong currency parameter');
+            }
+            
             $types = array();
             if(!is_null($this->getParam('types', null))) {
                 $types = explode(',', $this->getParam('types'));
@@ -815,7 +821,8 @@ class AccountController extends MainController {
             $orders = Order::getOrdersWithDeals(array(
                 'userId' => Yii::app()->user->id,
                 'types' => $types,
-                'id' => $this->getParam('id')
+                'id' => $this->getParam('id'),
+                'currency' => $currency,
             ), $this->paginationOptions);
         } catch (Exception $e) {
             Response::ResponseError();
