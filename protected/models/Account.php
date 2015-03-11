@@ -409,20 +409,23 @@ class Account extends CActiveRecord {
             return false;
         }
         
+        $orderCriteria = new CDbCriteria();
+        $orderCriteria->order = 'id';
+        
         $accountList = Account::model()->findAllByAttributes(array(
             'userId'=>$user->id,
             'type'=> array('user.safeWallet'),
-        ), 'ORDER BY "id"');
+        ), $orderCriteria);
         
         $tradeAccountList = Account::model()->findAllByAttributes(array(
             'userId'=>$user->id,
             'type'=> array('user.trading'),
-        ), 'ORDER BY "id"');
+        ), $orderCriteria);
         
         $withdrawalAccountList = Account::model()->findAllByAttributes(array(
             'userId' => $user->id,
             'type' => array('user.withdrawWallet')
-        ), 'ORDER BY "id"');
+        ), $orderCriteria);
         
         $tradeAccount = array();
         foreach($tradeAccountList as $value) {
