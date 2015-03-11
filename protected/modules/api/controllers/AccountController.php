@@ -635,7 +635,9 @@ class AccountController extends MainController {
             'currency' => $this->getParam('currency', null),
         );
         
+        $type = $this->getParam('type', 'pendingAccepted,accepted,partialFilled,pendingCancelled');
         try {
+            $filter['types'] = explode(',', $type);
             $orders = Order::getList($filter, $this->paginationOptions);
         } catch (Exception $e) {
             Response::ResponseError();
