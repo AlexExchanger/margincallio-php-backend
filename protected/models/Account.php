@@ -412,17 +412,17 @@ class Account extends CActiveRecord {
         $accountList = Account::model()->findAllByAttributes(array(
             'userId'=>$user->id,
             'type'=> array('user.safeWallet'),
-        ));
+        ), 'ORDER BY "id"');
         
         $tradeAccountList = Account::model()->findAllByAttributes(array(
             'userId'=>$user->id,
             'type'=> array('user.trading'),
-        ));
+        ), 'ORDER BY "id"');
         
         $withdrawalAccountList = Account::model()->findAllByAttributes(array(
             'userId' => $user->id,
             'type' => array('user.withdrawWallet')
-        ));
+        ), 'ORDER BY "id"');
         
         $tradeAccount = array();
         foreach($tradeAccountList as $value) {
