@@ -171,8 +171,12 @@ class AccountController extends MainController {
             $this->paginationOptions['limit'] = 30;
         }
         
+        $currency = $this->getParam('currency', null);
+        
         try {
-            $trades = Deal::getList(array(), $this->paginationOptions);
+            $trades = Deal::getList(array(
+                'currency' => $currency,
+            ), $this->paginationOptions);
             $data = array();
             foreach($trades as $value) {
                 $data[] = array(
