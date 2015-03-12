@@ -144,7 +144,7 @@ class Transaction extends CActiveRecord {
         $criteria = new CDbCriteria();
         
         if(!empty($balanceCriteria) && $balanceCriteria != '') {
-            if($balanceCriteria == 'debet') {
+            if($balanceCriteria == 'debit') {
                 $criteria->compare('side', 't');
             } else {
                 $criteria->compare('side', 'f');
