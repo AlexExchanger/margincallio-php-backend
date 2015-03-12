@@ -169,10 +169,16 @@ class UserController extends MainController {
 
         $email = $this->getParam('email', false);
         $password = $this->getParam('password', false);
-
+        
+        $keepLogin = $this->getParam('keepLogin', false);
         $auth = new UserIdentity($email, $password);
         if($auth->authenticate()) {
-            Yii::app()->user->login($auth);
+            if($keepLogin === '1' || $keepLogin === 'true') {
+                Yii::app()->user->allowAutoLogin = true;
+                Yii::app()->user->login($auth, 2592000);
+            } else {
+                Yii::app()->user->login($auth);
+            }
             $user = User::getCurrent();
             $user->lastLoginAt = TIME;
             $user->save(true, array('lastLoginAt'));

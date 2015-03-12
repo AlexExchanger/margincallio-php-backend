@@ -147,7 +147,7 @@ class AccountController extends MainController {
     public function actionAllTrades() {
         
         if($this->paginationOptions['limit'] == false) {
-            //magin number
+            //magic number
             $this->paginationOptions['limit'] = 30;
         }
         

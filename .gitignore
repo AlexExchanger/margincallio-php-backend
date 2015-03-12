@@ -6,3 +6,4 @@ logs/
 www/
 index.php
 protected/config/main.php
+protected/runtime/
