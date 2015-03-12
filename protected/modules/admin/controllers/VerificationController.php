@@ -61,8 +61,6 @@ class VerificationController extends AdminController {
         Response::ResponseSuccess($status);
     }
     
-    
-    
     public function actionRefuseUser() {
         $userId = $this->getParam('id');
         $reason = $this->getParam('reason');
@@ -78,5 +76,29 @@ class VerificationController extends AdminController {
         Response::ResponseSuccess($status);
     }
     
-    
+    public function actionAskForUserDoc() {
+        $userId = $this->getParam('id');
+        
+        try {
+            $user = User::get($userId);
+            if(!$user) {
+                throw new Exception('User doesn\'t exist');
+            }
+            
+            $wrongUserStatus = array('accepted', 'waitingForDocuments', 'waitingForModeration');
+            if(in_array($user->verifiedStatus, $wrongUserStatus)) {
+                throw new Exception('Can\'t ask for documents. User has status:  '.$user->verifiedStatus);
+            }
+            
+            $user->verifiedStatus = 'waitingForDocuments';
+            if(!$user->save()) {
+                throw new Exception('User doesn\'t saved');
+            }
+            
+        } catch(Exception $e) {
+            Response::ResponseError($e->getMessage());
+        }
+        
+        Response::ResponseSuccess('Request sent');
+    }
 }
