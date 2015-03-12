@@ -30,6 +30,7 @@ class AccountController extends MainController {
         
         $beginTime = Response::timestampToTick($this->getParam('begin', TIME - 804800));
         $endTime = Response::timestampToTick($this->getParam('end', TIME));
+        $currency = $this->getParam('currency', 'BTC');
         
         $availableRange = array(            
             '1m' => 600000000,
@@ -45,7 +46,7 @@ class AccountController extends MainController {
             Response::ResponseError();
         }
         
-        $candlesObject = new Candles($pair, $timeRange);
+        $candlesObject = new Candles($pair, $timeRange, $currency);
         
         $candles = $candlesObject->getLast($beginTime, $endTime);
         
@@ -60,6 +61,7 @@ class AccountController extends MainController {
 
         $searchingCriteria = new CDbCriteria();
         $searchingCriteria->addBetweenCondition('"createdAt"', $beginTime, $endTime);
+        $searchingCriteria->compare('currency', $currency);
         $searchingCriteria->order = '"createdAt" DESC';
         
         $allTrades = Deal::model()->findAll($searchingCriteria);
