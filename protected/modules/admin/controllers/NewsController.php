@@ -21,18 +21,6 @@ class NewsController extends AdminController {
         return true;
     }
     
-    private function preflight() {
-        $content_type = 'application/json';
-        $status = 200;
-        header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
-        header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
-        header('Access-Control-Allow-Credentials: true');
-        if (isset($_SERVER['HTTP_ORIGIN'])) {
-            header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
-        }
-        header('Content-type: ' . $content_type);
-    }
-    
     public function actionAddNews() {
         
         $data = array(

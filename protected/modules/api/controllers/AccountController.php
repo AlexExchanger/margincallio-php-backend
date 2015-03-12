@@ -26,26 +26,6 @@ class AccountController extends MainController {
         return true;
     }
     
-    public function actionTest() {
-        try {
-            $userId = Yii::app()->user->id;
-            
-            $connector = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
-            //$resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_INFO, $userId));
-            $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_BALANCE, $userId, 'btc'));
-            
-            
-        } catch (Exception $e) {
-            if($e instanceof TcpRemoteClient) {
-                TcpErrorHandler::TcpHandle($e->getType());
-            }
-            Response::ResponseError();
-        }
-        
-        Response::ResponseSuccess($resultCore);
-    }
-    
-    
     public function actionGraphicsStat() {
         
         $beginTime = Response::timestampToTick($this->getParam('begin', TIME - 804800));
@@ -158,7 +138,7 @@ class AccountController extends MainController {
             if($e instanceof ExceptionTcpRemoteClient) {
                 TcpErrorHandler::TcpHandle($e->errorType);
             }
-            Response::ResponseError();
+            Response::ResponseError('Order book error');
         }
         
         Response::ResponseSuccess($result);
@@ -267,7 +247,7 @@ class AccountController extends MainController {
         
         try {
             if(is_null($accountId)) {
-                throw new Exception();
+                throw new Exception('Wrong account id parameter');
             }
             
             $account = Account::get($accountId);
@@ -359,7 +339,7 @@ class AccountController extends MainController {
             Response::ResponseError($e->getMessage());
         }
         
-        Response::ResponseSuccess();
+        Response::ResponseSuccess([], 'Funds transfered');
     }   
     
     public function actionGetActiveOrders() {
@@ -386,18 +366,6 @@ class AccountController extends MainController {
         
         Response::ResponseSuccess($orders);
         
-    }
-    
-    private function preflight() {
-        $content_type = 'application/json';
-        $status = 200;
-
-        header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
-        header('Access-Control-Allow-Credentials: true');
-        if (isset($_SERVER['HTTP_ORIGIN'])) {
-            header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
-        }
-        header('Content-type: ' . $content_type);
     }
     
     /* Ticket system */
@@ -444,7 +412,7 @@ class AccountController extends MainController {
             $logMessage = 'Create ticket with id: '.$ticket->id.', for '.$ticket->department.' department.';
             Loger::logUser(Yii::app()->user->id, $logMessage);
             
-            Response::ResponseSuccess();
+            Response::ResponseSuccess([], 'Ticker created');
         } else {
             //headers
             $this->preflight();
@@ -457,7 +425,7 @@ class AccountController extends MainController {
         $department = $this->getParam('department', null);
         try {
             if(!$userId) {
-                throw new Exception();
+                throw new Exception('Wrong user id parameter');
             }
             
             $filters = array('userId' => $userId);
@@ -625,7 +593,7 @@ class AccountController extends MainController {
             if(isset($msg) && isset($msg[0])) {
                 Response::ResponseSuccess($msg[0]);
             }
-            Response::ResponseSuccess();
+            Response::ResponseSuccess('Success');
         } else {
             //headers
             $this->preflight();
@@ -704,7 +672,7 @@ class AccountController extends MainController {
         $key = $this->getParam('key', NULL);
         try {
             if(is_null($key)) {
-                throw new Exception();
+                throw new Exception('Wrong key parameter');
             }
             
             $connection = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
@@ -713,7 +681,7 @@ class AccountController extends MainController {
             if($e instanceof ExceptionTcpRemoteClient) {
                 TcpErrorHandler::TcpHandle($e->errorType);
             }
-            Response::ResponseError();
+            Response::ResponseError('Internal system error');
         }
         
         Response::ResponseSuccess($response);
@@ -732,7 +700,7 @@ class AccountController extends MainController {
             if($e instanceof ExceptionTcpRemoteClient) {
                 TcpErrorHandler::TcpHandle($e->errorType);
             }
-            Response::ResponseError();
+            Response::ResponseError('Internal system error');
         }
         
         Response::ResponseSuccess($data);
@@ -742,20 +710,20 @@ class AccountController extends MainController {
         $login = $this->getParam('login', NULL);
         try {
             if(is_null($login)) {
-                throw new Exception();
+                throw new Exception('Wrong login parameter');
             }
             
             $connection = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
             $response = $connection->sendRequest(array(TcpRemoteClient::FUNC_GENERATE_NEW_FIX_PASSWORD, $this->user->id, $login));
 
             if($response[0] != 0 || !isset($response[1])) {
-                throw new Exception();
+                throw new ExceptionTcpRemoteClient($response[0]);
             }
         } catch(Exception $e) {
             if($e instanceof ExceptionTcpRemoteClient) {
                 TcpErrorHandler::TcpHandle($e->errorType);
             }
-            Response::ResponseError();
+            Response::ResponseError('Internal system error');
         }
         
         Response::ResponseSuccess($response[1]);
@@ -780,7 +748,7 @@ class AccountController extends MainController {
             if($e instanceof ExceptionTcpRemoteClient) {
                 TcpErrorHandler::TcpHandle($e->errorType);
             }
-            Response::ResponseError();
+            Response::ResponseError('Internal system error');
         }
         
         Response::ResponseSuccess($data);
@@ -790,23 +758,23 @@ class AccountController extends MainController {
         $login = $this->getParam('login', NULL);
         try {
             if(is_null($login)) {
-                throw new Exception();
+                throw new Exception('Wrong login parameter');
             }
             
             $connection = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
             $response = $connection->sendRequest(array(TcpRemoteClient::FUNC_CANCEL_FIX_ACCOUNT, $this->user->id, $login));
             
             if($response[0] != 0) {
-                throw new Exception();
+                throw new ExceptionTcpRemoteClient($response[0]);
             }
         } catch(Exception $e) {
             if($e instanceof ExceptionTcpRemoteClient) {
                 TcpErrorHandler::TcpHandle($e->errorType);
             }
-            Response::ResponseError();
+            Response::ResponseError('Internal system error');
         }
         
-        Response::ResponseSuccess();
+        Response::ResponseSuccess('Fix account cancelled');
     }
     
     public function actionGetTrades() {

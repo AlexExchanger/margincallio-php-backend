@@ -10,27 +10,13 @@ class GatewayController extends MainController {
         }
         
         if(Yii::app()->user->isGuest) {
-            $this->actionPreflight();
-            //Response::GetResponseError('Access denied');
+            $this->preflight();
             return false;
         }
         
         $this->user = Yii::app()->user;
 
         return true;
-    }
-    
-    public function actionPreflight() {
-        $content_type = 'application/json';
-        $status = 200;
-
-        header("Access-Control-Allow-Headers:origin, content-type, accept, methods");
-        header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
-        header('Access-Control-Allow-Credentials: true');
-        if (isset($_SERVER['HTTP_ORIGIN'])) {
-            header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
-        }
-        header('Content-type: ' . $content_type);
     }
     
     public function actionall() {

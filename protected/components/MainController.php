@@ -35,4 +35,29 @@ class MainController extends CController {
         
         return $default;
     }
+    
+    protected function preflight() {
+        header('Content-Type: application/json');
+        
+        $allowDomains = array(
+            'http://stock.bit',
+            'http://spacebtc.tk',
+            'http://dev.stock.bit',
+            'http://dev.stock.loc',
+            'http://dev.stock.loc',
+            'http://admin.stock.bit',
+            'http://dev.admin.stock.bit',
+            'http://admin.stock.loc',
+            'http://dev.admin.stock.loc');
+        
+        header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
+        header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
+        header('Access-Control-Allow-Credentials: true');
+        
+        if(isset($_SERVER['HTTP_ORIGIN'])) {
+            if(in_array($_SERVER['HTTP_ORIGIN'], $allowDomains)) {
+                header('Access-Control-Allow-Origin: '.$_SERVER['HTTP_ORIGIN']);
+            }
+        }
+    }
 }

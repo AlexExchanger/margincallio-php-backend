@@ -19,18 +19,6 @@ class VerificationController extends MainController {
         return true;
     }
 
-    public function actionPreflight() {
-        $content_type = 'application/json';
-        $status = 200;
-
-        header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
-        header('Access-Control-Allow-Credentials: true');
-        if (isset($_SERVER['HTTP_ORIGIN'])) {
-            header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
-        }
-        header('Content-type: ' . $content_type);
-    }
-
     public function actionSendDocs() {
         
         $docs = $this->getParam('files', null);
@@ -107,7 +95,7 @@ class VerificationController extends MainController {
             Loger::logUser(Yii::app()->user->id, 'New verification documents');
             Response::ResponseSuccess($ticket->id, 'Success');
         } else {
-            $this->actionPreflight();
+            $this->preflight();
         }
     }
 
