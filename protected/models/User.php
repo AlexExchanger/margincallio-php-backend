@@ -15,6 +15,7 @@ class User extends CActiveRecord {
         'sverifier'
     );
     public static $verifiedStatusOptions = array(
+        'withoutVerify',
         'waitingForDocuments',
         'waitingForModeration', 
         'accepted',
@@ -227,7 +228,7 @@ class User extends CActiveRecord {
         $this->email = $email;
         $this->password = UserIdentity::trickyPasswordEncoding($email, $password);
         $this->emailVerification = UserIdentity::trickyPasswordEncoding($email, rand(0, PHP_INT_MAX));
-        $this->verifiedStatus = 'waitingForDocuments';
+        $this->verifiedStatus = 'withoutVerify';
         $this->type = 'trader';
         
         if(!$this->validate()) {
@@ -441,7 +442,7 @@ class User extends CActiveRecord {
         $user->password = UserIdentity::trickyPasswordEncoding($user->email, $password);
         
         $user->emailVerification = null;
-        $user->verifiedStatus = 'waitingForDocuments';
+        $user->verifiedStatus = 'withoutVerify';
         $user->type = ArrayHelper::getFromArray($data, 'type', 'trader');
         
         $codes = UserIdentity::generateAlarmCodes($user->id, $user->email);

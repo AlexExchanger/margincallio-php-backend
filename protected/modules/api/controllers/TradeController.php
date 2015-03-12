@@ -4,18 +4,31 @@ class TradeController extends MainController {
 
     private $user = null;
     
+    private $availableUserStatus = array(
+        'withoutVerify',
+        'accepted',
+    );
+    
     public function beforeAction($action) {
         if(!parent::beforeAction($action)) {
             return false;
         }
         
-        if(!Yii::app()->user->isGuest) {
-            $this->user = Yii::app()->user;
-            return true;
+        if(Yii::app()->user->isGuest) {
+            Response::ResponseError('Access denied');
         }
         
-        Response::GetResponseError('Access denied');
-        return false;
+        $this->user = Yii::app()->user;
+        $user = User::get($this->user->id);
+        if(!$user) {
+            Response::ResponseError('User doesn\'t exist');
+        }
+        
+        if(!in_array($user->verifiedStatus, $this->availableUserStatus)) {
+            Response::ResponseError('User doesn\'t verified');
+        }
+        
+        return true;
     }
     
 
