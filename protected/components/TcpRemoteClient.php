@@ -203,9 +203,7 @@ class TcpRemoteClient extends CComponent {
     public function checkResponse($status) {
         $statusArray = json_decode($status, true);
         if(!isset($statusArray[0]) || $statusArray[0] != 0) {
-            $e = new ExceptionTcpRemoteClient();
-            $e->errorType = (isset($responseArray[0]))?$responseArray[0]:99;
-            throw $e;
+            throw new ExceptionTcpRemoteClient((isset($responseArray[0]))?$responseArray[0]:99);
         }
         
         return (isset($statusArray[1]))? $statusArray[1]:false;
