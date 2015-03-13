@@ -59,7 +59,7 @@ class TcpRemoteClient extends CComponent {
     
     const FUNC_GET_ACTIVE_CONDITIONAL_ORDER = 3000;
     
-    const FUNC_SET_ACCOUNT_FEE = 3100;
+    const FUNC_SET_ACCOUNT_FEE = 1000;
     const FUNC_GET_TICKER = 7000;
     const FUNC_GET_DEPTH = 7100;
     
