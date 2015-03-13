@@ -361,7 +361,7 @@ class User extends CActiveRecord {
             'defaultPair' => 0,
             '2fa' => $user->twoFA,
             'verified' => $user->verifiedStatus,
-            'isVerified' => ($user->verifiedStatus == 'accepted')? true:false,
+            'isVerified' => ($user->verifiedStatus == 'accepted' || $user->verifiedStatus == 'withoutVerify')? true:false,
             'isDocumentsSent' => ($user->verifiedStatus != 'waitingForDocuments')? true:false,
             'openTickets' => $openTickets
         );
