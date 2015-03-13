@@ -114,7 +114,8 @@ class GatewayController extends AdminController {
             
             $account = Account::model()->findByAttributes(array(
                 'userId' => $data['userId'],
-                'type' => 'user.safeWallet'
+                'type' => 'user.safeWallet',
+                'currency' => 'EUR'
             ));
             
             if(!$account) {
