@@ -268,6 +268,7 @@ class Account extends CActiveRecord {
                 if(!isset($tradeWallet) || !isset($tradeWallet['balance'])) {
                     throw new Exception('Trading wallet doesn\'t exist');
                 }
+                $wallets[$walletFrom]->balance = $tradeWallet['balance'];
                 $compare = bccomp($tradeWallet['balance'], $amount);
             }
                 
