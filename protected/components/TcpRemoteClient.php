@@ -74,6 +74,8 @@ class TcpRemoteClient extends CComponent {
     const FUNC_GET_DERIVED_CURRENCIES = 5200;
     const FUNC_DELETE_CURRENCY_PAIR = 5300;
     
+    const FUNC_MAKE_SNAPSHOT = 9000;
+    
     const FUNC_OPEN_MARKET = 79100;
     const FUNC_CLOSE_MARKET = 79000;
     const FUNC_RESTART_FIX = 79500;

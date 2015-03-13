@@ -78,4 +78,22 @@ class AdminControlController extends AdminController {
         
         Response::ResponseSuccess();
     }
+    
+    
+    public function actionMakeSnapshot() {
+        try {
+            $connection = new TcpRemoteClient();
+            $connection->sendRequest(array(TcpRemoteClient::FUNC_MAKE_SNAPSHOT));
+            
+        } catch(Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->errorType);
+            }
+            Response::ResponseError($e->getMessage());
+        }
+        
+        Response::ResponseSuccess('Success');
+    }
+    
+    
 }
