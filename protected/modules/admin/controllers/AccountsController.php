@@ -34,6 +34,8 @@ class AccountsController extends AdminController {
     public function actionSetFee() {
         $fee = $this->getParam('fee', null);
         $currency = $this->getParam('currency', null);
+        $userId = $this->getParam('userId', null);
+        
         
         try {
             
@@ -43,8 +45,12 @@ class AccountsController extends AdminController {
             
             $connection = new TcpRemoteClient();
             
-            foreach($users as $value) {
-                $connection->sendRequest(array(TcpRemoteClient::FUNC_SET_ACCOUNT_FEE, $value->id, $currency, $fee));
+            if(!is_null($userId)) {
+                $connection->sendRequest(array(TcpRemoteClient::FUNC_SET_ACCOUNT_FEE, $userId, mb_strtolower($currency), $fee));
+            } else {
+                foreach($users as $value) {
+                    $connection->sendRequest(array(TcpRemoteClient::FUNC_SET_ACCOUNT_FEE, $value->id, mb_strtolower($currency), $fee));
+                }
             }
         } catch(Exception $e) {
             if($e instanceof ExceptionTcpRemoteClient) {
