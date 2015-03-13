@@ -535,7 +535,7 @@ class Account extends CActiveRecord {
         
         if($account->type == 'user.trading') {
             $connector = new TcpRemoteClient();
-            $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_INFO, $user->id));
+            $resultCore = $connector->sendRequest(array(TcpRemoteClient::FUNC_GET_ACCOUNT_BALANCE, $user->id, mb_strtolower($currency)));
 
             if(count($resultCore) <= 0 || !isset($resultCore[0]) || ($resultCore[0] != 0)) {
                 throw new Exception("User doesn't verified", 10012);
@@ -544,16 +544,14 @@ class Account extends CActiveRecord {
             $remoteAccountInfo = array(
                 'firstAvailable' => $resultCore[1],
                 'firstBlocked' => $resultCore[2],
-                'secondAvailable' => $resultCore[3],
-                'secondBlocked' => $resultCore[4],
             );
             
             $wallet = array(
                 'id' => $account->id,
                 'type' => 'trade',
                 'currency' => $account->currency,
-                'balance' => (string)bcadd((($account->currency == $pairArray[0])?  $remoteAccountInfo['firstAvailable']:$remoteAccountInfo['secondAvailable']), 0, 6), 
-                'hold' => (string)bcadd((($account->currency == $pairArray[0])?  $remoteAccountInfo['firstBlocked']:$remoteAccountInfo['secondBlocked']), 0, 6), 
+                'balance' => (string)bcadd(($remoteAccountInfo['firstAvailable']), 0, 6),
+                'hold' => (string)bcadd(($remoteAccountInfo['firstBlocked']), 0, 6),
             );
             
         } else {
