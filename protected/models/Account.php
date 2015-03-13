@@ -259,8 +259,19 @@ class Account extends CActiveRecord {
         
         try {
             $wallets = self::getAccountPair($user->id, $currency);
-
-            $compare = bccomp($wallets[$walletFrom]->balance, $amount);
+            
+            $compare = 0;
+            if(!$type) {
+                $compare = bccomp($wallets[$walletFrom]->balance, $amount);
+            } else {
+                $tradeWallet = Account::getAccountInfoOne($wallets[$walletFrom]->id);
+                if(!isset($tradeWallet) || !isset($tradeWallet['balance'])) {
+                    throw new Exception('Trading wallet doesn\'t exist');
+                }
+                $compare = bccomp($tradeWallet['balance'], $amount);
+            }
+                
+                
             if($compare < 0) {
                 throw new ExceptionNoMoney();
             }
