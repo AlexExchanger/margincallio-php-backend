@@ -29,4 +29,31 @@ class AccountsController extends AdminController {
             'data' => $result
         ));
     }
+    
+    
+    public function actionSetFee() {
+        $fee = $this->getParam('fee', null);
+        $currency = $this->getParam('currency', null);
+        
+        try {
+            
+            $users = User::model()->findAllByAttributes(array(
+                'type' => 'trader'
+            ));
+            
+            $connection = new TcpRemoteClient();
+            
+            foreach($users as $value) {
+                $connection->sendRequest(array(TcpRemoteClient::FUNC_SET_ACCOUNT_FEE, $value->id, $currency, $fee));
+            }
+        } catch(Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->errorType);
+            }
+            Response::ResponseError($e->getMessage());
+        }
+        
+        Response::ResponseSuccess('Success');
+    }
+    
 }
