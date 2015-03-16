@@ -84,7 +84,6 @@ class AdminControlController extends AdminController {
         try {
             $connection = new TcpRemoteClient();
             $connection->sendRequest(array(TcpRemoteClient::FUNC_MAKE_SNAPSHOT));
-            
         } catch(Exception $e) {
             if($e instanceof ExceptionTcpRemoteClient) {
                 TcpErrorHandler::TcpHandle($e->errorType);

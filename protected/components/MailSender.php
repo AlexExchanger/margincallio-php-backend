@@ -30,7 +30,7 @@ class MailSender extends CComponent {
         $mail->From = 'noreply@spacebtc.com';
         $mail->isHTML(true);
         $mail->addAddress($to);
-        $mail->Subject = isset($data['subject'])?$data['subject']:'Rocket BTC';
+        $mail->Subject = isset($data['subject'])?$data['subject']:'SpaceBTC';
         $mail->Body = $fullMessagePath;
         
         $status = $mail->send();
