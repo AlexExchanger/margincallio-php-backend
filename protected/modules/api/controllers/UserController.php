@@ -2,7 +2,7 @@
 
 class UserController extends MainController {
 
-    private $guestControl = array('login', 'register', 'activate', 'continueregister', 'lostpassword', 'changepasswordrequest', 'repairbyalarm');
+    private $guestControl = array('login', 'register', 'activate', 'continueregister', 'lostpassword', 'changepasswordrequest', 'repairbyalarm', 'iwantearly');
     private $fullControl = array('islogged');
     
     public function beforeAction($action) {
@@ -219,4 +219,16 @@ class UserController extends MainController {
         }
         Response::ResponseError();
     }
+    
+    public function actionIWantEarly() {
+        $email = $this->getParam('email');
+        try {
+            UserEarly::add($email);
+        } catch(Exception $e) {
+            Response::ResponseError($e->getMessage());
+        }
+        
+        Response::ResponseSuccess();
+    }
+    
 }
