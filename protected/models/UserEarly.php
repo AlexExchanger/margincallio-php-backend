@@ -25,6 +25,7 @@ class UserEarly extends CActiveRecord {
 
             $user = new UserEarly();
             $user->email = $email;
+            $user->ip = Yii::app()->request->getUserHostAddress();
             
             if(!$user->validate()) {
                 throw new Exception('Wrong email');
@@ -33,6 +34,8 @@ class UserEarly extends CActiveRecord {
             if(!$user->save()) {
                 throw new Exception('Can\'t save email');
             }
+            
+            MailSender::sendEmail('earlyAccess', $email);
             
             $dbTransaction->commit();
         } catch(Exception $e) {
