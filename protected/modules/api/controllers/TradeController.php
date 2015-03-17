@@ -52,7 +52,7 @@ class TradeController extends MainController {
             'rate' => $rate,
             'type' => mb_strtoupper($orderType),
             'currency' => $currency,
-            'base' => ($base === true || $base === 1)? 1:0,
+            'base' => ($base === 'true' || $base === '1')? 1:0,
             'sl_rate' => $sl_rate,
             'tp_rate' => $tp_rate,
             'ts_offset' => $ts_offset
