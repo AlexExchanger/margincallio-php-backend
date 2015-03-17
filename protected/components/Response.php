@@ -20,7 +20,8 @@ class Response extends CComponent {
             'http://admin.stock.bit',
             'http://dev.admin.stock.bit',
             'http://admin.stock.loc',
-            'http://dev.admin.stock.loc');
+            'http://dev.admin.stock.loc',
+            'http://landing.spacebtc.tk');
         
         if(isset($_SERVER['HTTP_ORIGIN'])) {
             if(in_array($_SERVER['HTTP_ORIGIN'], $allowDomains)) {
