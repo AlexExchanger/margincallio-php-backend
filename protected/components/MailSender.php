@@ -21,9 +21,10 @@ class MailSender extends CComponent {
         $mail->CharSet    = 'UTF-8';
         $mail->Host       = 'mail.spacebtc.com'; 
         $mail->SMTPAuth   = true;
-        $mail->Port       = 25;
+        $mail->Port       = 587;
         $mail->Username   = 'noreply@spacebtc.com';
         $mail->Password   = '43sahTMT4b';    
+        $mail->SMTPSecure = 'tls';
         
         $mail->SMTPDebug  = 0;
         

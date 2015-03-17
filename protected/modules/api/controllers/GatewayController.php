@@ -3,13 +3,14 @@
 class GatewayController extends MainController { 
     
     private $user = null;
+    private $fullControl = array('confurmwithdraw');
     
     public function beforeAction($action) {
         if(!parent::beforeAction($action)) {
             return false;
         }
         
-        if(Yii::app()->user->isGuest) {
+        if(Yii::app()->user->isGuest && !in_array(mb_strtolower($action->id), $this->fullControl)) {
             $this->preflight();
             return false;
         }
@@ -73,29 +74,31 @@ class GatewayController extends MainController {
                 throw new Exception();
             }
             
-            $type = ($type == 'in')? 0:1;
             $data = array(
                 'gatewayId' => $gatewayId,
                 'accountId' => $accountId,
                 'amount' => $amount,
                 'currency' => $currency,
+                'payment' => $paymentInformation,
+                'type' => ($type == 'in')? 0:1,
             );
-            
-            $result = ExternalGateway::processPayment($data, $paymentInformation, $type);
-            if(!$result) {
-                throw new Exception();
+        
+            $user = User::get(Yii::app()->user->id);
+            if(!$user) {
+                throw new Exception('User doesn\'t exist');
             }
             
-            $message = 'Done';
-            if($result == 'admin') {
-                $message = 'Avaing for admin';
+            $confurm = UserConfurm::generateForUser(Yii::app()->user->id, $data);
+            
+            if(!MailSender::sendEmail('conformationOut', $user->email, array('user'=>Yii::app()->user->id, 'code'=>$confurm->code))) {
+                throw new Exception('Error with confirmation sending');
             }
             
         } catch (Exception $e) {
             Response::ResponseError();
         }
         
-        Response::ResponseSuccess($message);
+        Response::ResponseSuccess('Request sent to email');
     }
     
     public function actionMake() {
@@ -106,4 +109,40 @@ class GatewayController extends MainController {
         
         Response::ResponseSuccess($address);
     }
+    
+    public function actionConfurmWithdraw() {
+        $code = $this->getParam('code', null);
+        $userId = $this->getParam('user', null);
+        
+        try {
+            $confurm = UserConfurm::model()->findByAttributes(array(
+                'code' => $code,
+                'userId' => $userId,
+                'used' => false
+            ));
+            
+            if (!$confurm) {
+                throw new Exception('Conformation doesn\'t exist');
+            }
+
+            $data = json_decode($confurm->details, true);
+            
+            $result = ExternalGateway::processPayment($data, $data['payment'], $data['type']);
+            
+            if (!$result) {
+                throw new Exception('Payment can\'t be proccess');
+            }
+
+            $message = 'Done';
+            if ($result == 'admin') {
+                $message = 'Awaiting for admin';
+            }
+
+        } catch (Exception $e) {
+            Response::ResponseError($e->getMessage());
+        }
+
+        Response::ResponseSuccess($message);
+    }
+    
 }
