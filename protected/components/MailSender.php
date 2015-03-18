@@ -57,7 +57,7 @@ class MailSender extends CComponent {
     }
     
     public static function sendToMailChimp($type, $data = array()) {
-        include Yii::getPathOfAlias('webroot').'/protected/extensions/MailChimp.php';
+        include Yii::getPathOfAlias('webroot').'/../protected/extensions/MailChimp.php';
         
         $api_key = 'f110bad0d9d9b569ad3b11840bb3109e-us10';
         
