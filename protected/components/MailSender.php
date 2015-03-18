@@ -44,5 +44,25 @@ class MailSender extends CComponent {
         return $status;
     }
     
+    public static function getMailChimpList($type) {
+        $list = array(
+            'early' => 'e96203f2e8',
+        );
+        
+        if(isset($list[$type])) {
+            return $list[$type];
+        }
+        
+        return false;
+    }
+    
+    public static function sendToMailChimp($type, $data = array()) {
+        include Yii::getPathOfAlias('webroot').'/protected/extensions/MailChimp.php';
+        
+        $api_key = 'f110bad0d9d9b569ad3b11840bb3109e-us10';
+        
+        $mailChimp = new \Drewm\MailChimp($api_key);
+        return $mailChimp->call($type, $data);
+    }
     
 }

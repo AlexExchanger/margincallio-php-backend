@@ -35,6 +35,21 @@ class UserEarly extends CActiveRecord {
                 throw new Exception('Can\'t save email');
             }
             
+            $mailchimp = array(
+                'id'                => MailSender::getMailChimpList('early'),
+                'email'             => array('email'=>$email),
+                'double_optin'      => false,
+                'update_existing'   => true,
+                'replace_interests' => false,
+                'send_welcome'      => false,
+            );
+            
+            $mcresult = MailSender::sendToMailChimp('lists/subscribe', $mailchimp);
+            
+            if(isset($mcresult) && isset($mcresult['status']) && $mcresult['status'] == 'error') {
+                throw new Exception('Error to sign up this email');
+            }
+            
             MailSender::sendEmail('earlyAccess', $email);
             
             $dbTransaction->commit();
