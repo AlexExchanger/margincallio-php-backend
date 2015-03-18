@@ -100,6 +100,9 @@ class AdminControlController extends AdminController {
             $connection = new TcpRemoteClient();
             $connection->sendRequest(array(TcpRemoteClient::FUNC_CLOSE_MARKET));            
         } catch(Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->errorType);
+            }
             Response::ResponseError($e->getMessage());
         }
         
@@ -112,11 +115,13 @@ class AdminControlController extends AdminController {
             $connection = new TcpRemoteClient();
             $connection->sendRequest(array(TcpRemoteClient::FUNC_OPEN_MARKET));            
         } catch(Exception $e) {
+            if($e instanceof ExceptionTcpRemoteClient) {
+                TcpErrorHandler::TcpHandle($e->errorType);
+            }
             Response::ResponseError($e->getMessage());
         }
         
         Response::ResponseSuccess('Unlocked');
     }
-    
     
 }

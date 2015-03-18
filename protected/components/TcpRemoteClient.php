@@ -187,10 +187,15 @@ class TcpRemoteClient extends CComponent {
     
     private function parseResponse($response, $status) {
         $responseArray = json_decode($response, true);
-        if(!isset($responseArray[0]) || $responseArray[0] != $status) {
-            $e = new ExceptionTcpRemoteClient();
-            $e->errorType = $responseArray[0];
-            throw $e;
+        if(!isset($responseArray[0]) || $responseArray[0] != $status || $responseArray[1] != 0) {
+            $type = 99;
+            if($responseArray[0] != $status) {
+                $type = $responseArray[0];
+            } else {
+                $type = $responseArray[1];
+            }
+            
+            throw new ExceptionTcpRemoteClient($type);
         }
         array_shift($responseArray);
         
@@ -223,7 +228,7 @@ class TcpRemoteClient extends CComponent {
         $result[] = fgets($this->_tcpResource, 4096);
         $status = $this->checkResponse($result[0]);
         $result[]= fgets($this->_tcpResource, 4096);
-        
+        //print_r($result); die();
         return $this->parseResponse($result[1], $status);
     }
 
