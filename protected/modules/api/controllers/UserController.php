@@ -228,7 +228,7 @@ class UserController extends MainController {
             Response::ResponseError($e->getMessage());
         }
         
-        Response::ResponseSuccess();
+        Response::ResponseSuccess('Subscribed !');
     }
     
 }
