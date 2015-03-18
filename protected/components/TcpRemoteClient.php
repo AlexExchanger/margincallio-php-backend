@@ -76,8 +76,8 @@ class TcpRemoteClient extends CComponent {
     
     const FUNC_MAKE_SNAPSHOT = 9000;
     
-    const FUNC_OPEN_MARKET = 79100;
-    const FUNC_CLOSE_MARKET = 79000;
+    const FUNC_OPEN_MARKET = 8900;
+    const FUNC_CLOSE_MARKET = 8800;
     const FUNC_RESTART_FIX = 79500;
     const FUNC_BACKUP_MASTER_SNAPSHOT = 80000;
     const FUNC_RESTORE_MASTER_SNAPSHOT = 80100;

@@ -94,5 +94,29 @@ class AdminControlController extends AdminController {
         Response::ResponseSuccess('Success');
     }
     
+    public function actionLockMarket() {
+        
+        try {
+            $connection = new TcpRemoteClient();
+            $connection->sendRequest(array(TcpRemoteClient::FUNC_CLOSE_MARKET));            
+        } catch(Exception $e) {
+            Response::ResponseError($e->getMessage());
+        }
+        
+        Response::ResponseSuccess('Locked');
+    }
+    
+    public function actionUnlockMarket() {
+        
+        try {
+            $connection = new TcpRemoteClient();
+            $connection->sendRequest(array(TcpRemoteClient::FUNC_OPEN_MARKET));            
+        } catch(Exception $e) {
+            Response::ResponseError($e->getMessage());
+        }
+        
+        Response::ResponseSuccess('Unlocked');
+    }
+    
     
 }
