@@ -808,7 +808,6 @@ class AccountController extends MainController {
         ));
     }
     
-    
     public function actionGetSecurityLog() {
         
         try {
@@ -823,5 +822,28 @@ class AccountController extends MainController {
         
         Response::ResponseSuccess($log);
     }
+    
+    public function actionGetReferalLink() {
+        
+        try {
+            $link = User::getReferalLink($this->user->id);
+        } catch(Exception $e) {
+            Response::ResponseError($e->getMessage());
+        }
+        
+        Response::ResponseSuccess($link);
+    }
+    
+    public function actionGetReferalCount() {
+        
+        try {
+            $count = User::getUserReferals($this->user->id);
+        } catch(Exception $e) {
+            Response::ResponseError($e->getMessage());
+        }
+        
+        Response::ResponseSuccess($count);
+    }
+    
     
 }

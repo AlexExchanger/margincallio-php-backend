@@ -62,7 +62,7 @@ class GatewayController extends AdminController {
             if($transaction->verifiedBy == Yii::app()->user->id) {
                 throw new Exception('This user can\'t approve this transaction');
             }
-            
+
             if($transaction->verifyStatus != 'pending') {
                 throw new Exception('This transaction can\'t be updated');
             }
@@ -75,6 +75,8 @@ class GatewayController extends AdminController {
             
             $account->balance = bcadd($account->balance, $transaction->amount);
             $account->update();
+            
+            User::sendToReferal($account->userId);
             
             $transaction->verifiedBy = Yii::app()->user->id;
             $transaction->verifyStatus = 'done';

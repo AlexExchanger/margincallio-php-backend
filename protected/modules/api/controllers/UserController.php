@@ -72,6 +72,7 @@ class UserController extends MainController {
         $password = $this->getParam('password', null);
         $inviteCode = $this->getParam('invite', false);
         $agree = $this->getParam('agree', false);
+        $code = $this->getParam('code', false);
         
         $user = new User();
         try {
@@ -88,9 +89,9 @@ class UserController extends MainController {
             }
             
             if(Yii::app()->params->registerByInvite || ($inviteCode!=false)) {
-                $status = $user->registerByInvite($inviteCode);
+                $status = $user->registerByInvite($inviteCode, $code);
             } else {
-                $status = $user->registerUser($email, $password);
+                $status = $user->registerUser($email, $password, $code);
             }
         } catch(Exception $e) {
             Response::ResponseError('Error: '.$e->getMessage());

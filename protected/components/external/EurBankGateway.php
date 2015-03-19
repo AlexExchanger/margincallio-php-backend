@@ -31,7 +31,7 @@ class EurBankGateway extends ExternalGateway {
             $transaction->accountId = $accountId;
             $transaction->amount = $amount;
             $transaction->createdAt = TIME;
-            $transaction->currency = 'USD';
+            $transaction->currency = 'EUR';
             
             if(!$transaction->save()) {
                 throw new Exception('Error with transaction save');
@@ -67,7 +67,7 @@ class EurBankGateway extends ExternalGateway {
             $transaction->accountId = $accountId;
             $transaction->amount = $amount;
             $transaction->createdAt = TIME;
-            $transaction->currency = 'USD';
+            $transaction->currency = 'EUR';
             
             if(!$transaction->save()) {
                 throw new Exception('Error with transaction save');

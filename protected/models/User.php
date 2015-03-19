@@ -91,7 +91,7 @@ class User extends CActiveRecord {
     }
     
     
-    public function registerByInvite($inviteCode) {
+    public function registerByInvite($inviteCode, $code) {
         $userInvite = UserInvite::model()->findByPk($inviteCode);
         
         if(!$userInvite || $userInvite->activated == true) {
@@ -224,7 +224,7 @@ class User extends CActiveRecord {
         return true;
     }
     
-    public function registerUser($email, $password) {
+    public function registerUser($email, $password, $code) {
         $this->email = $email;
         $this->password = UserIdentity::trickyPasswordEncoding($email, $password);
         $this->emailVerification = UserIdentity::trickyPasswordEncoding($email, rand(0, PHP_INT_MAX));
@@ -243,6 +243,12 @@ class User extends CActiveRecord {
             Response::ResponseError($message);
         }
         try {
+            
+            $parentUser = User::getByReferalCode($code);
+            if($parentUser) {
+                $this->parentId = $parentUser->id;
+            }
+            
             $this->save();
             $this->createAccountWallet($this->id);
             $this->createTradeAccountWallet($this->id);
@@ -258,6 +264,10 @@ class User extends CActiveRecord {
     
     public static function get($userId) {
         return self::model()->findByPk($userId);
+    }
+    
+    public static function getByReferalCode($code) {
+        return self::model()->findByAttributes(array('referalCode'=>$code));
     }
     
     public static function getCurrent() {
@@ -542,5 +552,71 @@ class User extends CActiveRecord {
         return $usersObj;
     }
     
+    
+    public static function getReferalLink($userId) {
+        
+        $user = User::get($userId);
+        if(!$user) {
+            throw new Exception('User doesn\'t exist');
+        }
+        
+        $code = '';
+        if(isset($user->referalCode) && !is_null($user->referalCode)) {
+            $code = $user->referalCode;
+        } else {
+            $code = md5(UserIdentity::trickyPasswordEncoding(''.$user->id, $user->email));
+            $user->referalCode = $code;
+            $user->update();
+        }
+        
+        $link = '';
+        if(isset($_SERVER['HTTP_ORIGIN'])) {
+            $link = $_SERVER['HTTP_ORIGIN'].'?code='.$code;
+        } else {
+            $link = 'http://spacebtc.com?code='.$code;
+        }
+        
+        return $link;
+    }
+    
+    public static function getUserReferals($userId) {
+        
+        $data['all'] = (int)User::model()->countByAttributes(array('parentId'=>$userId));
+        
+        $payedQuery = 'SELECT * FROM "user" WHERE "parentId"=:parentid AND "referalPay" IS NOT NULL';
+        $data['payed'] = (int)User::model()->countBySql($payedQuery, array(':parentid'=>$userId));
+        
+        return $data;
+    }
+    
+    public static function sendToReferal($userId) {
+        
+        $user = User::get($userId);
+        if(!isset($user->parentId) || is_null($user->parentId)) {
+            return false;
+        }
+        
+        if(!is_null($user->referalPay)) {
+            return false;
+        }
+        
+        try {
+            
+            $accountRequest = 'SELECT * FROM "account" WHERE "userId"=:userid AND "currency"=\'EUR\' AND "type"=\'user.safeWallet\' FOR UPDATE';
+            $parentUserAccount = Account::model()->findBySql($accountRequest, array(':userid'=>$user->parentId));
+            if(!$parentUserAccount) {
+                throw new Exception('Parent account doesn\'t exist');
+            }
+            
+            $parentUserAccount->balance = bcadd($parentUserAccount->balance, '10');
+            $user->referalPay = 10;
+
+            $parentUserAccount->update();
+            $user->update();
+        } catch(Exception $e) {
+            throw $e;
+        }
+        
+    }
     
 }
