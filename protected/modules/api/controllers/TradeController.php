@@ -79,7 +79,7 @@ class TradeController extends MainController {
             }
             Response::ResponseError($e->getMessage());
         }
-        Response::ResponseSuccess(array(), $message);
+        Response::ResponseSuccess();
     }
     
     public function actionCancelOrder() {
