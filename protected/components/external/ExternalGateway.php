@@ -116,7 +116,7 @@ class ExternalGateway extends CActiveRecord{
         
         $gatewayId = 0;
         switch($data['currency']) {
-            case 'USD':
+            case 'EUR':
                 $gatewayId = 4;
                 break;
             case 'BTC':
