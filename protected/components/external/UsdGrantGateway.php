@@ -16,7 +16,7 @@ class UsdGrantGateway extends ExternalGateway {
         parent::transferFrom($accountId, $amount);
         
         $account = Account::get($accountId);
-        if(!$account || $account->currency != 'USD') {
+        if(!$account || $account->currency != 'EUR') {
             return false;
         }
         
@@ -41,7 +41,7 @@ class UsdGrantGateway extends ExternalGateway {
             $transaction->accountId = $accountId;
             $transaction->amount = $amount;
             $transaction->createdAt = TIME;
-            $transaction->currency = 'USD';
+            $transaction->currency = 'EUR';
             
             if(!$transaction->save()) {
                 throw new Exception();
@@ -49,7 +49,7 @@ class UsdGrantGateway extends ExternalGateway {
             
             $gatewayAccount = Account::model()->findByAttributes(array(
                 'gateway' => "".self::$gatewayId,
-                'currency' => 'USD'
+                'currency' => 'EUR'
             ));
             
             if(!$gatewayAccount) {

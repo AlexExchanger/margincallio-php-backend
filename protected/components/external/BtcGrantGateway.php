@@ -12,8 +12,8 @@ class BtcGrantGateway extends ExternalGateway {
         return $payment;
     }
     
-    public function transferFrom($accountId, $transactionId = null, $amount) {
-        parent::transferFrom($accountId, $amount);
+    public function transferFrom($accountId, $transactionId = null, $amount, $data = array()) {
+        //parent::transferFrom($accountId, $amount);
         
         $account = Account::get($accountId);
         if(!$account || $account->currency != 'BTC') {
@@ -69,8 +69,8 @@ class BtcGrantGateway extends ExternalGateway {
         return true;
     }
 
-    public function transferTo($accountId, $transactionId, $amount) {
-        parent::transferFrom($accountId, $amount);
+    public function transferTo($accountId, $transactionId, $amount, $data = array()) {
+        //parent::transferFrom($accountId, $amount);
         
         $account = Account::get($accountId);
         if(!$account || $account->currency != 'BTC') {
