@@ -34,6 +34,7 @@ class User extends CActiveRecord {
         return array(
             array('email', 'required'),
             array('email', 'email'),
+            array('email', 'unique', 'message'=>'You already register for early access'),
             array('verifiedStatus', 'in', 'allowEmpty' => false, 'range' => self::$verifiedStatusOptions, 'strict' => true),
             array('id','numerical', 'integerOnly'=>true),
             array('id, password, email', 'safe'),
@@ -225,7 +226,7 @@ class User extends CActiveRecord {
     }
     
     public function registerUser($email, $password, $code) {
-        $this->email = $email;
+        $this->email = mb_strtolower($email);
         $this->password = UserIdentity::trickyPasswordEncoding($email, $password);
         $this->emailVerification = UserIdentity::trickyPasswordEncoding($email, rand(0, PHP_INT_MAX));
         $this->verifiedStatus = 'withoutVerify';

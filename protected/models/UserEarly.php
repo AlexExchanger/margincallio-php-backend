@@ -24,7 +24,7 @@ class UserEarly extends CActiveRecord {
         try {
 
             $user = new UserEarly();
-            $user->email = $email;
+            $user->email = mb_strtolower($email);
             $user->ip = Yii::app()->request->getUserHostAddress();
             
             if(!$user->validate()) {
