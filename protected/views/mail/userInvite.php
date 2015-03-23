@@ -67,7 +67,7 @@
             <table cellpadding="0" cellspacing="0" border="0" align="center" width="100%" style="margin-bottom: 45px;">
                 <tbody><tr>
                     <td valign="top" style="background-color: #002a48" width="5%"></td>
-                    <td valign="top" style="background-color: #002a48; padding-top:10px; padding-bottom: 10px;" width="90%"><a href="http://spacebtc.com/"><img class="image_fix" src="./Your Message Subject or Title_files/logo.png" alt="SpaceBTC" title="SpaceBTC" width="" height="x"></a></td>
+                    <td valign="top" style="background-color: #002a48; padding-top:10px; padding-bottom: 10px;" width="90%"><a href="http://spacebtc.com/"><img class="image_fix" src="http://spacebtc.tk/assets/common/logo.png" alt="SpaceBTC" title="SpaceBTC" width="" height="x"></a></td>
                     <td valign="top" style="background-color: #002a48" width="5%"></td>
                 </tr>
             </tbody></table>
