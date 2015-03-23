@@ -18,21 +18,31 @@ class UserEarly extends CActiveRecord {
         );
     }
     
+    /*
+    10 - User already exist
+    11 - Wrong email
+    12 - Can't save email (Unknow error)
+    */
+    
     public static function add($email) {
         
         $dbTransaction = Yii::app()->db->beginTransaction();
         try {
-
+            $tryuser = UserEarly::model()->countByAttributes(array('email' => mb_strtolower($email)));
+            if($tryuser > 0) {
+                throw new Exception('', 10);
+            }
+            
             $user = new UserEarly();
             $user->email = mb_strtolower($email);
             $user->ip = Yii::app()->request->getUserHostAddress();
             
             if(!$user->validate()) {
-                throw new Exception('Wrong email');
+                throw new Exception('', 11);
             }
             
             if(!$user->save()) {
-                throw new Exception('Can\'t save email');
+                throw new Exception('', 12);
             }
             
             $mailchimp = array(
@@ -47,7 +57,7 @@ class UserEarly extends CActiveRecord {
             $mcresult = MailSender::sendToMailChimp('lists/subscribe', $mailchimp);
             
             if(isset($mcresult) && isset($mcresult['status']) && $mcresult['status'] == 'error') {
-                throw new Exception('Error to sign up this email');
+                throw new Exception('', 12);
             }
             
             MailSender::sendEmail('earlyAccess', $email);

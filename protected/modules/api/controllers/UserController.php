@@ -226,7 +226,7 @@ class UserController extends MainController {
         try {
             UserEarly::add($email);
         } catch(Exception $e) {
-            Response::ResponseError($e->getMessage());
+            Response::ResponseError('', $e->getCode());
         }
         
         Response::ResponseSuccess('Subscribed !');

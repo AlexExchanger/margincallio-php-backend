@@ -39,9 +39,9 @@ class Response extends CComponent {
         ));
     }
 
-    public static function GetResponseError($message=''){
+    public static function GetResponseError($message='', $code = self::RESPONSE_ERROR){
         return CJSON::encode(array(
-            'status' => self::RESPONSE_ERROR,
+            'status' => $code,
             'message' => $message
         ));
     }
@@ -52,9 +52,9 @@ class Response extends CComponent {
         exit();
     }
 
-    public static function ResponseError($message=''){
+    public static function ResponseError($message='', $code = 1){
         self::setHeaders();
-        print self::GetResponseError($message);
+        print self::GetResponseError($message, $code);
         exit();
     }
     
