@@ -203,5 +203,29 @@ class StatController extends AdminController {
             $dbTransaction->rollback();
             Response::ResponseError();
         }        
-    } 
+    }
+    
+    public function actionAllUserBalance() {
+        
+        $currency = $this->getParam('currency', null);
+        
+        try {
+            if(is_null($currency)) {
+                throw new Exception('Wrong currency parameter');
+            }
+            $stat = Stat::getUsersStat($currency);
+        } catch(Exception $e) {
+            Response::ResponseError($e->getMessage());
+        }
+        
+        Response::ResponseSuccess($stat);
+    }
+    
+    
+    public function actionTraderInfo() {
+        
+        $userId = $this->getParam('id');
+        
+    }
+    
 }

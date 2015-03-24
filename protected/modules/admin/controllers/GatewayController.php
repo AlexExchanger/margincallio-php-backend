@@ -76,6 +76,24 @@ class GatewayController extends AdminController {
             $account->balance = bcadd($account->balance, $transaction->amount);
             $account->update();
             
+            $externalAccountQuery = 'SELECT * FROM "account" WHERE "type"=:type AND "currency"=:currency FOR UPDATE';
+            $externalAccount = Account::model()->findBySql($externalAccountQuery, array(
+                ':type' => 'system.gateway.external',
+                ':currency' => $transaction->currency
+            ));
+            
+            if(!$externalAccount) {
+                throw new Exception('System account error');
+            }
+            
+            if($transaction->type) {
+                $externalAccount->balance = bcsub($externalAccount->balance, $transaction->amount);
+            } else {
+                $externalAccount->balance = bcadd($externalAccount->balance, $transaction->amount);
+            }
+            
+            $externalAccount->update();
+            
             User::sendToReferal($account->userId);
             
             $transaction->verifiedBy = Yii::app()->user->id;

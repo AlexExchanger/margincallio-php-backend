@@ -175,4 +175,69 @@ class Stat extends CActiveRecord {
         return $stat;
     }
     
+    //normal stat
+    
+    public static function getUsersStat($currency) {
+        
+        $balanceQuery = 'SELECT "type", SUM("balance") as "balance" FROM "account" WHERE "currency"=:currency AND ("type"=\'user.safeWallet\' OR "type"=\'user.trading\') GROUP BY "type"';
+        $balanceFetch = Account::model()->findAllBySql($balanceQuery, array(':currency'=>$currency));
+        
+        $data = array();
+        foreach($balanceFetch as $value) {
+            if($value->type == 'user.safeWallet') {
+                $data['safe'] = $value->balance;
+            } else {
+                $data['trade'] = $value->balance;
+            }
+        }
+        
+        
+        //comission 
+        $sellerQuery = 'SELECT SUM("sellerFee") as "sellerFee" FROM "deal" WHERE "side"=FALSE';
+        $sellerResultObject = Deal::model()->findBySql($sellerQuery);
+        $sellerResult = $sellerResultObject->sellerFee;
+        
+        $buyerQuery = 'SELECT SUM("buyerFee") as "buyerFee" FROM "deal" WHERE "side"=FALSE';
+        $buyerResultObject = Deal::model()->findBySql($buyerQuery);
+        $buyerResult = $buyerResultObject->buyerFee;
+        
+        $buyerOtherQuery = 'SELECT SUM("buyerFee") as "buyerFee" FROM "deal" WHERE "side"=TRUE';
+        $buyerOtherResultObject = Deal::model()->findBySql($buyerOtherQuery);
+        $buyerOtherResult = $buyerOtherResultObject->buyerFee;
+        
+        $sellerOtherQuery = 'SELECT SUM("sellerFee") as "sellerFee" FROM "deal" WHERE "side"=TRUE';
+        $sellerOtherResultObject = Deal::model()->findBySql($sellerOtherQuery);
+        $sellerOtherResult = $sellerOtherResultObject->sellerFee;
+        
+        
+        $data['comissionCurrency'] = bcadd($buyerResult, $sellerOtherResult);
+        $data['comissionEur'] = bcadd($sellerResult, $buyerOtherResult);
+    
+           
+        //internal, external
+        $internalCurrency = Account::model()->findByAttributes(array(
+            'type' => 'system.gateway.internal',
+            'currency' => $currency
+        ));        
+        $internalEur = Account::model()->findByAttributes(array(
+            'type' => 'system.gateway.internal',
+            'currency' => 'EUR'
+        ));
+        
+        
+        $externalCurrency = Account::model()->findByAttributes(array(
+            'type' => 'system.gateway.external',
+            'currency' => $currency
+        ));
+        $externalEur = Account::model()->findByAttributes(array(
+            'type' => 'system.gateway.external',
+            'currency' => 'EUR'
+        ));
+        
+        $data['gatewayCurrency'] = bcsub($externalCurrency->balance, $internalCurrency->balance);
+        $data['gatewayEur'] = bcsub($externalEur->balance, $internalEur->balance); 
+        
+        return $data;
+    }
+    
 }
