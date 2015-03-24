@@ -193,20 +193,20 @@ class Stat extends CActiveRecord {
         
         
         //comission 
-        $sellerQuery = 'SELECT SUM("sellerFee") as "sellerFee" FROM "deal" WHERE "side"=FALSE';
-        $sellerResultObject = Deal::model()->findBySql($sellerQuery);
+        $sellerQuery = 'SELECT SUM("sellerFee") as "sellerFee" FROM "deal" WHERE "side"=FALSE AND "currency"=:currency';
+        $sellerResultObject = Deal::model()->findBySql($sellerQuery, array(':currency'=>$currency));
         $sellerResult = $sellerResultObject->sellerFee;
         
-        $buyerQuery = 'SELECT SUM("buyerFee") as "buyerFee" FROM "deal" WHERE "side"=FALSE';
-        $buyerResultObject = Deal::model()->findBySql($buyerQuery);
+        $buyerQuery = 'SELECT SUM("buyerFee") as "buyerFee" FROM "deal" WHERE "side"=FALSE AND "currency"=:currency';
+        $buyerResultObject = Deal::model()->findBySql($buyerQuery, array(':currency'=>$currency));
         $buyerResult = $buyerResultObject->buyerFee;
         
-        $buyerOtherQuery = 'SELECT SUM("buyerFee") as "buyerFee" FROM "deal" WHERE "side"=TRUE';
-        $buyerOtherResultObject = Deal::model()->findBySql($buyerOtherQuery);
+        $buyerOtherQuery = 'SELECT SUM("buyerFee") as "buyerFee" FROM "deal" WHERE "side"=TRUE AND "currency"=:currency';
+        $buyerOtherResultObject = Deal::model()->findBySql($buyerOtherQuery, array(':currency'=>$currency));
         $buyerOtherResult = $buyerOtherResultObject->buyerFee;
         
-        $sellerOtherQuery = 'SELECT SUM("sellerFee") as "sellerFee" FROM "deal" WHERE "side"=TRUE';
-        $sellerOtherResultObject = Deal::model()->findBySql($sellerOtherQuery);
+        $sellerOtherQuery = 'SELECT SUM("sellerFee") as "sellerFee" FROM "deal" WHERE "side"=TRUE AND "currency"=:currency';
+        $sellerOtherResultObject = Deal::model()->findBySql($sellerOtherQuery, array(':currency'=>$currency));
         $sellerOtherResult = $sellerOtherResultObject->sellerFee;
         
         
