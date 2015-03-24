@@ -23,7 +23,20 @@ class Response extends CComponent {
             'http://dev.admin.stock.loc',
             'http://landing.spacebtc.tk',
             'http://landing.stock.loc',
-            'http://admin.spacebtc.tk');
+            'http://admin.spacebtc.tk',
+            'https://stock.bit',
+            'https://spacebtc.tk',
+            'https://dev.stock.bit',
+            'https://dev.stock.loc',
+            'https://dev.stock.loc',
+            'https://admin.stock.bit',
+            'https://dev.admin.stock.bit',
+            'https://admin.stock.loc',
+            'https://dev.admin.stock.loc',
+            'https://landing.spacebtc.tk',
+            'https://landing.stock.loc',
+            'https://admin.spacebtc.tk',
+            'https://lp.spacebtc.com');
         
         if(isset($_SERVER['HTTP_ORIGIN'])) {
             if(in_array($_SERVER['HTTP_ORIGIN'], $allowDomains)) {
