@@ -50,7 +50,8 @@ class MainController extends CController {
             'http://admin.stock.loc',
             'http://dev.admin.stock.loc',
             'http://landing.spacebtc.tk',
-            'http://landing.stock.loc');
+            'http://landing.stock.loc',
+            'http://admin.spacebtc.tk');
         
         header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
         header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
