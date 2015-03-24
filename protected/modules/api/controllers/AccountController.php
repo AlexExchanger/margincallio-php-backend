@@ -820,7 +820,7 @@ class AccountController extends MainController {
             Response::ResponseSuccess($e->getMessage());
         }
         
-        Response::ResponseSuccess($log);
+        Response::ResponseSuccess(array('count'=>count($log), 'data'=> $log));
     }
     
     public function actionGetReferalLink() {
