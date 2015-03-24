@@ -75,12 +75,12 @@
                 <tbody><tr>
                     <td width="5%"></td>
                     <td width="90%" style="background-color: #ffffff; padding: 35px;">
-
-                        <h1 style="color: #000000;">SpaceBTC</h1>
-
-                        <p style="color: #000000;">You just signed up to early access to SpaceBTC!</p>
-                        <p style="color: #000000;">Bitcoin can also be seen as the most prominent triple entry bookkeeping system in existence.</p>
-
+                        <h1 style="color: #000000;">SPACEBTC</h1>
+                        <br>
+                        <p style="color: #000000;">You have just signed up to early access at SPACEBTC!</p>
+                        <p style="color: #000000;">Now you are a part of something big and revolutionary, keep calm and wait for the news.</p>
+                        <br>
+                        <p style="color: #000000;">We’ll keep you up to date, and surely, we won’t forget to remind you about our blast off to another galaxy of trading!</p>
                     </td>
                     <td width="5%"></td>
                 </tr>
