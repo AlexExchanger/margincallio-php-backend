@@ -177,43 +177,138 @@ class Stat extends CActiveRecord {
     
     //normal stat
     
+    public static function getCommisionIncomeByData($currency, $beginValue, $endValue) {
+        $begin = Response::timestampToTick($beginValue);
+        $end = Response::timestampToTick($endValue);
+        
+        
+        $sellerQuery = 'SELECT SUM("sellerFee") as "sellerFee" FROM "deal" WHERE "side"=FALSE AND "currency"=:currency AND "createdAt" BETWEEN :begin AND :end';
+        $sellerResultObject = Deal::model()->findBySql($sellerQuery, array(':currency'=>$currency, ':begin'=>$begin, ':end'=>$end));
+        $sellerResult = $sellerResultObject->sellerFee;
+        
+        $buyerQuery = 'SELECT SUM("buyerFee") as "buyerFee" FROM "deal" WHERE "side"=FALSE AND "currency"=:currency AND "createdAt" BETWEEN :begin AND :end';
+        $buyerResultObject = Deal::model()->findBySql($buyerQuery, array(':currency'=>$currency, ':begin'=>$begin, ':end'=>$end));
+        $buyerResult = $buyerResultObject->buyerFee;
+        
+        $buyerOtherQuery = 'SELECT SUM("buyerFee") as "buyerFee" FROM "deal" WHERE "side"=TRUE AND "currency"=:currency AND "createdAt" BETWEEN :begin AND :end';
+        $buyerOtherResultObject = Deal::model()->findBySql($buyerOtherQuery, array(':currency'=>$currency, ':begin'=>$begin, ':end'=>$end));
+        $buyerOtherResult = $buyerOtherResultObject->buyerFee;
+        
+        $sellerOtherQuery = 'SELECT SUM("sellerFee") as "sellerFee" FROM "deal" WHERE "side"=TRUE AND "currency"=:currency AND "createdAt" BETWEEN :begin AND :end';
+        $sellerOtherResultObject = Deal::model()->findBySql($sellerOtherQuery, array(':currency'=>$currency, ':begin'=>$begin, ':end'=>$end));
+        $sellerOtherResult = $sellerOtherResultObject->sellerFee;
+        
+        return array(
+            'comissionCurrency' => bcadd($buyerResult, $sellerOtherResult),
+            'comissionEur' => bcadd($sellerResult, $buyerOtherResult),
+        );
+    }
+    
+    
     public static function getUsersStat($currency) {
         
-        $balanceQuery = 'SELECT "type", SUM("balance") as "balance" FROM "account" WHERE "currency"=:currency AND ("type"=\'user.safeWallet\' OR "type"=\'user.trading\') GROUP BY "type"';
+        $balanceQuery = 'SELECT "type", SUM("balance") as "balance" FROM "account" WHERE "currency"=:currency AND ("type"=\'user.safeWallet\' OR "type"=\'user.trading\' OR "type"=\'user.withdrawWallet\') GROUP BY "type"';
         $balanceFetch = Account::model()->findAllBySql($balanceQuery, array(':currency'=>$currency));
         
         $data = array();
         foreach($balanceFetch as $value) {
             if($value->type == 'user.safeWallet') {
                 $data['safe'] = $value->balance;
-            } else {
+            } elseif($value->type == 'user.trading') {
                 $data['trade'] = $value->balance;
+            } else {
+                $data['withdraw'] = $value->balance;
+            }
+        }
+        
+        //balance eur
+        $balanceFetchEur = Account::model()->findAllBySql($balanceQuery, array(':currency'=>'EUR'));
+        
+        foreach($balanceFetchEur as $value) {
+            if($value->type == 'user.safeWallet') {
+                $data['safeEur'] = $value->balance;
+            } elseif($value->type == 'user.trading') {
+                $data['tradeEur'] = $value->balance;
+            } else {
+                $data['withdrawEur'] = $value->balance;
             }
         }
         
         
         //comission 
-        $sellerQuery = 'SELECT SUM("sellerFee") as "sellerFee" FROM "deal" WHERE "side"=FALSE AND "currency"=:currency';
-        $sellerResultObject = Deal::model()->findBySql($sellerQuery, array(':currency'=>$currency));
-        $sellerResult = $sellerResultObject->sellerFee;
-        
-        $buyerQuery = 'SELECT SUM("buyerFee") as "buyerFee" FROM "deal" WHERE "side"=FALSE AND "currency"=:currency';
-        $buyerResultObject = Deal::model()->findBySql($buyerQuery, array(':currency'=>$currency));
-        $buyerResult = $buyerResultObject->buyerFee;
-        
-        $buyerOtherQuery = 'SELECT SUM("buyerFee") as "buyerFee" FROM "deal" WHERE "side"=TRUE AND "currency"=:currency';
-        $buyerOtherResultObject = Deal::model()->findBySql($buyerOtherQuery, array(':currency'=>$currency));
-        $buyerOtherResult = $buyerOtherResultObject->buyerFee;
-        
-        $sellerOtherQuery = 'SELECT SUM("sellerFee") as "sellerFee" FROM "deal" WHERE "side"=TRUE AND "currency"=:currency';
-        $sellerOtherResultObject = Deal::model()->findBySql($sellerOtherQuery, array(':currency'=>$currency));
-        $sellerOtherResult = $sellerOtherResultObject->sellerFee;
+        $monthData = new DateTime('first day of this month');
+        $dayData = new DateTime();
+        $dayData->setTime(0, 0, 0);
         
         
-        $data['comissionCurrency'] = bcadd($buyerResult, $sellerOtherResult);
-        $data['comissionEur'] = bcadd($sellerResult, $buyerOtherResult);
-    
-           
+        $data['allTime'] = self::getCommisionIncomeByData($currency, '0', TIME);
+        $data['lastMonth'] = self::getCommisionIncomeByData($currency, $monthData->getTimestamp(), TIME);
+        $data['lastDay'] = self::getCommisionIncomeByData($currency, $dayData->getTimestamp(), TIME);
+        
+        
+        
+        //currency hot, cold
+        $currencyColdQuery = 'SELECT SUM("balance") as "balance" FROM "account" WHERE "currency"=:currency AND "type"=\'system.gateway.cold\'';
+        $currencyCold = Account::model()->findBySql($currencyColdQuery, array(':currency'=>$currency));
+        
+        if(!$currencyCold) {
+            $data['coldCurrency'] = 0;
+        } else {
+            $data['coldCurrency'] = $currencyCold->balance;
+        }
+        
+        if($currency == 'BTC') {
+            $hotGateway = GatewayFactory::create(2);
+            $hotBalance = $hotGateway->callForMoney();
+            if($hotBalance == false) {
+                $data['hotCurrency'] = -1;
+            } else {
+                $data['hotCurrency'] = $hotBalance['balance'];
+            }
+            
+        } else {
+            $data['hotCurrency'] = 0;
+        }
+        
+        $data['externalAmountCurrency'] = bcadd($data['hotCurrency'], $data['coldCurrency']);
+        
+        $eurExternalQuery = 'SELECT SUM("balance") as "balance" FROM "account" WHERE "currency"=\'EUR\' AND "type"=\'system.gateway.cold\'';
+        $eurExternal = Account::model()->findBySql($eurExternalQuery);
+        if(!$eurExternal) {
+            $data['externalAmountEur'] = 0;
+        } else {
+            $data['externalAmountEur'] = $eurExternal->balance;
+        }
+        
+        //active orders
+        $activeOrdersQuery = 'SELECT SUM("actualSize") as "actualSize" FROM "order" WHERE "currency"=:currency AND "side"=TRUE AND ("status"=\'accepted\' OR "status"=\'partialFilled\')';
+        $activeOrder = Order::model()->findBySql($activeOrdersQuery, array(':currency'=>$currency));
+
+        if(!$activeOrder || !isset($activeOrder->actualSize)) {
+            $data['activeOrderCurrency'] = 0;
+        } else {
+            $data['activeOrderCurrency'] = $activeOrder->actualSize;
+        }
+        
+        $data['internalAmountCurrency'] = bcadd(bcadd(bcadd($data['safe'], $data['trade']), $data['withdraw']), $data['activeOrderCurrency']);
+        
+        //active orders eur
+        $activeOrdersEurQuery = 'SELECT SUM("actualSize") as "actualSize" FROM "order" WHERE "currency"=:currency AND "side"=FALSE AND ("status"=\'accepted\' OR "status"=\'partialFilled\')';
+        $activeOrderEur = Order::model()->findBySql($activeOrdersEurQuery, array(':currency'=>'EUR'));
+
+        if(!$activeOrderEur || !isset($activeOrderEur->actualSize)) {
+            $data['activeOrderEur'] = 0;
+        } else {
+            $data['activeOrderEur'] = $activeOrder->actualSize;
+        }
+        
+        $data['internalAmountEur'] = bcadd(bcadd(bcadd($data['safeEur'], $data['tradeEur']), $data['withdrawEur']), $data['activeOrderEur']);
+        
+        //earning
+        $data['earningCurrency'] = bcsub($data['externalAmountCurrency'], $data['internalAmountCurrency']);
+        $data['earningEur'] = bcsub($data['externalAmountEur'], $data['internalAmountEur']);
+        
+        
         //internal, external
         $internalCurrency = Account::model()->findByAttributes(array(
             'type' => 'system.gateway.internal',
@@ -236,6 +331,30 @@ class Stat extends CActiveRecord {
         
         $data['gatewayCurrency'] = bcsub($externalCurrency->balance, $internalCurrency->balance);
         $data['gatewayEur'] = bcsub($externalEur->balance, $internalEur->balance); 
+        
+        //total spread
+        $connection = new TcpRemoteClient(Yii::app()->params->coreUsdBtc);
+        $response = $connection->sendRequest(array(TcpRemoteClient::FUNC_GET_DEPTH, mb_strtolower($currency), 30));
+
+        if(!isset($response[0]) || $response[0] != 0) {
+            throw new ExceptionTcpRemoteClient($response[0]);
+        }
+        
+        $data['depth'] = array(
+            'volumeEur' => $response[1],
+            'volumeCurrency' => $response[2],
+            'countBuy' => $response[3],
+            'countSell' => $response[4],
+        );
+        
+        if(count($response[5]) > 0 && count($response[6]) > 0) {
+            $lastBuy = $response[5][0];
+            $lastSell = $response[6][0];
+            
+            $data['spread'] = bcsub($lastSell[1], $lastBuy[1]);
+        } else {
+            $data['spread'] = 0;
+        }
         
         return $data;
     }
