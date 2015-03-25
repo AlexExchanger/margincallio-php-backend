@@ -816,11 +816,31 @@ class AccountController extends MainController {
             );
             
             $log = UserLog::getList($filters, $this->paginationOptions);
+            $data = array();
+            $setLast = false;
+            foreach($log as $value) {
+                $current = false; 
+                if($value->action == 'login' && $setLast == false) {
+                    $setLast = true;
+                    $current = true;
+                }
+                
+                $data[] = array(
+                    'id' => $value->id,
+                    'userId' => $value->userId,
+                    'createdAt' => $value->createdAt,
+                    'action' => $value->action,
+                    'data' => $value->data,
+                    'ip' => $value->ip,
+                    'current' => $current
+                );
+            }
+            
         } catch(Exception $e) {
             Response::ResponseSuccess($e->getMessage());
         }
         
-        Response::ResponseSuccess(array('count'=>count($log), 'data'=> $log));
+        Response::ResponseSuccess(array('count'=>(isset($this->paginationOptions))?$this->paginationOptions['total']:'', 'data'=> $data));
     }
     
     public function actionGetReferalLink() {
