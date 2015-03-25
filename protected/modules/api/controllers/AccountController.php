@@ -64,7 +64,18 @@ class AccountController extends MainController {
         $searchingCriteria->compare('currency', $currency);
         $searchingCriteria->order = '"createdAt" DESC';
         
-        $allTrades = Deal::model()->findAll($searchingCriteria);
+        $allTrades = array();
+        $oneTime = 10000;
+        $totalDeals = Deal::model()->count($searchingCriteria);
+        $timesCount = (int)($totalDeals/$oneTime) + 1;
+        for($i = 0; $i != $timesCount; $i++) {
+            $searchingCriteria->limit = $oneTime;
+            $searchingCriteria->offset = $oneTime*$i;
+            $currentTrades = Deal::model()->findAll($searchingCriteria);
+            $allTrades = array_merge($allTrades, $currentTrades);
+        }
+        
+        //$allTrades = Deal::model()->findAll($searchingCriteria);
         
         if(count($allTrades) <= 0) {
             Response::ResponseSuccess(array(
