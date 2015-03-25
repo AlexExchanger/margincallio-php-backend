@@ -77,13 +77,16 @@ class UserLog extends CActiveRecord {
             $criteria->compare('ip', $filters['ip']);
         }
         
+        $pagination['total'] = (int) self::model()->count($criteria);
         if ($limit) {
-            $pagination['total'] = (int) self::model()->count($criteria);
             $criteria->limit = $limit;
             $criteria->offset = $offset;
         }
 
-        ListCriteria::sortCriteria($criteria, $sort, ['id', 'createdAt']);
+        $sort = 'id DESC';
+        $criteria->order = $sort;
+        //ListCriteria::sortCriteria($criteria, $sort, ['id', 'createdAt']);
+        
         return self::model()->findAll($criteria);
     }
 
