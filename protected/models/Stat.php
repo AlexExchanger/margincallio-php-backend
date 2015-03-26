@@ -251,7 +251,7 @@ class Stat extends CActiveRecord {
         $currencyColdQuery = 'SELECT SUM("balance") as "balance" FROM "account" WHERE "currency"=:currency AND "type"=\'system.gateway.cold\'';
         $currencyCold = Account::model()->findBySql($currencyColdQuery, array(':currency'=>$currency));
         
-        if(!$currencyCold) {
+        if(!$currencyCold || $currencyCold->balance == null) {
             $data['coldCurrency'] = 0;
         } else {
             $data['coldCurrency'] = $currencyCold->balance;
