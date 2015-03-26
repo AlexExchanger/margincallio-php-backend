@@ -73,4 +73,18 @@ class Funds extends CModel {
         
         return $rate->save(true, array('value'));
     }
+    
+    
+    public static function setColdBalance($currency, $amount) {
+        
+        $account = Account::model()->findByAttributes(array('currency'=>$currency, 'type'=>'system.gateway.cold'));
+        if(!$account) {
+            throw new Exception('Account doesn\'t exist');
+        }
+        
+        $account->balance = $amount;
+        $account->update();
+    }
+    
+    
 }

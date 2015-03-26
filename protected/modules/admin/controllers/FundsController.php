@@ -63,4 +63,25 @@ class FundsController extends AdminController {
         Response::ResponseSuccess();
     }
     
+    public function actionSetColdBalance() {
+        $currency = $this->getParam('currency', null);
+        $amount = $this->getParam('amount', null);
+        try {
+            if(is_null($currency)) {
+                throw new Exception('Wrong currency parameter');
+            }
+            
+            if(is_null($amount)) {
+                throw new Exception('Wrong amount parameter');
+            }
+            
+            Funds::setColdBalance($currency, $amount);
+        } catch(Exception $e) {
+            Response::ResponseError($e->getMessage());
+        }
+        
+        Response::ResponseSuccess('Success');
+    }
+    
+    
 }
