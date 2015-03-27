@@ -134,10 +134,12 @@ class Stat extends CActiveRecord {
         $defaultPair = 'deal';
         
         //24 hour volume
-        $dayVolumeQuery = 'SELECT SUM("size") as "size" FROM "'.$defaultPair.'" ';
-        $dayVolumeQuery .= 'WHERE "createdAt" BETWEEN '.$todayRange['open'];
-        $dayVolumeQuery .= ' AND '.$todayRange['close'];
-        $dayVolumeResult = Deal::model()->findBySql($dayVolumeQuery);
+        $dayVolumeQuery = 'SELECT SUM("size") as "size" FROM "deal" ';
+        $dayVolumeQuery .= 'WHERE "createdAt" BETWEEN :open AND :close';
+        $dayVolumeResult = Deal::model()->findBySql($dayVolumeQuery, array(
+            ':open' => $todayRange['open'],
+            ':close' => $todayRange['close'],
+            ));
         if(isset($dayVolumeResult->size)) {
             $stat['dayVolume'] = Response::bcScaleOut($dayVolumeResult->size, 4);
         }
@@ -159,8 +161,8 @@ class Stat extends CActiveRecord {
         $stat['ask'] = Response::bcScaleOut($response[2], 4);
         
         //Todays open price
-        $todayOpenQuery = 'SELECT "price" FROM "deal" WHERE "createdAt" > '.$todayRange['open'].' ORDER BY "createdAt" ASC LIMIT 1';
-        $todayOpenResult = Deal::model()->findBySql($todayOpenQuery);
+        $todayOpenQuery = 'SELECT "price" FROM "deal" WHERE "createdAt" > :open ORDER BY "createdAt" ASC LIMIT 1';
+        $todayOpenResult = Deal::model()->findBySql($todayOpenQuery, array(':open'=>$todayRange['open']));
         if(isset($todayOpenResult->price)) {
             $stat['todayOpen'] = Response::bcScaleOut($todayOpenResult->price, 4);
         }
@@ -172,30 +174,54 @@ class Stat extends CActiveRecord {
             $stat['dailyChangePercent'] = bcmul($stat['dailyChangeCurr'], $cent, 4);
         }
         
+        //high, low price by last 24 hours
+        $priceRangeQuery = 'SELECT MAX("price") as "high", MIN("price") as "low" FROM "deal" WHERE "createdAt" BETWEEN :open AND :close';
+        $priceRangeResult = Deal::model()->findAllBySql($priceRangeQuery, array(
+            ':open' => $todayRange['open'],
+            ':close' => $todayRange['close']
+        ));
+        
+        if(isset($priceRangeResult)) {
+            if(isset($priceRangeResult->high)) {
+                $stat['high'] = $priceRangeResult->high;
+            }
+            if(isset($priceRangeResult->low)) {
+                $stat['low'] = $priceRangeResult->low;
+            }            
+        }
+        
         return $stat;
     }
     
     //normal stat
     
-    public static function getCommisionIncomeByData($currency, $beginValue, $endValue) {
+    public static function getCommisionIncomeByData($currency, $beginValue, $endValue, $userId = 0) {
         $begin = Response::timestampToTick($beginValue);
         $end = Response::timestampToTick($endValue);
         
+        if($userId == 0) {
+            $sellerQuery = 'SELECT SUM("sellerFee") as "sellerFee" FROM "deal" WHERE "side"=FALSE AND "currency"=:currency AND "createdAt" BETWEEN :begin AND :end';
+            $sellerResultObject = Deal::model()->findBySql($sellerQuery, array(':currency'=>$currency, ':begin'=>$begin, ':end'=>$end));
+            $buyerQuery = 'SELECT SUM("buyerFee") as "buyerFee" FROM "deal" WHERE "side"=FALSE AND "currency"=:currency AND "createdAt" BETWEEN :begin AND :end';
+            $buyerResultObject = Deal::model()->findBySql($buyerQuery, array(':currency'=>$currency, ':begin'=>$begin, ':end'=>$end));
+            $buyerOtherQuery = 'SELECT SUM("buyerFee") as "buyerFee" FROM "deal" WHERE "side"=TRUE AND "currency"=:currency AND "createdAt" BETWEEN :begin AND :end';
+            $buyerOtherResultObject = Deal::model()->findBySql($buyerOtherQuery, array(':currency'=>$currency, ':begin'=>$begin, ':end'=>$end));
+            $sellerOtherQuery = 'SELECT SUM("sellerFee") as "sellerFee" FROM "deal" WHERE "side"=TRUE AND "currency"=:currency AND "createdAt" BETWEEN :begin AND :end';
+            $sellerOtherResultObject = Deal::model()->findBySql($sellerOtherQuery, array(':currency'=>$currency, ':begin'=>$begin, ':end'=>$end));
+        } else {
+            $sellerQuery = 'SELECT SUM("sellerFee") as "sellerFee" FROM "deal" WHERE ("userBuyId"=:userid OR "userSellId"=:userid) AND "side"=FALSE AND "currency"=:currency AND "createdAt" BETWEEN :begin AND :end';
+            $sellerResultObject = Deal::model()->findBySql($sellerQuery, array(':currency'=>$currency, ':begin'=>$begin, ':end'=>$end, ':userid'=>$userId));
+            $buyerQuery = 'SELECT SUM("buyerFee") as "buyerFee" FROM "deal" WHERE ("userBuyId"=:userid OR "userSellId"=:userid) AND "side"=FALSE AND "currency"=:currency AND "createdAt" BETWEEN :begin AND :end';
+            $buyerResultObject = Deal::model()->findBySql($buyerQuery, array(':currency'=>$currency, ':begin'=>$begin, ':end'=>$end, ':userid'=>$userId));
+            $buyerOtherQuery = 'SELECT SUM("buyerFee") as "buyerFee" FROM "deal" WHERE ("userBuyId"=:userid OR "userSellId"=:userid) AND "side"=TRUE AND "currency"=:currency AND "createdAt" BETWEEN :begin AND :end';
+            $buyerOtherResultObject = Deal::model()->findBySql($buyerOtherQuery, array(':currency'=>$currency, ':begin'=>$begin, ':end'=>$end, ':userid'=>$userId));
+            $sellerOtherQuery = 'SELECT SUM("sellerFee") as "sellerFee" FROM "deal" WHERE ("userBuyId"=:userid OR "userSellId"=:userid) AND "side"=TRUE AND "currency"=:currency AND "createdAt" BETWEEN :begin AND :end';
+            $sellerOtherResultObject = Deal::model()->findBySql($sellerOtherQuery, array(':currency'=>$currency, ':begin'=>$begin, ':end'=>$end, ':userid'=>$userId));
+        }
         
-        $sellerQuery = 'SELECT SUM("sellerFee") as "sellerFee" FROM "deal" WHERE "side"=FALSE AND "currency"=:currency AND "createdAt" BETWEEN :begin AND :end';
-        $sellerResultObject = Deal::model()->findBySql($sellerQuery, array(':currency'=>$currency, ':begin'=>$begin, ':end'=>$end));
         $sellerResult = $sellerResultObject->sellerFee;
-        
-        $buyerQuery = 'SELECT SUM("buyerFee") as "buyerFee" FROM "deal" WHERE "side"=FALSE AND "currency"=:currency AND "createdAt" BETWEEN :begin AND :end';
-        $buyerResultObject = Deal::model()->findBySql($buyerQuery, array(':currency'=>$currency, ':begin'=>$begin, ':end'=>$end));
         $buyerResult = $buyerResultObject->buyerFee;
-        
-        $buyerOtherQuery = 'SELECT SUM("buyerFee") as "buyerFee" FROM "deal" WHERE "side"=TRUE AND "currency"=:currency AND "createdAt" BETWEEN :begin AND :end';
-        $buyerOtherResultObject = Deal::model()->findBySql($buyerOtherQuery, array(':currency'=>$currency, ':begin'=>$begin, ':end'=>$end));
         $buyerOtherResult = $buyerOtherResultObject->buyerFee;
-        
-        $sellerOtherQuery = 'SELECT SUM("sellerFee") as "sellerFee" FROM "deal" WHERE "side"=TRUE AND "currency"=:currency AND "createdAt" BETWEEN :begin AND :end';
-        $sellerOtherResultObject = Deal::model()->findBySql($sellerOtherQuery, array(':currency'=>$currency, ':begin'=>$begin, ':end'=>$end));
         $sellerOtherResult = $sellerOtherResultObject->sellerFee;
         
         return array(
@@ -355,6 +381,36 @@ class Stat extends CActiveRecord {
         } else {
             $data['spread'] = 0;
         }
+        
+        return $data;
+    }
+ 
+    public static function personalStat($userId, $currency) {
+        
+        $data = array();
+        
+        //accounts
+        $accounts = Account::model()->findAllByAttributes(array(
+            'currency' => $currency,
+            'type' => array('user.safeWallet', 'user.trading'),
+            'userId' => $userId
+        ));
+        
+        if($accounts) {
+            $data['accounts'] = $accounts;
+        }
+        
+        //comissions
+        $monthData = new DateTime('first day of this month');
+        $dayData = new DateTime();
+        $dayData->setTime(0, 0, 0);
+        
+        $data['allTime'] = self::getCommisionIncomeByData($currency, '0', TIME, $userId);
+        $data['lastMonth'] = self::getCommisionIncomeByData($currency, $monthData->getTimestamp(), TIME, $userId);
+        $data['lastDay'] = self::getCommisionIncomeByData($currency, $dayData->getTimestamp(), TIME, $userId);
+
+        
+        
         
         return $data;
     }
