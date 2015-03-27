@@ -39,5 +39,6 @@ return array(
     ),
     'params' => array_merge(array(
         'pathToLog' =>  implode(DIRECTORY_SEPARATOR, array($_SERVER['DOCUMENT_ROOT'], 'logs')),
+        'frontUrl' => 'http://stock.bit',
     ), require 'params.php'),
 );

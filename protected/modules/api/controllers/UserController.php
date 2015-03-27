@@ -60,10 +60,13 @@ class UserController extends MainController {
                 $resultMessage = 'Unknow error';
             }
             
-            Response::ResponseError($resultMessage);
+            $frontUrl = Yii::app()->params['frontUrl'];
+            
+            header("Location: ".$frontUrl.'/registration/fail');
+            exit();
         }
-        
-        Response::ResponseSuccess(array(), 'Successfuly verified');
+
+        header("Location: ".$frontUrl.'/registration/success');
     }
     
     public function actionRegister() {
@@ -188,7 +191,7 @@ class UserController extends MainController {
             Loger::logUser(Yii::app()->user->id, 'User has logged in', 'login');
             Response::ResponseSuccess($data, 'User has logged');
         } else {
-            Response::ResponseError('Wrong email or password');
+            Response::ResponseError($auth->errorMessage);
         }
     }
 

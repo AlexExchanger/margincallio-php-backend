@@ -50,6 +50,9 @@ class UserIdentity extends CUserIdentity {
         } else if($record->password !== self::trickyPasswordEncoding($this->username, $this->password)) {
             $this->errorCode = self::ERROR_PASSWORD_INVALID;
             $this->errorMessage = 'Invalid username or password';
+        } else if(!is_null($record->emailVerification)) {
+            $this->errorCode = self::ERROR_UNKNOWN_IDENTITY;
+            $this->errorMessage = 'User not activated';
         } else {
             $this->_id = $record->id;
             $this->errorCode = self::ERROR_NONE;
