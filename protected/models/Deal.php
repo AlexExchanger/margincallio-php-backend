@@ -4,6 +4,9 @@ class Deal extends CActiveRecord {
 
     public static $pair = 'BTCUSD';
 
+    public static $high;
+    public static $low;
+    
     public static function model($className = __CLASS__) {
         return parent::model($className);
     }
