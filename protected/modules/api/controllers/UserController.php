@@ -70,6 +70,7 @@ class UserController extends MainController {
         
         $auth->setAutologin();
         $auth->authenticate();
+        Yii::app()->user->login($auth);
         $user->lastLoginAt = TIME;
         $user->save(true, array('lastLoginAt'));
         Loger::logUser(Yii::app()->user->id, 'User has logged in', 'login');
@@ -109,7 +110,7 @@ class UserController extends MainController {
         }
     
         if($status) {
-            Response::ResponseSuccess(array(), 'User has registered');
+            Response::ResponseSuccess(array(), 'User has registered. Conformation email sent to your address.');
         } else {
             Response::ResponseError('Unknow error');
         }
