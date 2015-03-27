@@ -70,7 +70,7 @@ class UserController extends MainController {
         
         $auth->setAutologin();
         $auth->authenticate();
-        Yii::app()->user->login($auth);
+        Yii::app()->user->login($auth, 2592000);
         $user->lastLoginAt = TIME;
         $user->save(true, array('lastLoginAt'));
         Loger::logUser(Yii::app()->user->id, 'User has logged in', 'login');
