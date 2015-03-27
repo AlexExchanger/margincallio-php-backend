@@ -180,7 +180,7 @@ class User extends CActiveRecord {
         $user->emailVerification = null;
         $user->save();
         
-        return true;
+        return $user;
     }
     
     public static function continueVerifying($cid, $password, $phone) {

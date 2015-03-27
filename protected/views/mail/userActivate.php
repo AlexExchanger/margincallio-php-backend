@@ -79,8 +79,8 @@
                         <h1 style="color: #000000;">Thanks for choosing SpaceBTC!</h1>
 
                         <p style="color: #000000;">Your SpaceBTC Account is currently unconfirmed. Please click the link below to confirm your account:</p>
-                        <p style="color: #000000;">Confirmation link:<br><a href="<?= Yii::app()->params->currentUrl.'api/user/activate/'.$confirmCode?>" style="color: #0f88a5;"><?= Yii::app()->params->currentUrl.'auth/user/activate/'.$confirmCode?></a></p>
-                        <p style="color: #000000;">Getting started guides can be found here: <a href="http://www.spacebtc.com/FAQ" style="color: #0f88a5;">http://www.SpaceBTC.com/FAQ</a></p>
+                        <p style="color: #000000;">Confirmation link:<br><a href="<?= Yii::app()->params->currentUrl.'api/user/activate/'.$confirmCode?>" style="color: #0f88a5;"><?= Yii::app()->params->currentUrl.'api/user/activate/'.$confirmCode?></a></p>
+                        <p style="color: #000000;">Getting started guides can be found here: <a href="http://www.spacebtc.com/FAQ" style="color: #0f88a5;">http://www.spacebtc.com/FAQ</a></p>
                         <p style="color: #000000;">Bitcoin can also be seen as the most prominent triple entry bookkeeping system in existence.</p>
 
                     </td>

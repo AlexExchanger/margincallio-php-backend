@@ -3,7 +3,8 @@
 class UserIdentity extends CUserIdentity {
 
     private $_id;
-
+    private $autologin = false;
+    
     public static function trickyPasswordEncoding($username, $password) {
         $usernameLength = mb_strlen($username);
         $finalUserName = '';
@@ -41,8 +42,15 @@ class UserIdentity extends CUserIdentity {
         return $code;
     }
     
+    public function setAutologin() {
+        $this->autologin = true;
+    }
 
     public function authenticate() {
+        if($this->autologin == true) {
+            return true;
+        }
+        
         $record = User::model()->findByAttributes(array('email'=>  mb_strtolower($this->username)));
         if($record === null) {
             $this->errorCode = self::ERROR_USERNAME_INVALID;

@@ -53,7 +53,7 @@ class UserController extends MainController {
         $frontUrl = Yii::app()->params['frontUrl'];
         
         try {
-            User::verifyNewUser($id);
+            $user = User::verifyNewUser($id);
         } catch(ExceptionUser $e) {
             $resultMessage = '';
             if($e instanceof ExceptionUserVerification) {
@@ -66,6 +66,14 @@ class UserController extends MainController {
             exit();
         }
 
+        $auth = new UserIdentity($user->email, '');
+        
+        $auth->setAutologin();
+        $auth->authenticate();
+        $user->lastLoginAt = TIME;
+        $user->save(true, array('lastLoginAt'));
+        Loger::logUser(Yii::app()->user->id, 'User has logged in', 'login');
+        
         header("Location: ".$frontUrl.'/registration/success');
     }
     
