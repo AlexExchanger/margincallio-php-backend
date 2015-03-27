@@ -68,6 +68,10 @@ class UserIdentity extends CUserIdentity {
         return !$this->errorCode;
     }
 
+    public function setId($id) {
+        $this->_id = $id;
+    }
+    
     public function getId() {
         return $this->_id;
     }

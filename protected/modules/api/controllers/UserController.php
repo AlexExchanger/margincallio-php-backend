@@ -69,7 +69,7 @@ class UserController extends MainController {
         $auth = new UserIdentity($user->email, '');
         
         $auth->setAutologin();
-        $auth->authenticate();
+        $auth->setId($user->id);
         Yii::app()->user->allowAutoLogin = true;
         Yii::app()->user->login($auth, 2592000);
         $user->lastLoginAt = TIME;
