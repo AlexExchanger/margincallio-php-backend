@@ -176,7 +176,7 @@ class Stat extends CActiveRecord {
         
         //high, low price by last 24 hours
         $priceRangeQuery = 'SELECT MAX("price") as "high", MIN("price") as "low" FROM "deal" WHERE "createdAt" BETWEEN :open AND :close';
-        $priceRangeResult = Deal::model()->findAllBySql($priceRangeQuery, array(
+        $priceRangeResult = Deal::model()->findBySql($priceRangeQuery, array(
             ':open' => $todayRange['open'],
             ':close' => $todayRange['close']
         ));
