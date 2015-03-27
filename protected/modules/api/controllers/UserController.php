@@ -50,6 +50,8 @@ class UserController extends MainController {
     }
     
     public function actionActivate($id) {
+        $frontUrl = Yii::app()->params['frontUrl'];
+        
         try {
             User::verifyNewUser($id);
         } catch(ExceptionUser $e) {
@@ -59,8 +61,6 @@ class UserController extends MainController {
             } else {
                 $resultMessage = 'Unknow error';
             }
-            
-            $frontUrl = Yii::app()->params['frontUrl'];
             
             header("Location: ".$frontUrl.'/registration/fail');
             exit();
