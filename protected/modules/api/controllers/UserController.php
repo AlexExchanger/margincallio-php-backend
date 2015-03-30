@@ -242,7 +242,10 @@ class UserController extends MainController {
             Response::ResponseError('', $e->getCode());
         }
         
-        Response::ResponseSuccess('Subscribed !');
+        Response::setHeaders();
+        print Response::GetResponseSuccess('Subscribed !');
+        
+        UserEarly::toMailChimp($email);
     }
     
 }

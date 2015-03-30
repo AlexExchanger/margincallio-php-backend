@@ -18,12 +18,28 @@ class UserEarly extends CActiveRecord {
         );
     }
     
+    public static function toMailChimp($email) {
+        $mailchimp = array(
+            'id'                => MailSender::getMailChimpList('early'),
+            'email'             => array('email'=>$email),
+            'double_optin'      => false,
+            'update_existing'   => true,
+            'replace_interests' => false,
+            'send_welcome'      => false,
+        );
+            
+        $mcresult = MailSender::sendToMailChimp('lists/subscribe', $mailchimp);
+
+        if(isset($mcresult) && isset($mcresult['status']) && $mcresult['status'] == 'error') {
+            return false;
+        }
+    }
+    
     /*
     10 - User already exist
     11 - Wrong email
     12 - Can't save email (Unknow error)
     */
-    
     public static function add($email) {
         
         $dbTransaction = Yii::app()->db->beginTransaction();
@@ -42,21 +58,6 @@ class UserEarly extends CActiveRecord {
             }
             
             if(!$user->save()) {
-                throw new Exception('', 12);
-            }
-            
-            $mailchimp = array(
-                'id'                => MailSender::getMailChimpList('early'),
-                'email'             => array('email'=>$email),
-                'double_optin'      => false,
-                'update_existing'   => true,
-                'replace_interests' => false,
-                'send_welcome'      => false,
-            );
-            
-            $mcresult = MailSender::sendToMailChimp('lists/subscribe', $mailchimp);
-            
-            if(isset($mcresult) && isset($mcresult['status']) && $mcresult['status'] == 'error') {
                 throw new Exception('', 12);
             }
             
