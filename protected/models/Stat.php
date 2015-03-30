@@ -184,10 +184,14 @@ class Stat extends CActiveRecord {
         if(isset($priceRangeResult)) {
             if(isset($priceRangeResult->high)) {
                 $stat['high'] = $priceRangeResult->high;
+            } else {
+                $stat['high'] = null;
             }
             if(isset($priceRangeResult->low)) {
                 $stat['low'] = $priceRangeResult->low;
-            }            
+            } else {
+                $stat['low'] = null;
+            }
         }
         
         return $stat;
