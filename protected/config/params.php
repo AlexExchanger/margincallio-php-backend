@@ -4,13 +4,13 @@ return array(
     
     //Core params
     'coreUsdBtc' => array(
-        'url' => '184.168.134.144',
+        'url' => '52.28.120.92',
         'port' => '1330',
     ),
     
     //Back-end params
     'registerByInvite' => false,
-    'currentUrl' => 'http://site.exchange/',
+    'currentUrl' => 'http://stock.bit/',
     'supportedCurrency' => array('BTC', 'EUR', 'LTC', 'DOGE'),
     'currency' => array(
         array(

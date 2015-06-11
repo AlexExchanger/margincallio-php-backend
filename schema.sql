@@ -49,7 +49,7 @@ CREATE TABLE account (
 );
 
 
-ALTER TABLE account OWNER TO postgres;
+ALTER TABLE account OWNER TO admin;
 
 --
 -- Name: account_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -63,7 +63,7 @@ CREATE SEQUENCE account_id_seq
     CACHE 1;
 
 
-ALTER TABLE account_id_seq OWNER TO postgres;
+ALTER TABLE account_id_seq OWNER TO admin;
 
 --
 -- Name: account_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -84,7 +84,7 @@ CREATE SEQUENCE alarm_code_seq
     CACHE 1;
 
 
-ALTER TABLE alarm_code_seq OWNER TO postgres;
+ALTER TABLE alarm_code_seq OWNER TO admin;
 
 --
 -- Name: alarm_code; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -97,7 +97,7 @@ CREATE TABLE alarm_code (
 );
 
 
-ALTER TABLE alarm_code OWNER TO postgres;
+ALTER TABLE alarm_code OWNER TO admin;
 
 --
 -- Name: candles_15m; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -115,7 +115,7 @@ CREATE TABLE candles_15m (
 );
 
 
-ALTER TABLE candles_15m OWNER TO postgres;
+ALTER TABLE candles_15m OWNER TO admin;
 
 --
 -- Name: candles_1h; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -133,7 +133,7 @@ CREATE TABLE candles_1h (
 );
 
 
-ALTER TABLE candles_1h OWNER TO postgres;
+ALTER TABLE candles_1h OWNER TO admin;
 
 --
 -- Name: candles_1m; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -151,7 +151,7 @@ CREATE TABLE candles_1m (
 );
 
 
-ALTER TABLE candles_1m OWNER TO postgres;
+ALTER TABLE candles_1m OWNER TO admin;
 
 --
 -- Name: candles_5m; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -169,7 +169,7 @@ CREATE TABLE candles_5m (
 );
 
 
-ALTER TABLE candles_5m OWNER TO postgres;
+ALTER TABLE candles_5m OWNER TO admin;
 
 --
 -- Name: coin_address_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -183,7 +183,7 @@ CREATE SEQUENCE coin_address_id_seq
     CACHE 1;
 
 
-ALTER TABLE coin_address_id_seq OWNER TO postgres;
+ALTER TABLE coin_address_id_seq OWNER TO admin;
 
 --
 -- Name: coin_address; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -202,7 +202,7 @@ CREATE TABLE coin_address (
 );
 
 
-ALTER TABLE coin_address OWNER TO postgres;
+ALTER TABLE coin_address OWNER TO admin;
 
 --
 -- Name: deal; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -224,7 +224,7 @@ CREATE TABLE deal (
 );
 
 
-ALTER TABLE deal OWNER TO postgres;
+ALTER TABLE deal OWNER TO admin;
 
 --
 -- Name: file; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -243,7 +243,7 @@ CREATE TABLE file (
 );
 
 
-ALTER TABLE file OWNER TO postgres;
+ALTER TABLE file OWNER TO admin;
 
 --
 -- Name: file_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -257,7 +257,7 @@ CREATE SEQUENCE file_id_seq
     CACHE 1;
 
 
-ALTER TABLE file_id_seq OWNER TO postgres;
+ALTER TABLE file_id_seq OWNER TO admin;
 
 --
 -- Name: file_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -278,7 +278,7 @@ CREATE SEQUENCE gateway_id_seq
     CACHE 1;
 
 
-ALTER TABLE gateway_id_seq OWNER TO postgres;
+ALTER TABLE gateway_id_seq OWNER TO admin;
 
 --
 -- Name: gateway; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -294,7 +294,7 @@ CREATE TABLE gateway (
 );
 
 
-ALTER TABLE gateway OWNER TO postgres;
+ALTER TABLE gateway OWNER TO admin;
 
 --
 -- Name: news; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -316,7 +316,7 @@ CREATE TABLE news (
 );
 
 
-ALTER TABLE news OWNER TO postgres;
+ALTER TABLE news OWNER TO admin;
 
 --
 -- Name: news_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -330,7 +330,7 @@ CREATE SEQUENCE news_id_seq
     CACHE 1;
 
 
-ALTER TABLE news_id_seq OWNER TO postgres;
+ALTER TABLE news_id_seq OWNER TO admin;
 
 --
 -- Name: news_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -359,7 +359,7 @@ CREATE TABLE "order" (
 );
 
 
-ALTER TABLE "order" OWNER TO postgres;
+ALTER TABLE "order" OWNER TO admin;
 
 --
 -- Name: stat; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -373,7 +373,7 @@ CREATE TABLE stat (
 );
 
 
-ALTER TABLE stat OWNER TO postgres;
+ALTER TABLE stat OWNER TO admin;
 
 --
 -- Name: stat_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -387,7 +387,7 @@ CREATE SEQUENCE stat_id_seq
     CACHE 1;
 
 
-ALTER TABLE stat_id_seq OWNER TO postgres;
+ALTER TABLE stat_id_seq OWNER TO admin;
 
 --
 -- Name: stat_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -408,7 +408,7 @@ CREATE SEQUENCE system_id_seq
     CACHE 1;
 
 
-ALTER TABLE system_id_seq OWNER TO postgres;
+ALTER TABLE system_id_seq OWNER TO admin;
 
 --
 -- Name: system; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -421,7 +421,7 @@ CREATE TABLE system (
 );
 
 
-ALTER TABLE system OWNER TO postgres;
+ALTER TABLE system OWNER TO admin;
 
 --
 -- Name: ticket; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -442,7 +442,7 @@ CREATE TABLE ticket (
 );
 
 
-ALTER TABLE ticket OWNER TO postgres;
+ALTER TABLE ticket OWNER TO admin;
 
 --
 -- Name: ticket_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -456,7 +456,7 @@ CREATE SEQUENCE ticket_id_seq
     CACHE 1;
 
 
-ALTER TABLE ticket_id_seq OWNER TO postgres;
+ALTER TABLE ticket_id_seq OWNER TO admin;
 
 --
 -- Name: ticket_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -479,7 +479,7 @@ CREATE TABLE ticket_message (
 );
 
 
-ALTER TABLE ticket_message OWNER TO postgres;
+ALTER TABLE ticket_message OWNER TO admin;
 
 --
 -- Name: ticket_message_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -493,7 +493,7 @@ CREATE SEQUENCE ticket_message_id_seq
     CACHE 1;
 
 
-ALTER TABLE ticket_message_id_seq OWNER TO postgres;
+ALTER TABLE ticket_message_id_seq OWNER TO admin;
 
 --
 -- Name: ticket_message_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -520,7 +520,7 @@ CREATE TABLE transaction (
 );
 
 
-ALTER TABLE transaction OWNER TO postgres;
+ALTER TABLE transaction OWNER TO admin;
 
 --
 -- Name: transaction_external_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -534,7 +534,7 @@ CREATE SEQUENCE transaction_external_id_seq
     CACHE 1;
 
 
-ALTER TABLE transaction_external_id_seq OWNER TO postgres;
+ALTER TABLE transaction_external_id_seq OWNER TO admin;
 
 --
 -- Name: transaction_external; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -555,7 +555,7 @@ CREATE TABLE transaction_external (
 );
 
 
-ALTER TABLE transaction_external OWNER TO postgres;
+ALTER TABLE transaction_external OWNER TO admin;
 
 --
 -- Name: transaction_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -569,7 +569,7 @@ CREATE SEQUENCE transaction_id_seq
     CACHE 1;
 
 
-ALTER TABLE transaction_id_seq OWNER TO postgres;
+ALTER TABLE transaction_id_seq OWNER TO admin;
 
 --
 -- Name: transaction_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -604,7 +604,7 @@ CREATE TABLE "user" (
 );
 
 
-ALTER TABLE "user" OWNER TO postgres;
+ALTER TABLE "user" OWNER TO admin;
 
 --
 -- Name: user_early_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -618,7 +618,7 @@ CREATE SEQUENCE user_early_seq
     CACHE 1;
 
 
-ALTER TABLE user_early_seq OWNER TO postgres;
+ALTER TABLE user_early_seq OWNER TO admin;
 
 --
 -- Name: user_early; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -631,7 +631,7 @@ CREATE TABLE user_early (
 );
 
 
-ALTER TABLE user_early OWNER TO postgres;
+ALTER TABLE user_early OWNER TO admin;
 
 --
 -- Name: user_external_address_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -645,7 +645,7 @@ CREATE SEQUENCE user_external_address_id_seq
     CACHE 1;
 
 
-ALTER TABLE user_external_address_id_seq OWNER TO postgres;
+ALTER TABLE user_external_address_id_seq OWNER TO admin;
 
 --
 -- Name: user_external_address; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -660,7 +660,7 @@ CREATE TABLE user_external_address (
 );
 
 
-ALTER TABLE user_external_address OWNER TO postgres;
+ALTER TABLE user_external_address OWNER TO admin;
 
 --
 -- Name: user_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -674,7 +674,7 @@ CREATE SEQUENCE user_id_seq
     CACHE 1;
 
 
-ALTER TABLE user_id_seq OWNER TO postgres;
+ALTER TABLE user_id_seq OWNER TO admin;
 
 --
 -- Name: user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -694,7 +694,7 @@ CREATE TABLE user_invite (
 );
 
 
-ALTER TABLE user_invite OWNER TO postgres;
+ALTER TABLE user_invite OWNER TO admin;
 
 --
 -- Name: user_log; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -710,7 +710,7 @@ CREATE TABLE user_log (
 );
 
 
-ALTER TABLE user_log OWNER TO postgres;
+ALTER TABLE user_log OWNER TO admin;
 
 --
 -- Name: user_log_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -724,7 +724,7 @@ CREATE SEQUENCE user_log_id_seq
     CACHE 1;
 
 
-ALTER TABLE user_log_id_seq OWNER TO postgres;
+ALTER TABLE user_log_id_seq OWNER TO admin;
 
 --
 -- Name: user_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -743,7 +743,7 @@ CREATE TABLE user_phone (
 );
 
 
-ALTER TABLE user_phone OWNER TO postgres;
+ALTER TABLE user_phone OWNER TO admin;
 
 --
 -- Name: user_transaction_confurm_id; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -757,7 +757,7 @@ CREATE SEQUENCE user_transaction_confurm_id
     CACHE 1;
 
 
-ALTER TABLE user_transaction_confurm_id OWNER TO postgres;
+ALTER TABLE user_transaction_confurm_id OWNER TO admin;
 
 --
 -- Name: user_transaction_confurm; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -772,7 +772,7 @@ CREATE TABLE user_transaction_confurm (
 );
 
 
-ALTER TABLE user_transaction_confurm OWNER TO postgres;
+ALTER TABLE user_transaction_confurm OWNER TO admin;
 
 --
 -- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
